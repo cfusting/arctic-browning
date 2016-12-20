@@ -1,8 +1,11 @@
 language: python
-python: 
-  - "2.7"
+python:
+- '2.7'
 install:
-  - pip install numpy
-script: 
-  - cd scripts
-  - python -m unittest lib_test
+- pip install numpy
+script:
+- cd scripts
+- python -m unittest lib_test
+notifications:
+  slack:
+    secure: OZdekczESpUwlfURFkvl5hNqPvp591OzVuyvb4sFXN67bD7xgZewzPL4yt06/h0Ll8apxHFX4EVVrkMfnXqx2/utGFJZRSRtmq5V0jdaULeWyZ3keiTluCHZvDpllZnXvoe2ZicHegjQ29N4rDhBgArchL4laDuk963di2/LxdRB4Adl9NAhl6Dsm4huzmwc6PO3Lh66fcpChSkOYRrR7oiMhV0uWjMbp3vinO9/o1OcCnhn8+bLg12F5oTWDHeA7vlJ0staHng7VI4y6t0JsLC4zjx6uvcAcge6/U8XGAPrufBuQLc7kAE3rNwwGPTDh0c8UO+TGhk7qjd+OdF2CPUEf9KqnfJ7ng3DMmZgRpXn6FVkrkTUPwQfg3wHQZOq8iEjYdnObjMsjiS30Jt2xsu+N2TWO5gYz/08aoHP8ghDDpOXUk7BPDpR7o/SM9X5IV+oft+YJcA7wPaexhZg4qbZWfQunGjna6aL+vM40ELz6Q8YTv4zqIWpqUtkh7Ox9Op3ZdUyORuCfgmVmIRgXfEGeq0M66gCdn99NAqB3uQc1i2LUTF3VvUQ1wPDiuwEbVQoYPPLDKmCdkPbfem2iBo99KMCEUJCC4cDeqCrA3qwZi2SpFpIKAcm6KNqSx09EZpao+Sqs34wZsw/ownxy6Jd6MXYeekmf3c4r/zQ3jk=
