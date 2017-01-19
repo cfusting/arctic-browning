@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Fetch temporal statistics from a l
 parser.add_argument('-s', '--start-year', help='YYYY', required=True, type=int)
 parser.add_argument('-e', '--end-year', help='YYYY', required=True, type=int)
 parser.add_argument('-f', '--first-day', help='ddd', required=True)
-parser.add_argument('-l,' '--last-day', help='ddd', required=True)
+parser.add_argument('-l', '--last-day', help='ddd', required=True)
 parser.add_argument('-d', '--directory-path', help='Path to directory containing the data.', required=True)
 parser.add_argument('-k', '--data-file-regex', help='Filter files using this expression.', required=True)
 parser.add_argument('-r', '--reliability-file-regex', help='Filter files using this expression.', required=True)
