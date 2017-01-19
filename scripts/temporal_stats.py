@@ -18,6 +18,7 @@ parser.add_argument('-r', '--reliability-file-regex', help='Filter files using t
 parser.add_argument('-j', '--date-regex', help='Match file date using this expression.', required=True)
 parser.add_argument('-x', '--dry-run', help="List the files to be processed but don't take any statistics.",
                     action="store_true")
+parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
 args = parser.parse_args()
 
 TIME_AXIS = 2
@@ -57,11 +58,19 @@ def get_files_in_time_range(start, end, files, date_regex):
 def get_matching_files(directory, file_regex):
     files = os.listdir(directory)
     names = filter(lambda x: re.compile(file_regex).search(x) is not None, files)
-    return map(lambda x: directory + x)
+    return map(lambda x: directory + x, names)
 
 
 data_files = get_matching_files(args.directory_path, args.data_file_regex)
+if args.verbose is True:
+    print "Matched data files:"
+    for i in data_files:
+        print i
 reliability_files = get_matching_files(args.directory_path, args.reliability_file_regex)
+if args.verbose is True:
+    print "Matched reliability files:"
+    for i in reliability_files:
+        print i
 for year in range(args.start_year, args.end_year + 1):
     start_date = datetime.strptime(str(year) + args.first_day, YEAR_DAY)
     end_date = datetime.strptime(str(year) + args.last_day, YEAR_DAY)
