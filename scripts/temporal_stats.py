@@ -13,9 +13,9 @@ parser.add_argument('-e', '--end-year', help='YYYY', required=True, type=int)
 parser.add_argument('-f', '--first-day', help='ddd', required=True)
 parser.add_argument('-l', '--last-day', help='ddd', required=True)
 parser.add_argument('-d', '--directory-path', help='Path to directory containing the data.', required=True)
-parser.add_argument('-k', '--data-file-regex', help='Filter files using this expression.', required=True)
-parser.add_argument('-r', '--reliability-file-regex', help='Filter files using this expression.', required=True)
-parser.add_argument('-j', '--date-regex', help='Match file date using this expression.', required=True)
+parser.add_argument('-k', '--data-file-regex', help='Filter files using this expression. Make sure to wrap this in single quotes.', required=True)
+parser.add_argument('-r', '--reliability-file-regex', help='Filter files using this expression. Make sure to wrap this in single quotes.', required=True)
+parser.add_argument('-j', '--date-regex', help='Extract the date using this expression. Make sure to wrap this in single quotes.', required=True)
 parser.add_argument('-x', '--dry-run', help="List the files to be processed but don't take any statistics.",
                     action="store_true")
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
@@ -34,7 +34,7 @@ def get_filenames_list(file_name):
 
 def open_raster_file(file_name, array_type):
     rast = gdal.Open(file_name)
-    band = rast.getRasterBand(1)
+    band = rast.GetRasterBand(1)
     return np.array(band.ReadAsArray(), array_type)
 
 
@@ -58,9 +58,10 @@ def get_files_in_time_range(start, end, files, date_regex):
 def get_matching_files(directory, file_regex):
     files = os.listdir(directory)
     names = filter(lambda x: re.compile(file_regex).search(x) is not None, files)
-    return map(lambda x: directory + x, names)
+    return map(lambda x: directory + os.sep + x, names)
 
-
+if args.verbose is True:
+    print "Will match date with: " + args.date_regex
 data_files = get_matching_files(args.directory_path, args.data_file_regex)
 if args.verbose is True:
     print "Matched data files:"
