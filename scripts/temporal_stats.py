@@ -4,6 +4,7 @@ import gdal
 import argparse
 import numpy as np
 import numpy.ma as ma
+import sys
 from lib import build_qa_mask
 from datetime import datetime
 
@@ -13,12 +14,17 @@ parser.add_argument('-e', '--end-year', help='YYYY', required=True, type=int)
 parser.add_argument('-f', '--first-day', help='ddd', required=True)
 parser.add_argument('-l', '--last-day', help='ddd', required=True)
 parser.add_argument('-d', '--directory-path', help='Path to directory containing the data.', required=True)
-parser.add_argument('-k', '--data-file-regex', help='Filter files using this expression. Make sure to wrap this in single quotes.', required=True)
-parser.add_argument('-r', '--reliability-file-regex', help='Filter files using this expression. Make sure to wrap this in single quotes.', required=True)
-parser.add_argument('-j', '--date-regex', help='Extract the date using this expression. Make sure to wrap this in single quotes.', required=True)
+parser.add_argument('-k', '--data-file-regex', help='Filter files using this expression. Make sure to wrap this in'
+                                                    ' single quotes.', required=True)
+parser.add_argument('-r', '--reliability-file-regex', help='Filter files using this expression. Make sure to wrap this'
+                                                           ' in single quotes.', required=True)
+parser.add_argument('-j', '--date-regex', help='Extract the date using this expression. Make sure to wrap this in '
+                                               'single quotes.', required=True)
 parser.add_argument('-x', '--dry-run', help="List the files to be processed but don't take any statistics.",
                     action="store_true")
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
+parser.add_argument('-c', '--no-check', help="Don't check that the data and reliability files match up. This could "
+                                             "result in the wrong mask being created.")
 args = parser.parse_args()
 
 TIME_AXIS = 2
@@ -63,15 +69,24 @@ def get_matching_files(directory, file_regex):
 if args.verbose is True:
     print "Will match date with: " + args.date_regex
 data_files = get_matching_files(args.directory_path, args.data_file_regex)
+data_files.sort(reverse=True)
 if args.verbose is True:
     print "Matched data files:"
     for i in data_files:
         print i
 reliability_files = get_matching_files(args.directory_path, args.reliability_file_regex)
+reliability_files.sort(reverse=True)
 if args.verbose is True:
     print "Matched reliability files:"
     for i in reliability_files:
         print i
+date_pattern = re.compile(args.date_regex)
+for raster, rel in zip(data_files, reliability_files):
+    print "Testing that each data file has an associated reliability file."
+    if date_pattern.search(raster).group() == date_pattern.search(rel).group():
+        print "Test passed."
+    else:
+        sys.exit("Data and reliability files do not match.")
 for year in range(args.start_year, args.end_year + 1):
     start_date = datetime.strptime(str(year) + args.first_day, YEAR_DAY)
     end_date = datetime.strptime(str(year) + args.last_day, YEAR_DAY)
