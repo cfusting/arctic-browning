@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1
-#PBS -N getstats 
-#PBS -l walltime=01:00:00
+#PBS -l nodes=1:ppn=1,pmem=32gb,pvmem=32gb
+#PBS -N get_temporal_stats 
+#PBS -l walltime=04:00:00
 source $HOME/arctic-browning/scripts/temporal_statistics.sh
