@@ -66,17 +66,17 @@ def get_matching_files(directory, file_regex):
     names = filter(lambda x: re.compile(file_regex).search(x) is not None, files)
     return map(lambda x: directory + os.sep + x, names)
 
-if args.verbose is True:
+if args.verbose:
     print "Will match date with: " + args.date_regex
 data_files = get_matching_files(args.directory_path, args.data_file_regex)
 data_files.sort(reverse=True)
-if args.verbose is True:
+if args.verbose:
     print "Matched data files:"
     for i in data_files:
         print i
 reliability_files = get_matching_files(args.directory_path, args.reliability_file_regex)
 reliability_files.sort(reverse=True)
-if args.verbose is True:
+if args.verbose:
     print "Matched reliability files:"
     for i in reliability_files:
         print i
@@ -93,16 +93,17 @@ for year in range(args.start_year, args.end_year + 1):
     reliability_files_in_range = get_files_in_time_range(start_date, end_date, reliability_files, args.date_regex)
     space_list = []
     for raster, rel in zip(data_files_in_range, reliability_files_in_range):
-        print "Processing data: " + raster
-        print "Applying reliability mask: " + rel
+        if args.verbose:
+            print "Processing data: " + raster
+            print "Applying reliability mask: " + rel
         space_list.append(create_masked_array(raster, np.int16, rel, np.int8))
     # Lon, Lat, Time.
     space_time = np.stack(space_list, axis=TIME_AXIS)
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
+        sd_dat = space_time.std(axis=TIME_AXIS).mean()
         min_dat = space_time.min(axis=TIME_AXIS).mean()
         max_dat = space_time.max(axis=TIME_AXIS).mean()
-        sd_dat = space_time.std(axis=TIME_AXIS).mean()
         print str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
 
