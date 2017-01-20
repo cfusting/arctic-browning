@@ -1,7 +1,7 @@
 #!/bin/bash
 source $HOME"/.bash_profile"
 source $HOME"/modis/bin/activate"
-SCRIPT=$HOME"/arctic-browning/temporal_stats.py"
+SCRIPT=$HOME"/arctic-browning/scripts/temporal_statistics.py"
 NDVIOUT=$HOME"/results/ndvi_temporal_stats.csv"
 DIRECTORY=$HOME"/ndvi_terra/mosaics"
 echo "mean,sd,min,max" > $NDVIOUT
