@@ -103,6 +103,8 @@ for year in range(args.start_year, args.end_year + 1):
         space_list.append(create_masked_array(raster, np.int16, rel, np.int8))
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
+    if args.verbose:
+        print "Space-time shape: " + space_time.shape
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
