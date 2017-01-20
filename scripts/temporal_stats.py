@@ -81,12 +81,11 @@ if args.verbose is True:
     for i in reliability_files:
         print i
 date_pattern = re.compile(args.date_regex)
+print "Testing that each data file has an associated reliability file."
 for raster, rel in zip(data_files, reliability_files):
-    print "Testing that each data file has an associated reliability file."
-    if date_pattern.search(raster).group() == date_pattern.search(rel).group():
-        print "Test passed."
-    else:
+    if date_pattern.search(raster).group() != date_pattern.search(rel).group():
         sys.exit("Data and reliability files do not match.")
+print "Test passed."
 for year in range(args.start_year, args.end_year + 1):
     start_date = datetime.strptime(str(year) + args.first_day, YEAR_DAY)
     end_date = datetime.strptime(str(year) + args.last_day, YEAR_DAY)
