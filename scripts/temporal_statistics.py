@@ -95,17 +95,19 @@ for year in range(args.start_year, args.end_year + 1):
     reliability_files_in_range = get_files_in_time_range(start_date, end_date, reliability_files, args.date_regex)
     space_list = []
     for raster, rel in zip(data_files_in_range, reliability_files_in_range):
+        if date_pattern.search(raster).group() != date_pattern.search(rel).group():
+            sys.exit("Data and reliability files do not match.")
         if args.verbose:
             print "Processing data: " + raster
             print "Applying reliability mask: " + rel
         space_list.append(create_masked_array(raster, np.int16, rel, np.int8))
     # Lon, Lat, Time.
-    space_time = np.stack(space_list, axis=TIME_AXIS)
+    space_time = ma.dstack(space_list)
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
         sd_dat = space_time.std(axis=TIME_AXIS).mean()
         min_dat = space_time.min(axis=TIME_AXIS).mean()
         max_dat = space_time.max(axis=TIME_AXIS).mean()
-        print str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
+        print str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
 
