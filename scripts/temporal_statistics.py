@@ -48,7 +48,7 @@ def create_masked_array(array_file, array_type, mask_file, mask_type):
     raster_array = open_raster_file(array_file, array_type)
     rel_array = open_raster_file(mask_file, mask_type)
     build_qa_mask(raster_array, rel_array)
-    return ma.array(raster_array, mask=rel)
+    return ma.array(raster_array, mask=rel_array)
 
 
 def get_files_in_time_range(start, end, files, date_regex):
@@ -107,7 +107,8 @@ for year in range(args.start_year, args.end_year + 1):
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
     if args.verbose:
-        print "Space-time shape: " + str(space_time.shape)
+        print "Space-time shape:" + str(space_time.shape)
+        print "Space-time totally masked: " + str(space_time.mask.all())
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
