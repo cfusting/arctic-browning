@@ -1,5 +1,5 @@
 rm(list = ls())
-setwd("~/Dropbox/browning/results")
+setwd("~/Dropbox/arctic-browning/analysis/data")
 PIXELS <- 10690908
 evi <- read.csv("evistats.csv", na.strings = "--") 
 evi$mean <- evi$mean* .0001

@@ -100,11 +100,14 @@ for year in range(args.start_year, args.end_year + 1):
         if args.verbose:
             print "Processing data: " + raster
             print "Applying reliability mask: " + rel
-        space_list.append(create_masked_array(raster, np.int16, rel, np.int8))
+        masked_array = create_masked_array(raster, np.int16, rel, np.int8)
+        if args.verbose:
+            print "Data totally masked: " + str(masked_array.mask.all())
+        space_list.append(masked_array)
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
     if args.verbose:
-        print "Space-time shape: " + space_time.shape
+        print "Space-time shape: " + str(space_time.shape)
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
