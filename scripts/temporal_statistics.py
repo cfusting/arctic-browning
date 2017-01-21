@@ -26,7 +26,7 @@ parser.add_argument('-x', '--dry-run', help="List the files to be processed but 
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
 parser.add_argument('-c', '--no-check', help="Don't check that the data and reliability files match up. This could "
                                              "result in the wrong mask being created.")
-parser.add_argument('l', '--log-file', help="Name of the file to log info and warnings.")
+parser.add_argument('-b', '--log-file', help="Name of the file to log info and warnings.")
 args = parser.parse_args()
 
 logger = logging.getLogger(__name__)
@@ -115,5 +115,5 @@ for year in range(args.start_year, args.end_year + 1):
         sd_dat = space_time.std(axis=TIME_AXIS).mean()
         min_dat = space_time.min(axis=TIME_AXIS).mean()
         max_dat = space_time.max(axis=TIME_AXIS).mean()
-        str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
+        print str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
 
