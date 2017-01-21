@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import numpy.ma as ma
 import sys
+import logging
 from lib import build_qa_mask
 from datetime import datetime
 
@@ -25,7 +26,15 @@ parser.add_argument('-x', '--dry-run', help="List the files to be processed but 
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
 parser.add_argument('-c', '--no-check', help="Don't check that the data and reliability files match up. This could "
                                              "result in the wrong mask being created.")
+parser.add_argument('l', '--log-file', help="Name of the file to log info and warnings.")
 args = parser.parse_args()
+
+logger = logging.getLogger(__name__)
+if args.verbose:
+    logger.setLevel(logging.DEBUG)
+if args.log_file is not None:
+    handler = logging.FileHandler(args.log_file)
+    logger.addHandler(handler)
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
@@ -66,28 +75,22 @@ def get_matching_files(directory, file_regex):
     names = filter(lambda x: re.compile(file_regex).search(x) is not None, files)
     return map(lambda x: directory + os.sep + x, names)
 
-if args.verbose:
-    print "Will match date with: " + args.date_regex
+logger.debug("Will match date with: " + args.date_regex)
 data_files = get_matching_files(args.directory_path, args.data_file_regex)
 data_files.sort(reverse=True)
-if args.verbose:
-    print "Matched data files:"
-    for i in data_files:
-        print i
+logger.debug("Matched data files:")
+for i in data_files:
+    logger.debug(i)
 reliability_files = get_matching_files(args.directory_path, args.reliability_file_regex)
 reliability_files.sort(reverse=True)
-if args.verbose:
-    print "Matched reliability files:"
-    for i in reliability_files:
-        print i
+logger.debug("Matched reliability files:")
+for i in reliability_files:
+    logger.debug(i)
 date_pattern = re.compile(args.date_regex)
-if args.verbose:
-    print "Testing that each data file has an associated reliability file."
 for raster, rel in zip(data_files, reliability_files):
     if date_pattern.search(raster).group() != date_pattern.search(rel).group():
         sys.exit("Data and reliability files do not match.")
-if args.verbose:
-    print "Test passed."
+logger.info("Validated that each data file has an associated reliability file.")
 for year in range(args.start_year, args.end_year + 1):
     start_date = datetime.strptime(str(year) + args.first_day, YEAR_DAY)
     end_date = datetime.strptime(str(year) + args.last_day, YEAR_DAY)
@@ -97,23 +100,20 @@ for year in range(args.start_year, args.end_year + 1):
     for raster, rel in zip(data_files_in_range, reliability_files_in_range):
         if date_pattern.search(raster).group() != date_pattern.search(rel).group():
             sys.exit("Data and reliability files do not match.")
-        if args.verbose:
-            print "Processing data: " + raster
-            print "Applying reliability mask: " + rel
+        logger.info("Processing data: " + raster)
+        logger.info("Applying reliability mask: " + rel)
         masked_array = create_masked_array(raster, np.int16, rel, np.int8)
-        if args.verbose:
-            print "Data totally masked: " + str(masked_array.mask.all())
+        logger.debug("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
-    if args.verbose:
-        print "Space-time shape:" + str(space_time.shape)
-        print "Space-time totally masked: " + str(space_time.mask.all())
+    logger.debug("Space-time shape:" + str(space_time.shape))
+    logger.debug("Space-time totally masked: " + str(space_time.mask.all()))
     if args.dry_run is False:
         # Average over time, then over space.
         mean_dat = space_time.mean(axis=TIME_AXIS).mean()
         sd_dat = space_time.std(axis=TIME_AXIS).mean()
         min_dat = space_time.min(axis=TIME_AXIS).mean()
         max_dat = space_time.max(axis=TIME_AXIS).mean()
-        print str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
+        str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
 
