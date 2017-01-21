@@ -30,11 +30,13 @@ parser.add_argument('-b', '--log-file', help="Name of the file to log info and w
 args = parser.parse_args()
 
 logger = logging.getLogger(__name__)
+format_handler = logging.Formatter(fmt="%(asctime)s %(message)s")
+logger.addHandler(format_handler)
 if args.verbose:
     logger.setLevel(logging.DEBUG)
 if args.log_file is not None:
-    handler = logging.FileHandler(args.log_file)
-    logger.addHandler(handler)
+    file_handler = logging.FileHandler(args.log_file)
+    logger.addHandler(file_handler)
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
@@ -116,4 +118,3 @@ for year in range(args.start_year, args.end_year + 1):
         min_dat = space_time.min(axis=TIME_AXIS).mean()
         max_dat = space_time.max(axis=TIME_AXIS).mean()
         print str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)
-
