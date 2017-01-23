@@ -47,10 +47,10 @@ def create_masked_array(array_file, array_type, mask_file, mask_type):
     return ma.array(raster_array, mask=rel_array)
 
 
-def get_files_in_time_range(start, end, files, date_pattern):
+def get_files_in_time_range(start, end, files, date_regex):
     filtered_files = []
     for fl in files:
-        fl_time = date_pattern.search(fl).group()
+        fl_time = re.compile(date_regex).search(fl).group()
         file_datetime = datetime.strptime(fl_time, YEAR_DAY)
         if file_datetime is not None and start <= file_datetime <= end:
             filtered_files.append(fl)
@@ -78,24 +78,24 @@ def get_data_and_reliability_lists(directory_path, data_file_regex, date_regex, 
     return data_files, reliability_files
 
 
-def validate_reliability(data_files, reliability_files, date_pattern):
+def validate_reliability(data_files, reliability_files, date_regex):
     for raster, rel in zip(data_files, reliability_files):
-        if date_pattern.search(raster).group() != date_pattern.search(rel).group():
+        if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
     logger.info("Validated that each data file has an associated reliability file.")
 
 
-def filter_files_in_range(data_files, reliability_files, year, first_day, last_day, date_pattern):
+def filter_files_in_range(data_files, reliability_files, year, first_day, last_day, date_regex):
     start_date = datetime.strptime(str(year) + first_day, YEAR_DAY)
     end_date = datetime.strptime(str(year) + last_day, YEAR_DAY)
-    return (get_files_in_time_range(start_date, end_date, data_files, date_pattern),
-            get_files_in_time_range(start_date, end_date, reliability_files, date_pattern))
+    return (get_files_in_time_range(start_date, end_date, data_files, date_regex),
+            get_files_in_time_range(start_date, end_date, reliability_files, date_regex))
 
 
-def retrieve_space_time(data_files, reliability_files, date_pattern):
+def retrieve_space_time(data_files, reliability_files, date_regex):
     space_list = []
     for raster, rel in zip(data_files, reliability_files):
-        if date_pattern.search(raster).group() != date_pattern.search(rel).group():
+        if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
         logger.info("Processing data: " + raster)
         logger.info("Applying reliability mask: " + rel)
