@@ -10,10 +10,6 @@ from datetime import datetime
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
 
-logger = logging.getLogger(__name__)
-format_handler = logging.Formatter(fmt="%(asctime)s %(message)s")
-logger.addHandler(format_handler)
-
 
 def build_qa_mask(iarray, rarray):
     """build an array mask.
@@ -64,17 +60,17 @@ def get_matching_files(directory, file_regex):
 
 
 def get_data_and_reliability_lists(directory_path, data_file_regex, date_regex, reliability_file_regex):
-    logger.debug("Will match date with: " + date_regex)
+    logging.debug("Will match date with: " + date_regex)
     data_files = get_matching_files(directory_path, data_file_regex)
     data_files.sort(reverse=True)
-    logger.debug("Matched data files:")
+    logging.debug("Matched data files:")
     for i in data_files:
-        logger.debug(i)
+        logging.debug(i)
     reliability_files = get_matching_files(directory_path, reliability_file_regex)
     reliability_files.sort(reverse=True)
-    logger.debug("Matched reliability files:")
+    logging.debug("Matched reliability files:")
     for i in reliability_files:
-        logger.debug(i)
+        logging.debug(i)
     return data_files, reliability_files
 
 
@@ -82,7 +78,7 @@ def validate_reliability(data_files, reliability_files, date_regex):
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
-    logger.info("Validated that each data file has an associated reliability file.")
+    logging.info("Validated that each data file has an associated reliability file.")
 
 
 def filter_files_in_range(data_files, reliability_files, year, first_day, last_day, date_regex):
@@ -97,15 +93,15 @@ def retrieve_space_time(data_files, reliability_files, date_regex):
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
-        logger.info("Processing data: " + raster)
-        logger.info("Applying reliability mask: " + rel)
+        logging.info("Processing data: " + raster)
+        logging.info("Applying reliability mask: " + rel)
         masked_array = create_masked_array(raster, np.int16, rel, np.int8)
-        logger.debug("Data totally masked: " + str(masked_array.mask.all()))
+        logging.debug("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
-    logger.debug("Space-time shape:" + str(space_time.shape))
-    logger.debug("Space-time totally masked: " + str(space_time.mask.all()))
+    logging.debug("Space-time shape:" + str(space_time.shape))
+    logging.debug("Space-time totally masked: " + str(space_time.mask.all()))
     return space_time
 
 

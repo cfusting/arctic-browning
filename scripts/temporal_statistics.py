@@ -21,14 +21,10 @@ parser.add_argument('-c', '--no-check', help="Don't check that the data and reli
 parser.add_argument('-b', '--log-file', help="Name of the file to log info and warnings.")
 args = parser.parse_args()
 
-logger = logging.getLogger(__name__)
-format_handler = logging.Formatter(fmt="%(asctime)s %(message)s")
-logger.addHandler(format_handler)
-if args.verbose:
-    logger.setLevel(logging.DEBUG)
-if args.log_file is not None:
-    file_handler = logging.FileHandler(args.log_file)
-    logger.addHandler(file_handler)
+if args.verbose and args.log_file is not None:
+    logging.basicConfig(level=logging.DEBUG, filename=args.log_file)
+elif args.verbose and args.log_file is None:
+    logging.basicConfig(level=logging.DEBUG)
 
 data_files, reliability_files = get_data_and_reliability_lists(args.directory_path, args.data_file_regex,
                                                                args.date_regex, args.reliability_file_regex)
