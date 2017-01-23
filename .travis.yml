@@ -8,7 +8,7 @@ before_install:
 install:
 - git clone git@github.com:dezhin/pygdal.git
 - cd pygdal
-- pip install 1.8.1/
+- pip install 2.1.0/
 script:
 - cd scripts
 - python -m unittest lib_test
