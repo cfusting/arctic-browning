@@ -5,8 +5,9 @@ before_install:
 - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 - sudo apt-get update
 - sudo apt-get install gdal
+- gdal-config --version
 install:
-  - pip install 'pygdal>=2.1.0.0,<=2.1.0.999'
+- sudo pip install 'pygdal>=2.1.0.0,<=2.1.0.999'
 script:
 - cd scripts
 - python -m unittest lib_test
