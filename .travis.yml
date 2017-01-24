@@ -9,7 +9,7 @@ before_install:
 - sudo apt-get install gdal-bin libgdal-dev
 - gdal-config --version
 install:
-- sudo pip install 'pygdal>=2.1.0.0,<=2.1.0.999'
+- pip install 'pygdal>=2.1.0.0,<=2.1.0.999'
 script:
 - cd scripts
 - python -m unittest lib_test
