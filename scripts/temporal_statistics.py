@@ -35,5 +35,5 @@ for year in range(args.start_year, args.end_year + 1):
                                                                             args.date_regex)
     space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex)
     if args.dry_run is False:
-        mean_dat, min_dat, max_dat, sd_dat = average_overage_time_then_space(space_time)
+        mean_dat, min_dat, max_dat, sd_dat = average_over_time_then_space(space_time)
         print str(year) + "," + str(mean_dat) + "," + str(min_dat) + "," + str(max_dat) + "," + str(sd_dat)

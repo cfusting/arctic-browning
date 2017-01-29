@@ -42,8 +42,9 @@ ggplot(ndvi.ag, aes(x = year, y = mean, group = 1)) +
   labs(title = "Mean NDVI over the NAR - Yearly Sum", 
        x = "Year", y = "NDVI")
 
-ggplot(ndvi.sum.ag[1:13,], aes(x = year, y = mean, group = 1)) +
+ggplot(ndvi.sum.ag, aes(x = year, y = mean, group = 1)) +
   geom_line(size = 2, color = "red") +
   geom_point(size = 3) +
-  labs(title = "Mean NDVI over the NAR - Summer Mean", 
-       x = "Year", y = "NDVI")
+  labs(title = "Mean NDVI over the NAR - Summer - Space -> Time", 
+       x = "Year", y = "NDVI") +
+  scale_y_continuous(limits = c(.64,.71))

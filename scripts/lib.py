@@ -6,6 +6,7 @@ import numpy.ma as ma
 import sys
 import logging
 from datetime import datetime
+from QA_check import qa_check
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
@@ -21,6 +22,17 @@ def build_qa_mask(iarray, rarray):
     # rarray[rarray == 1] = 0
     rarray[iarray == -3000] = 1
     rarray[rarray != 0] = 1
+
+
+def mask_missing(raster_array, mask):
+    mask[raster_array == -3000] = True
+
+
+def build_mask(raster_array, rel_array):
+    mask = qa_check(rel_array)
+    mask = np.logical_not(mask)
+    mask_missing(raster_array, mask)
+    return mask
 
 
 def get_filenames_list(file_name):
@@ -39,8 +51,8 @@ def open_raster_file(file_name, array_type):
 def create_masked_array(array_file, array_type, mask_file, mask_type):
     raster_array = open_raster_file(array_file, array_type)
     rel_array = open_raster_file(mask_file, mask_type)
-    build_qa_mask(raster_array, rel_array)
-    return ma.array(raster_array, mask=rel_array)
+    mask = build_mask(raster_array, rel_array)
+    return ma.array(raster_array, mask=mask)
 
 
 def get_files_in_time_range(start, end, files, date_regex):
@@ -105,9 +117,25 @@ def retrieve_space_time(data_files, reliability_files, date_regex):
     return space_time
 
 
-def average_overage_time_then_space(space_time):
+def average_over_time(space_time):
+    return(space_time.mean(axis=TIME_AXIS),
+           space_time.std(axis=TIME_AXIS),
+           space_time.min(axis=TIME_AXIS),
+           space_time.max(axis=TIME_AXIS))
+
+
+def average_over_space(space):
+    """
+    Average over space masking out any value below 12000.
+    :param space:
+    :return:
+    """
+    return ma.masked_less(space, 1200)
+
+
+def average_over_time_then_space(space_time):
     # Average over time, then over space.
     return(space_time.mean(axis=TIME_AXIS).mean(),
-           space_time.std(axis=TIME_AXIS).mean(),
-           space_time.min(axis=TIME_AXIS).mean(),
-           space_time.max(axis=TIME_AXIS).mean())
+           space_time.std(axis=TIME_AXIS).std(),
+           space_time.min(axis=TIME_AXIS).min(),
+           space_time.max(axis=TIME_AXIS).max())
