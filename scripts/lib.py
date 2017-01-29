@@ -118,24 +118,13 @@ def retrieve_space_time(data_files, reliability_files, date_regex):
 
 
 def average_over_time(space_time):
-    return(space_time.mean(axis=TIME_AXIS),
-           space_time.std(axis=TIME_AXIS),
-           space_time.min(axis=TIME_AXIS),
-           space_time.max(axis=TIME_AXIS))
-
-
-def average_over_space(space):
-    """
-    Average over space masking out any value below 12000.
-    :param space:
-    :return:
-    """
-    return ma.masked_less(space, 1200)
+    return (space_time.mean(axis=TIME_AXIS),
+            space_time.count(axis=TIME_AXIS) /
+            float(space_time.shape[TIME_AXIS]))
 
 
 def average_over_time_then_space(space_time):
-    # Average over time, then over space.
-    return(space_time.mean(axis=TIME_AXIS).mean(),
-           space_time.std(axis=TIME_AXIS).std(),
-           space_time.min(axis=TIME_AXIS).min(),
-           space_time.max(axis=TIME_AXIS).max())
+    space, weight = average_over_time(space_time)
+    space_masked = ma.masked_less(space, 1200)
+    weight_masked = ma.array(weight, mask=space_masked.mask)
+    return space_masked.mean(), weight_masked.mean()
