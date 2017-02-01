@@ -19,6 +19,7 @@ parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
 parser.add_argument('-c', '--no-check', help="Don't check that the data and reliability files match up. This could "
                                              "result in the wrong mask being created.")
 parser.add_argument('-b', '--log-file', help="Name of the file to log info and warnings.")
+parser.add_argument('-z', '--sanity-path', help="Save masks to specified directory.")
 args = parser.parse_args()
 
 if args.verbose and args.log_file is not None:
@@ -33,7 +34,7 @@ for year in range(args.start_year, args.end_year + 1):
     data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex)
+    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path)
     if args.dry_run is False:
         mean_dat, weight_dat = average_over_time_then_space(space_time)
         print str(year) + "," + str(mean_dat) + "," + str(weight_dat)

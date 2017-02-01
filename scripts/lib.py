@@ -7,9 +7,11 @@ import sys
 import logging
 from datetime import datetime
 from QA_check import qa_check
+import gdal_lib as gd
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
+NO_DATA = -3000
 
 
 def build_qa_mask(iarray, rarray):
@@ -20,12 +22,12 @@ def build_qa_mask(iarray, rarray):
     :return:
     """
     # rarray[rarray == 1] = 0
-    rarray[iarray == -3000] = 1
+    rarray[iarray == NO_DATA] = 1
     rarray[rarray != 0] = 1
 
 
 def mask_missing(raster_array, mask):
-    mask[raster_array == -3000] = True
+    mask[raster_array == NO_DATA] = True
 
 
 def build_mask(raster_array, rel_array):
@@ -43,15 +45,27 @@ def get_filenames_list(file_name):
 
 
 def open_raster_file(file_name, array_type):
+    """
+    Take Modis VI data and convert it into a numpy array of array_type.
+    :param file_name: Name of the file.
+    :param array_type: Type of the array.
+    :return: Numpy array
+    """
     rast = gdal.Open(file_name)
     band = rast.GetRasterBand(1)
-    return np.array(band.ReadAsArray(), array_type)
+    return np.array(band.ReadAsArray(), array_type), rast
 
 
-def create_masked_array(array_file, array_type, mask_file, mask_type):
-    raster_array = open_raster_file(array_file, array_type)
+def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_path):
+    raster_array, srcds = open_raster_file(array_file, array_type)
     rel_array = open_raster_file(mask_file, mask_type)
     mask = build_mask(raster_array, rel_array)
+    if sanity_path is not None:
+        driver = gdal.GetDriverByName("GTiff")
+        driver.CreateCopy()
+        ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
+        gd.create_geotiff(sanity_path + os.sep + array_file, mask, driver, ndv, NO_DATA, xsize, ysize, geot,
+                          projection, datatype)
     return ma.array(raster_array, mask=mask)
 
 
@@ -100,20 +114,20 @@ def filter_files_in_range(data_files, reliability_files, year, first_day, last_d
             get_files_in_time_range(start_date, end_date, reliability_files, date_regex))
 
 
-def retrieve_space_time(data_files, reliability_files, date_regex):
+def retrieve_space_time(data_files, reliability_files, date_regex, sanity_path):
     space_list = []
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
         logging.info("Processing data: " + raster)
         logging.info("Applying reliability mask: " + rel)
-        masked_array = create_masked_array(raster, np.int16, rel, np.int8)
-        logging.debug("Data totally masked: " + str(masked_array.mask.all()))
+        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path)
+        logging.warn("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.
     space_time = ma.dstack(space_list)
     logging.debug("Space-time shape:" + str(space_time.shape))
-    logging.debug("Space-time totally masked: " + str(space_time.mask.all()))
+    logging.warn("Space-time totally masked: " + str(space_time.mask.all()))
     return space_time
 
 

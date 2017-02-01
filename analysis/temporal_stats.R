@@ -1,6 +1,6 @@
 rm(list = ls())
 setwd("~/Dropbox/arctic-browning/analysis/data")
-ndvi_t <- read.csv("ndvi_temporal_stats.csv")
+ndvi_t <- read.csv("ndvi_temporal_stats_005_noclouds.csv")
 ndvi_t$mean <- ndvi_t$mean * .0001
 ndvi_t$year <- as.Date(as.character(ndvi_t$year), "%Y")
 
