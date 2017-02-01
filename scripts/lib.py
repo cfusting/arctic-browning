@@ -58,7 +58,7 @@ def open_raster_file(file_name, array_type):
 
 def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_path):
     raster_array, srcds = open_raster_file(array_file, array_type)
-    rel_array = open_raster_file(mask_file, mask_type)
+    rel_array, srcds2 = open_raster_file(mask_file, mask_type)
     mask = build_mask(raster_array, rel_array)
     if sanity_path is not None:
         driver = gdal.GetDriverByName("GTiff")
