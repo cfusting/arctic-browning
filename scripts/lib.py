@@ -56,14 +56,17 @@ def open_raster_file(file_name, array_type):
     return np.array(band.ReadAsArray(), array_type), rast
 
 
-def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_path):
+def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_path, date_regex):
     raster_array, srcds = open_raster_file(array_file, array_type)
     rel_array, srcds2 = open_raster_file(mask_file, mask_type)
     mask = build_mask(raster_array, rel_array)
     if sanity_path is not None:
         driver = gdal.GetDriverByName("GTiff")
         ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
-        gd.create_geotiff(sanity_path + os.sep + "_mask" + array_file, mask, driver, ndv, NO_DATA, xsize, ysize, geot,
+        date_id = re.compile(date_regex).search(array_file).group()
+        mask_path = sanity_path + date_id + "_mask" 
+        logging.debug("mask path: " + mask_path)
+        gd.create_geotiff(mask_path, mask, driver, ndv, NO_DATA, xsize, ysize, geot,
                           projection, datatype)
     return ma.array(raster_array, mask=mask)
 
@@ -120,7 +123,7 @@ def retrieve_space_time(data_files, reliability_files, date_regex, sanity_path):
             sys.exit("Data and reliability files do not match.")
         logging.info("Processing data: " + raster)
         logging.info("Applying reliability mask: " + rel)
-        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path)
+        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path, date_regex)
         logging.warn("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.
