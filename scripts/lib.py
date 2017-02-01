@@ -62,7 +62,6 @@ def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_pat
     mask = build_mask(raster_array, rel_array)
     if sanity_path is not None:
         driver = gdal.GetDriverByName("GTiff")
-        driver.CreateCopy()
         ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
         gd.create_geotiff(sanity_path + os.sep + array_file, mask, driver, ndv, NO_DATA, xsize, ysize, geot,
                           projection, datatype)
