@@ -1,6 +1,6 @@
 rm(list = ls())
 setwd("~/Dropbox/arctic-browning/analysis/data")
-ndvi_t <- read.csv("ndvi_temporal_stats_005_noclouds.csv")
+ndvi_t <- read.csv("ndvi_temporal_stats_005.csv")
 ndvi_t$mean <- ndvi_t$mean * .0001
 ndvi_t$year <- as.Date(as.character(ndvi_t$year), "%Y")
 
@@ -12,3 +12,4 @@ ggplot(ndvi_t, aes(x = year, y = mean)) +
        y = "NDVI", x = "Year") +
   scale_x_date(date_breaks = "1 year", date_labels = "%Y") + 
   scale_y_continuous(limits = c(.64,.71))
+
