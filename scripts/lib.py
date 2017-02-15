@@ -180,7 +180,9 @@ def get_unmasked_pixel_proportion_over_time(space_time):
     :param space_time: lon, lat, time
     :return: lon, lat of pixel proportions (floats)
     """
-    return (np.invert(space_time).astype(int).mean(axis=TIME_AXIS)).astype(int)
+    space_time_mean = np.invert(space_time).astype(int).mean(axis=TIME_AXIS)
+    logging.debug("space_time_mean shape: " + str(space_time_mean.shape))
+    return space_time_mean.astype(int)
 
 
 def save_like_geotiff(source_path, source_type, matrix, no_data_value, file_path):
