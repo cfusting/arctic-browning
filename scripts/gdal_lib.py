@@ -21,16 +21,16 @@ def get_geo_info(srcds):
 def create_geotiff(name, array, driver, ndv, nde,
                    xsize, ysize, geot, projection, datatype):
     newfilename = name + '.tif'
-    # Set nans to the original No Data Value
-    array[array == nde] = ndv
     # Set up the dataset
     dataset = driver.Create(newfilename, xsize, ysize, 1, datatype)
     # the '1' is for band 1.
     dataset.SetGeoTransform(geot)
     dataset.SetProjection(projection.ExportToWkt())
+    if ndv is not None and nde is not None:
+        array[array == nde] = ndv
+        dataset.GetRasterBand(1).SetNoDataValue(ndv)
     # Write the array
     dataset.GetRasterBand(1).WriteArray(array)
-    dataset.GetRasterBand(1).SetNoDataValue(ndv)
     return newfilename
 
 
@@ -41,7 +41,7 @@ def main(filename, output):
     array = band.ReadAsArray()
     newarray = array + 20
     ndv, xsize, ysize, geot, projection, datatype = get_geo_info(srcds)
-    create_geotiff(output, newarray, driver, ndv, -3000, xsize, ysize, geot, projection, datatype)
+    create_geotiff(output, newarray, driver, ndv, -2980, xsize, ysize, geot, projection, datatype)
 
 
 if __name__ == '__main__':
