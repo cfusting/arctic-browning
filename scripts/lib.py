@@ -77,6 +77,8 @@ def save_mask(date_regex, sanity_path, srcds, array_file, mask, data_type):
     no_data = NDVI_NO_DATA if data_type is NDVI else LST_NO_DATA
     driver = gdal.GetDriverByName("GTiff")
     ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
+    ndv = LST_NO_DATA if ndv is None else ndv
+    logging.debug("ndv: " + str(ndv))
     date_id = re.compile(date_regex).search(array_file).group()
     mask_path = sanity_path + date_id + "_mask"
     logging.debug("mask path: " + mask_path)
@@ -142,14 +144,14 @@ def filter_files_in_range(data_files, reliability_files, year, first_day, last_d
             get_files_in_time_range(start_date, end_date, reliability_files, date_regex))
 
 
-def retrieve_space_time(data_files, reliability_files, date_regex, sanity_path):
+def retrieve_space_time(data_files, reliability_files, date_regex, sanity_path, data_type):
     space_list = []
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
         logging.info("Processing data: " + raster)
         logging.info("Applying reliability mask: " + rel)
-        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path, date_regex)
+        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path, date_regex, data_type)
         logging.warn("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.
@@ -185,6 +187,7 @@ def save_like_geotiff(source_path, source_type, matrix, no_data_value, file_path
     raster_array, srcds = open_raster_file(source_path, source_type)
     driver = gdal.GetDriverByName("GTiff")
     ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
+    ndv = LST_NO_DATA if ndv is None else ndv
     logging.debug("Saving Geotiff: " + file_path)
     gd.create_geotiff(file_path, matrix, driver, ndv, no_data_value, xsize, ysize, geot,
                       projection, datatype)

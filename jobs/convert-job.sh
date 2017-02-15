@@ -10,6 +10,6 @@ ids=$(ls | grep -oh A[0-9]*[0-9] | sort | uniq)
 for i in $ids
 do
     ls | grep $i".*hdf$" > $i".filelist"
-	source $HOME/arctic-browning/scripts/$convertscript $i".filelist"
+	source $HOME/arctic-browning/scripts/convert.sh $i".filelist"
     rm $i".filelist"
 done

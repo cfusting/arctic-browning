@@ -37,12 +37,12 @@ for year in range(args.start_year, args.end_year + 1):
     data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path)
+    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path, LST)
     if args.dry_run is False:
         masked_props.append(get_unmasked_pixel_proportion_over_time(space_time))
 
 masked_props_over_years = np.stack(masked_props, axis=TIME_AXIS).mean(axis=TIME_AXIS)
 # Assumes all files are of the same dimension. Safe assumption but shitty way to do this.
-save_like_geotiff(data_files[0], np.int16, masked_props_over_years, NDVI_NO_DATA, args.out_path)
+save_like_geotiff(data_files[0], np.int16, masked_props_over_years, LST_NO_DATA, args.out_path)
 
 
