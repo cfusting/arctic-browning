@@ -71,7 +71,7 @@ def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_pat
 def get_files_in_time_range(start, end, files, date_regex):
     filtered_files = []
     for fl in files:
-        fl_time = re.compile(date_regex).search(fl).group()
+        fl_time = re.search(date_regex,fl).group()
         file_datetime = datetime.strptime(fl_time, YEAR_DAY)
         if file_datetime is not None and start <= file_datetime <= end:
             filtered_files.append(fl)
