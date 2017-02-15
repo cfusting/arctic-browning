@@ -177,8 +177,8 @@ def get_unmasked_pixel_proportion_over_time(space_time):
     :param space_time: lon, lat, time
     :return: lon, lat of pixel proportions (floats)
     """
-    space_time_mean = np.invert(space_time).astype(int).mean(axis=TIME_AXIS)
-    logging.debug("space_time_mean shape: " + str(space_time_mean.shape))
+    space_time_mean = np.invert(space_time.mask).astype(int).mean(axis=TIME_AXIS)
+    logging.debug("Space time mean shape: " + str(space_time_mean.shape))
     return space_time_mean
 
 
