@@ -43,7 +43,8 @@ for year in range(args.start_year, args.end_year + 1):
     masked_props.append(unmasked_props)
 
 masked_props_over_years = np.stack(masked_props, axis=TIME_AXIS).mean(axis=TIME_AXIS)
-logging.debug("Output shape: " + str(masked_props_over_years.shape))
+masked_out = (masked_props_over_years * 10000).astype(int)
+logging.debug("Output shape: " + str(masked_out.shape))
 # Assumes all files are of the same dimension. Safe assumption but shitty way to do this.
-save_like_geotiff(data_files[0], np.int16, masked_props_over_years, LST_NO_DATA, args.out_path)
+save_like_geotiff(data_files[0], np.int16, masked_out, args.out_path)
 

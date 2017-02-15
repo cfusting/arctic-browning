@@ -37,7 +37,7 @@ def build_ndvi_mask(raster_array, rel_array):
     return mask
 
 
-def build_temp_mask(raster_array, rel_array):
+def build_lst_mask(raster_array, rel_array):
     mask = qa_check_temp(rel_array)
     mask = np.logical_not(mask)
     mask[raster_array == LST_NO_DATA] = True
@@ -63,7 +63,7 @@ def open_raster_file(file_name, array_type):
     return np.array(band.ReadAsArray(), array_type), rast
 
 
-def save_mask(date_regex, sanity_path, srcds, array_file, mask, data_type):
+def save_mask(date_regex, sanity_path, srcds, array_file, mask):
     """
     Saves the generated mask. Useful sanity check.
     :param date_regex:
@@ -71,18 +71,15 @@ def save_mask(date_regex, sanity_path, srcds, array_file, mask, data_type):
     :param srcds:
     :param array_file:
     :param mask:
-    :param data_type:
     :return:
     """
-    no_data = NDVI_NO_DATA if data_type is NDVI else LST_NO_DATA
     driver = gdal.GetDriverByName("GTiff")
     ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
-    ndv = LST_NO_DATA if ndv is None else ndv
-    logging.debug("ndv: " + str(ndv))
+    logging.debug("Mask no data value: " + str(ndv))
     date_id = re.compile(date_regex).search(array_file).group()
     mask_path = sanity_path + date_id + "_mask"
     logging.debug("mask path: " + mask_path)
-    gd.create_geotiff(mask_path, mask, driver, ndv, no_data, xsize, ysize, geot,
+    gd.create_geotiff(mask_path, mask, driver, None, None, xsize, ysize, geot,
                       projection, datatype)
 
 
@@ -93,9 +90,9 @@ def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_pat
     if data_type is NDVI:
         mask = build_ndvi_mask(raster_array, rel_array)
     elif data_type is LST:
-        mask = build_temp_mask(raster_array, rel_array)
+        mask = build_lst_mask(raster_array, rel_array)
     if sanity_path is not None:
-        save_mask(date_regex, sanity_path, srcds, array_file, mask, data_type)
+        save_mask(date_regex, sanity_path, srcds2, array_file, mask)
     return ma.array(raster_array, mask=mask)
 
 
@@ -182,14 +179,13 @@ def get_unmasked_pixel_proportion_over_time(space_time):
     """
     space_time_mean = np.invert(space_time).astype(int).mean(axis=TIME_AXIS)
     logging.debug("space_time_mean shape: " + str(space_time_mean.shape))
-    return space_time_mean.astype(int)
+    return space_time_mean
 
 
-def save_like_geotiff(source_path, source_type, matrix, no_data_value, file_path):
+def save_like_geotiff(source_path, source_type, matrix, file_path):
     raster_array, srcds = open_raster_file(source_path, source_type)
     driver = gdal.GetDriverByName("GTiff")
     ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
-    ndv = LST_NO_DATA if ndv is None else ndv
     logging.debug("Saving Geotiff: " + file_path)
-    gd.create_geotiff(file_path, matrix, driver, ndv, no_data_value, xsize, ysize, geot,
+    gd.create_geotiff(file_path, matrix, driver, None, None, xsize, ysize, geot,
                       projection, datatype)
