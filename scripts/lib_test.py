@@ -5,7 +5,8 @@ import numpy.testing as npt
 from lib import *
 
 """ In essence, I hope to test as many functions as I can that are used in temporal_statistics.py and are non-trivial.
-Because a lot of the functions have to do with filtering the data by the files used, I think it would be beneficial to have a bit more data
+Because a lot of the functions have to do with filtering the data by the files used, I think it would be beneficial to
+have a bit more data
 """
 
 
@@ -16,7 +17,7 @@ class Test:
         correctmask = np.array([1, 0, 1, 1, 1, 0, 1])
         build_qa_mask(inputarray, reliability)
         npt.assert_array_equal(reliability, correctmask)
-        assert ma.array(inputarray, mask=reliability).sum()== 12337
+        assert ma.array(inputarray, mask=reliability).sum() == 12337
 
     def test_get_filenames_list(self):
         files_from = "../test_data/data_list.txt"
@@ -50,16 +51,4 @@ class Test:
             "A2016177_clipped_mosaic_250m 16 days NDVI.tif",
             "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif"]
 
-    def test_filter_files_in_range(self):
-        """This function seems too simple to test IMO, but I could write one if need be
-        """
-        assert True
-
-    def test_retrieve_space_time(self):
-        """I'm not sure how to test this one. create_masked_array is not easily testable considering the QA function is used. I will also trust that the numpyma functions work. Do I need to trust that appending to an array works?
-        """
-        assert True
-
-    def test_average_over_time_then_space(self):
-        assert True
 
