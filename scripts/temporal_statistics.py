@@ -13,6 +13,7 @@ parser.add_argument('-r', '--reliability-file-regex', help='Filter files using t
                                                            ' in single quotes.', required=True)
 parser.add_argument('-j', '--date-regex', help='Extract the date using this expression. Make sure to wrap this in '
                                                'single quotes.', required=True)
+parser.add_argument('-n', '--no-space', help='Do not aggregate over space.', action='store_true')
 parser.add_argument('-x', '--dry-run', help="List the files to be processed but don't take any statistics.",
                     action="store_true")
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
@@ -34,7 +35,13 @@ for year in range(args.start_year, args.end_year + 1):
     data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path, NDVI)
+    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path,
+                                     NDVI)
     if args.dry_run is False:
-        mean_dat, weight_dat = average_over_time_then_space(space_time)
-        print str(year) + "," + str(mean_dat) + "," + str(weight_dat)
+        if args.no_space is True:
+            space, weight = average_over_time(space_time)
+            for s, w in zip(space, weight):
+                print str(year) + "," + str(s) + "," + str(w)
+        else:
+            mean_dat, weight_dat = average_over_time_then_space(space_time)
+            print str(year) + "," + str(mean_dat) + "," + str(weight_dat)
