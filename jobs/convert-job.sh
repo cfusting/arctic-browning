@@ -1,7 +1,10 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=03:00:00
+#PBS -q shortq
 #PBS -N modis-convert
+#PBS -o /users/c/f/cfusting/job_logs
+#PBS -e /users/c/f/cfusting/job_logs
 source /users/c/f/cfusting/.bash_profile
 source /users/c/f/cfusting/geospatial/bin/activate
 cd $directory
