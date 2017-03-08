@@ -40,7 +40,7 @@ for year in range(args.start_year, args.end_year + 1):
     if args.dry_run is False:
         if args.no_space is True:
             space, weight = average_over_time(space_time)
-            for s, w in zip(space, weight):
+            for s, w in zip(space.flatten(), weight.flatten()):
                 print str(year) + "," + str(s) + "," + str(w)
         else:
             mean_dat, weight_dat = average_over_time_then_space(space_time)
