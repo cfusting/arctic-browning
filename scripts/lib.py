@@ -63,10 +63,9 @@ def open_raster_file(file_name, array_type):
     return np.array(band.ReadAsArray(), array_type), rast
 
 
-def save_mask(date_regex, sanity_path, srcds, array_file, mask):
+def save_mask(sanity_path, srcds, array_file, mask):
     """
     Saves the generated mask. Useful sanity check.
-    :param date_regex:
     :param sanity_path:
     :param srcds:
     :param array_file:
@@ -76,23 +75,27 @@ def save_mask(date_regex, sanity_path, srcds, array_file, mask):
     driver = gdal.GetDriverByName("GTiff")
     ndv, xsize, ysize, geot, projection, datatype = gd.get_geo_info(srcds)
     logging.debug("Mask no data value: " + str(ndv))
-    date_id = re.compile(date_regex).search(array_file).group()
-    mask_path = sanity_path + date_id + "_mask"
+    mask_path = sanity_path + array_file + "_mask"
     logging.debug("mask path: " + mask_path)
     gd.create_geotiff(mask_path, mask, driver, None, None, xsize, ysize, geot,
                       projection, datatype)
 
 
-def create_masked_array(array_file, array_type, mask_file, mask_type, sanity_path, date_regex, data_type):
-    raster_array, srcds = open_raster_file(array_file, array_type)
-    rel_array, srcds2 = open_raster_file(mask_file, mask_type)
-    mask = None
-    if data_type is NDVI:
-        mask = build_ndvi_mask(raster_array, rel_array)
-    elif data_type is LST:
-        mask = build_lst_mask(raster_array, rel_array)
+def create_ndvi_masked_array(array_file, mask_file, sanity_path):
+    raster_array, srcds = open_raster_file(array_file, np.int16)
+    rel_array, srcds2 = open_raster_file(mask_file, np.uint8)
+    mask = build_ndvi_mask(raster_array, rel_array)
     if sanity_path is not None:
-        save_mask(date_regex, sanity_path, srcds2, array_file, mask)
+        save_mask(sanity_path, srcds2, array_file, mask)
+    return ma.array(raster_array, mask=mask)
+
+
+def create_lst_masked_array(array_file, mask_file, sanity_path):
+    raster_array, srcds = open_raster_file(array_file, np.uint16)
+    rel_array, srcds2 = open_raster_file(mask_file, np.uint8)
+    mask = build_lst_mask(raster_array, rel_array)
+    if sanity_path is not None:
+        save_mask(sanity_path, srcds2, array_file, mask)
     return ma.array(raster_array, mask=mask)
 
 
@@ -141,14 +144,31 @@ def filter_files_in_range(data_files, reliability_files, year, first_day, last_d
             get_files_in_time_range(start_date, end_date, reliability_files, date_regex))
 
 
-def retrieve_space_time(data_files, reliability_files, date_regex, sanity_path, data_type):
+def retrieve_ndvi_space_time(data_files, reliability_files, date_regex, sanity_path):
     space_list = []
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
             sys.exit("Data and reliability files do not match.")
         logging.info("Processing data: " + raster)
         logging.info("Applying reliability mask: " + rel)
-        masked_array = create_masked_array(raster, np.int16, rel, np.int8, sanity_path, date_regex, data_type)
+        masked_array = create_ndvi_masked_array(raster, rel, sanity_path)
+        logging.warn("Data totally masked: " + str(masked_array.mask.all()))
+        space_list.append(masked_array)
+    # Lon, Lat, Time.
+    space_time = ma.dstack(space_list)
+    logging.debug("Space-time shape:" + str(space_time.shape))
+    logging.warn("Space-time totally masked: " + str(space_time.mask.all()))
+    return space_time
+
+
+def retrieve_lst_space_time(data_files, reliability_files, date_regex, sanity_path):
+    space_list = []
+    for raster, rel in zip(data_files, reliability_files):
+        if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
+            sys.exit("Data and reliability files do not match.")
+        logging.info("Processing data: " + raster)
+        logging.info("Applying reliability mask: " + rel)
+        masked_array = create_lst_masked_array(raster, rel, sanity_path)
         logging.warn("Data totally masked: " + str(masked_array.mask.all()))
         space_list.append(masked_array)
     # Lon, Lat, Time.

@@ -35,8 +35,8 @@ for year in range(args.start_year, args.end_year + 1):
     data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path,
-                                     NDVI)
+    space_time = retrieve_ndvi_space_time(data_files_in_range, reliability_files_in_range,
+                                          args.date_regex, args.sanity_path)
     if args.dry_run is False:
         if args.no_space is True:
             space, weight = average_over_time(space_time)

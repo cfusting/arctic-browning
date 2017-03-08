@@ -1,18 +1,30 @@
-dist: trusty
-sudo: required
 language: python
 python:
 - '2.7'
-before_install:
-- sudo add-apt-repository -y ppa:ubuntugis/ppa
-- sudo apt-get update
-- sudo apt-get install gdal-bin libgdal-dev
-- gdal-config --version
 install:
-- pip install 'pygdal>=2.1.0.0,<=2.1.0.999'
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION gdal
+  - source activate test-environment
+  - python setup.py install
 script:
 - cd scripts
-- python -m unittest lib_test
+- pytest
 notifications:
   slack:
     secure: OZdekczESpUwlfURFkvl5hNqPvp591OzVuyvb4sFXN67bD7xgZewzPL4yt06/h0Ll8apxHFX4EVVrkMfnXqx2/utGFJZRSRtmq5V0jdaULeWyZ3keiTluCHZvDpllZnXvoe2ZicHegjQ29N4rDhBgArchL4laDuk963di2/LxdRB4Adl9NAhl6Dsm4huzmwc6PO3Lh66fcpChSkOYRrR7oiMhV0uWjMbp3vinO9/o1OcCnhn8+bLg12F5oTWDHeA7vlJ0staHng7VI4y6t0JsLC4zjx6uvcAcge6/U8XGAPrufBuQLc7kAE3rNwwGPTDh0c8UO+TGhk7qjd+OdF2CPUEf9KqnfJ7ng3DMmZgRpXn6FVkrkTUPwQfg3wHQZOq8iEjYdnObjMsjiS30Jt2xsu+N2TWO5gYz/08aoHP8ghDDpOXUk7BPDpR7o/SM9X5IV+oft+YJcA7wPaexhZg4qbZWfQunGjna6aL+vM40ELz6Q8YTv4zqIWpqUtkh7Ox9Op3ZdUyORuCfgmVmIRgXfEGeq0M66gCdn99NAqB3uQc1i2LUTF3VvUQ1wPDiuwEbVQoYPPLDKmCdkPbfem2iBo99KMCEUJCC4cDeqCrA3qwZi2SpFpIKAcm6KNqSx09EZpao+Sqs34wZsw/ownxy6Jd6MXYeekmf3c4r/zQ3jk=
