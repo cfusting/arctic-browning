@@ -37,7 +37,8 @@ for year in range(args.start_year, args.end_year + 1):
     data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_space_time(data_files_in_range, reliability_files_in_range, args.date_regex, args.sanity_path, LST)
+    space_time = retrieve_lst_space_time(data_files_in_range, reliability_files_in_range,
+                                     args.date_regex, args.sanity_path)
     unmasked_props = get_unmasked_pixel_proportion_over_time(space_time)
     logging.debug("Unmasked Pixels for one year shape :" + str(unmasked_props.shape))
     masked_props.append(unmasked_props)
