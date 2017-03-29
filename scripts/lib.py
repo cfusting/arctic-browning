@@ -108,6 +108,7 @@ def create_lst_masked_array(array_file, mask_file, sanity_path):
     srcds2 = None
     return res
 
+
 def get_files_in_time_range(start, end, files, date_regex):
     filtered_files = []
     for fl in files:
