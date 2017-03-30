@@ -87,7 +87,12 @@ def create_ndvi_masked_array(array_file, mask_file, sanity_path):
     mask = build_ndvi_mask(raster_array, rel_array)
     if sanity_path is not None:
         save_mask(sanity_path, srcds2, array_file, mask)
-    return ma.array(raster_array, mask=mask)
+    res = ma.array(raster_array, mask=mask)
+    raster_array = None
+    srcds = None
+    rel_array = None
+    srcds2 = None
+    return res
 
 
 def create_lst_masked_array(array_file, mask_file, sanity_path):
@@ -96,7 +101,12 @@ def create_lst_masked_array(array_file, mask_file, sanity_path):
     mask = build_lst_mask(raster_array, rel_array)
     if sanity_path is not None:
         save_mask(sanity_path, srcds2, array_file, mask)
-    return ma.array(raster_array, mask=mask)
+    res = ma.array(raster_array, mask=mask)
+    raster_array = None
+    srcds = None
+    rel_array = None
+    srcds2 = None
+    return res
 
 
 def get_files_in_time_range(start, end, files, date_regex):
