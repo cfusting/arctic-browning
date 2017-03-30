@@ -130,6 +130,22 @@ def get_data_and_reliability_lists(directory_path, data_file_regex, date_regex, 
     return data_files, reliability_files
 
 
+def get_files_list(directory_path, data_file_regex, date_regex):
+    logging.debug("Will match date with: " + date_regex)
+    data_files = get_matching_files(directory_path, data_file_regex)
+    data_files.sort(reverse=True)
+    logging.debug("Matched data files:")
+    for i in data_files:
+        logging.debug(i)
+    return data_files
+
+
+def filter_data_files_in_range(data_files, year, first_day, last_day, date_regex):
+    start_date = datetime.strptime(str(year) + first_day, YEAR_DAY)
+    end_date = datetime.strptime(str(year) + last_day, YEAR_DAY)
+    return get_files_in_time_range(start_date, end_date, data_files, date_regex)
+
+
 def validate_reliability(data_files, reliability_files, date_regex):
     for raster, rel in zip(data_files, reliability_files):
         if re.compile(date_regex).search(raster).group() != re.compile(date_regex).search(rel).group():
