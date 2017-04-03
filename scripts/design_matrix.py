@@ -1,9 +1,11 @@
 import argparse
 import datetime as dt
 import logging
+
 import numpy as np
-import modisfile as modis
 from pyhdf.SD import SD, SDC
+
+import modis.modisfile as modis
 
 parser = argparse.ArgumentParser(description='Create design matrix.')
 parser.add_argument('-l', '--lst-files', help='File containing LST file paths.', required=True)
@@ -90,6 +92,7 @@ ndvi_transpose = ndvi_vector.reshape(rows, 1)
 design_masked = np.ma.concatenate([lst_matrix, ndvi_transpose], axis=1)
 design_matrix = np.ma.compress_rows(design_masked)
 logging.debug("Design Matrix shape: " + str(design_matrix.shape))
+logging.debug(str(design_matrix))
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
 sds = sd.create("design_matrix", SDC.FLOAT64, design_matrix.shape)
 sds.first_year = args.first_year
