@@ -112,7 +112,7 @@ def create_lst_masked_array(array_file, mask_file, sanity_path):
 def get_files_in_time_range(start, end, files, date_regex):
     filtered_files = []
     for fl in files:
-        fl_time = re.search(date_regex,fl).group()
+        fl_time = re.search(date_regex, fl).group()
         file_datetime = datetime.strptime(fl_time, YEAR_DAY)
         if file_datetime is not None and start <= file_datetime <= end:
             filtered_files.append(fl)
