@@ -11,6 +11,8 @@ parser.add_argument('-t', '--tiles', nargs='+', help='tiles you would like to do
                     required=True)
 parser.add_argument('-v', '--verbose', help="Verbose run.", action="store_true")
 parser.add_argument('-b', '--log-file', help="Name of the file to log info and warnings.")
+parser.add_argument('-u', '--username', help="earthdata username.", required=True)
+parser.add_argument('-p', '--password', help="password", required=True)
 args = parser.parse_args()
 
 if args.verbose and args.log_file is not None:
@@ -23,11 +25,9 @@ start_date = datetime.strptime(args.start_day, DATE_FORMAT)
 duration = end_date - start_date
 d = duration.days
 
-username = "tim_stevens"
-password = "cowDuck!37"
 product = "MOD10A2.006"
 
-doo = modisSuite.downloader(product, username, password, date=args.start_day, delta=d, tuiles=args.tiles,
+doo = modisSuite.downloader(product, args.username, args.password, date=args.start_day, delta=d, tuiles=args.tiles,
                             output=args.directory)
 for x, y in doo.telechargerTout():
     print(x, y)
