@@ -49,6 +49,8 @@ for fl in file_list:
     shp = dat.get().shape
     MASKED_DAT_NAME = "masked_" + args.band
     if MASKED_DAT_NAME in sd.datasets() and not args.overwrite:
+        print MASKED_DAT_NAME
+        print sd.datasets()
         sys.exit('Masked data present. Exiting.')
     sds_data = None
     if MASKED_DAT_NAME not in sd.datasets():
@@ -67,8 +69,6 @@ for fl in file_list:
     elif args.type == SNOW:
         mask = build_snow_mask(dat.get())
         masked_dat = np.ma.array(dat.get(), mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
-        masked_dat[masked_dat == 50] = 0  # might be better suited for post processing
-        masked_dat[masked_dat == 200] = 1
     sds_data[:] = masked_dat.filled()
     logging.debug('Written values: ' + str(sds_data.get()))
     sds_data.endaccess()

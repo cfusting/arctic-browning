@@ -51,4 +51,3 @@ class Test:
             "A2016177_clipped_mosaic_250m 16 days NDVI.tif",
             "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif"]
 
-
