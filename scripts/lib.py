@@ -44,13 +44,6 @@ def build_lst_mask(raster_array, rel_array):
     return mask
 
 
-def build_snow_mask(snow_array):
-    mask = np.ones(snow_array.shape, dtype=bool)
-    mask[snow_array == 50] = False  # no snow
-    mask[snow_array == 200] = False  # snow
-    return mask
-
-
 def clean_snow_data(snow_array):
     clean = np.zeros(snow_array.shape)
     clean[:] = -1
