@@ -1,9 +1,9 @@
 import numpy.testing as npt
-
-""" In essence, I hope to test as many functions as I can that are used in temporal_statistics.py and are non-trivial.
-Because a lot of the functions have to do with filtering the data by the files used, I think it would be beneficial to
-have a bit more data
-"""
+import numpy as np
+import numpy.ma as ma
+import datetime as dt
+from scripts.hdf.utilities.lib import build_qa_mask, get_filenames_list, get_data_and_reliability_lists, \
+    get_files_in_time_range, YEAR_DAY
 
 
 class Test:
@@ -37,8 +37,8 @@ class Test:
                                                                                date_regex, reliability_file_regex)
 
     def test_get_files_in_time_range(self):
-        start = datetime.strptime("2016150", YEAR_DAY)
-        end = datetime.strptime("2016192", YEAR_DAY)
+        start = dt.datetime.strptime("2016150", YEAR_DAY)
+        end = dt.datetime.strptime("2016192", YEAR_DAY)
         files = ["A2016177_clipped_mosaic_250m 16 days NDVI.tif", "A2016193_clipped_mosaic_250m 16 days NDVI.tif",
                  "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                  "A2016193_clipped_mosaic_250m 16 days pixel reliability.tif"]
@@ -46,5 +46,4 @@ class Test:
         assert get_files_in_time_range(start,  end, files, date_regex) == [
             "A2016177_clipped_mosaic_250m 16 days NDVI.tif",
             "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif"]
-
 

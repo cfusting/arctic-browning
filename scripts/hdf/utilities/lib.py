@@ -2,13 +2,14 @@ import logging
 import os
 import re
 import sys
-from datetime import datetime
+import datetime as dt
 
 import gdal
 import numpy as np
 import numpy.ma as ma
 
 import gdal_lib as gd
+from QA_check import qa_check, qa_check_temp
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
@@ -17,6 +18,13 @@ LST_NO_DATA = 0
 NDVI_THRESHOLD = 1200
 LST = "lst"
 NDVI = "ndvi"
+
+
+def build_snow_mask(snow_array):
+    mask = np.ones(snow_array.shape, dtype=bool)
+    mask[snow_array == 50] = False  # no snow
+    mask[snow_array == 200] = False  # snow
+    return mask
 
 
 def build_qa_mask(iarray, rarray):
@@ -43,6 +51,13 @@ def build_lst_mask(raster_array, rel_array):
     mask = np.logical_not(mask)
     mask[raster_array == LST_NO_DATA] = True
     return mask
+
+
+def clean_snow_data(snow_array):
+    clean = np.zeros(snow_array.shape)
+    clean[:] = -1
+    clean[snow_array == 50] = 0  # no snow
+    clean[snow_array == 200] = 1  # snow
 
 
 def get_filenames_list(file_name):
@@ -114,7 +129,7 @@ def get_files_in_time_range(start, end, files, date_regex):
     filtered_files = []
     for fl in files:
         fl_time = re.search(date_regex, fl).group()
-        file_datetime = datetime.strptime(fl_time, YEAR_DAY)
+        file_datetime = dt.datetime.strptime(fl_time, YEAR_DAY)
         if file_datetime is not None and start <= file_datetime <= end:
             filtered_files.append(fl)
     return filtered_files
@@ -149,8 +164,8 @@ def validate_reliability(data_files, reliability_files, date_regex):
 
 
 def filter_files_in_range(data_files, reliability_files, year, first_day, last_day, date_regex):
-    start_date = datetime.strptime(str(year) + first_day, YEAR_DAY)
-    end_date = datetime.strptime(str(year) + last_day, YEAR_DAY)
+    start_date = dt.datetime.strptime(str(year) + first_day, YEAR_DAY)
+    end_date = dt.datetime.strptime(str(year) + last_day, YEAR_DAY)
     return (get_files_in_time_range(start_date, end_date, data_files, date_regex),
             get_files_in_time_range(start_date, end_date, reliability_files, date_regex))
 

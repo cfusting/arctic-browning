@@ -1,7 +1,5 @@
 import argparse
-import numpy as np
 import gdal
-from gdalconst import *
 from osgeo import osr
 
 
@@ -50,4 +48,3 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='output file', required=True)
     args = parser.parse_args()
     main(args.input, args.output)
-
