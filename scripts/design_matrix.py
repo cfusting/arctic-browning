@@ -23,7 +23,7 @@ if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
 NDVI_START = 152
-NDVI_END = 244
+NDVI_END = 245
 
 
 def build_matrix(modis_files, layer_name):
