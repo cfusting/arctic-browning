@@ -1,4 +1,6 @@
 import argparse
+import logging
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Fetch temporal statistics from a list of rasters.')
 parser.add_argument('-s', '--start-year', help='YYYY', required=True, type=int)
@@ -27,20 +29,20 @@ if args.verbose and args.log_file is not None:
 elif args.verbose and args.log_file is None:
     logging.basicConfig(level=logging.DEBUG)
 
-data_files, reliability_files = get_data_and_reliability_lists(args.directory_path, args.data_file_regex,
+data_files, reliability_files = lib.get_data_and_reliability_lists(args.directory_path, args.data_file_regex,
                                                                args.date_regex, args.reliability_file_regex)
-validate_reliability(data_files, reliability_files, args.date_regex)
+lib.validate_reliability(data_files, reliability_files, args.date_regex)
 for year in range(args.start_year, args.end_year + 1):
-    data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
+    data_files_in_range, reliability_files_in_range = lib.filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_ndvi_space_time(data_files_in_range, reliability_files_in_range,
+    space_time = lib.retrieve_ndvi_space_time(data_files_in_range, reliability_files_in_range,
                                           args.date_regex, args.sanity_path)
     if args.dry_run is False:
         if args.no_space is True:
-            space, weight = average_over_time(space_time)
+            space, weight = lib.average_over_time(space_time)
             for s, w in zip(space.flatten(), weight.flatten()):
                 print str(year) + "," + str(s) + "," + str(w)
         else:
-            mean_dat, weight_dat = average_over_time_then_space(space_time)
+            mean_dat, weight_dat = lib.average_over_time_then_space(space_time)
             print str(year) + "," + str(mean_dat) + "," + str(weight_dat)

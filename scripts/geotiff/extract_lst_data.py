@@ -1,4 +1,6 @@
 import argparse
+import logging
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Extract masked data from a geotiff.')
 parser.add_argument('-i', '--input', help="Input geotiff.", required=True)
@@ -15,7 +17,7 @@ if args.verbose and args.log_file is not None:
 elif args.verbose and args.log_file is None:
     logging.basicConfig(level=logging.DEBUG)
 
-data = create_lst_masked_array(args.input, args.quality, args.sanity_path)
+data = lib.create_lst_masked_array(args.input, args.quality, args.sanity_path)
 for idx, val in enumerate(data.flatten()):
     print str(val * .02)
 

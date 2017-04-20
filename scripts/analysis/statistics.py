@@ -4,7 +4,7 @@ import gdal
 import numpy as np
 import numpy.ma as ma
 
-from scripts.hdf.utilities import build_qa_mask
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Fetch statistics from a raster.')
 parser.add_argument('-i', '--input', help='Input raster', required=True)
@@ -18,7 +18,7 @@ inputband = inputraster.GetRasterBand(1)
 reliabilityband = reliabilityraster.GetRasterBand(1)
 inputarray = np.array(inputband.ReadAsArray(), np.int16)
 reliabilityarray = np.array(reliabilityband.ReadAsArray(), np.int8)
-build_qa_mask(inputarray, reliabilityarray)
+lib.build_qa_mask(inputarray, reliabilityarray)
 masked = ma.array(inputarray, mask=reliabilityarray)
 
 pixels = inputarray.size - reliabilityarray.sum()

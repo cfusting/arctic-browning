@@ -1,4 +1,7 @@
 import argparse
+import numpy as np
+import logging
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Fetch temporal statistics from a list of rasters.')
 parser.add_argument('-s', '--start-year', help='YYYY', required=True, type=int)
@@ -27,24 +30,24 @@ if args.verbose and args.log_file is not None:
 elif args.verbose and args.log_file is None:
     logging.basicConfig(level=logging.DEBUG)
 
-data_files, reliability_files = get_data_and_reliability_lists(args.directory_path, args.data_file_regex,
+data_files, reliability_files = lib.get_data_and_reliability_lists(args.directory_path, args.data_file_regex,
                                                                args.date_regex, args.reliability_file_regex)
 
-validate_reliability(data_files, reliability_files, args.date_regex)
+lib.validate_reliability(data_files, reliability_files, args.date_regex)
 masked_props = []
 for year in range(args.start_year, args.end_year + 1):
-    data_files_in_range, reliability_files_in_range = filter_files_in_range(data_files, reliability_files, year,
+    data_files_in_range, reliability_files_in_range = lib.filter_files_in_range(data_files, reliability_files, year,
                                                                             args.first_day, args.last_day,
                                                                             args.date_regex)
-    space_time = retrieve_lst_space_time(data_files_in_range, reliability_files_in_range,
+    space_time = lib.retrieve_lst_space_time(data_files_in_range, reliability_files_in_range,
                                      args.date_regex, args.sanity_path)
-    unmasked_props = get_unmasked_pixel_proportion_over_time(space_time)
+    unmasked_props = lib.get_unmasked_pixel_proportion_over_time(space_time)
     logging.debug("Unmasked Pixels for one year shape :" + str(unmasked_props.shape))
     masked_props.append(unmasked_props)
 
-masked_props_over_years = np.stack(masked_props, axis=TIME_AXIS).mean(axis=TIME_AXIS)
+masked_props_over_years = np.stack(masked_props, axis=lib.TIME_AXIS).mean(axis=lib.TIME_AXIS)
 masked_out = (masked_props_over_years * 10000).astype(int)
 logging.debug("Output shape: " + str(masked_out.shape))
 # Assumes all files are of the same dimension. Safe assumption but shitty way to do this.
-save_like_geotiff(data_files[0], np.int16, masked_out, args.out_path)
+lib.save_like_geotiff(data_files[0], np.int16, masked_out, args.out_path)
 

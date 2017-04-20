@@ -1,9 +1,10 @@
-import numpy.testing as npt
+import datetime as dt
+
 import numpy as np
 import numpy.ma as ma
-import datetime as dt
-from scripts.hdf.utilities.lib import build_qa_mask, get_filenames_list, get_data_and_reliability_lists, \
-    get_files_in_time_range, YEAR_DAY
+import numpy.testing as npt
+
+from utilities import lib
 
 
 class Test:
@@ -11,7 +12,7 @@ class Test:
         inputarray = np.array([-3000, 3244, 1000, 2320, 1232, 9093, -3000])
         reliability = np.array([-1, 0, 1, 2, 3, 0, 0])
         correctmask = np.array([1, 0, 1, 1, 1, 0, 1])
-        build_qa_mask(inputarray, reliability)
+        lib.build_qa_mask(inputarray, reliability)
         npt.assert_array_equal(reliability, correctmask)
         assert ma.array(inputarray, mask=reliability).sum() == 12337
 
@@ -21,7 +22,7 @@ class Test:
                  "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                  "A2016193_clipped_mosaic_250m 16 days NDVI.tif",
                  "A2016193_clipped_mosaic_250m 16 days pixel reliability.tif"]
-        assert files == get_filenames_list(files_from)
+        assert files == lib.get_filenames_list(files_from)
 
     def test_get_data_and_reliability_lists(self):
         directory_path = "../test_data"
@@ -33,17 +34,17 @@ class Test:
         reliability_files = ["A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                              "A2016193_clipped_mosaic_250m 16 days pixel reliability.tif"]
         reliability_files.sort(reverse=True)
-        assert data_files, reliability_files == get_data_and_reliability_lists(directory_path, data_file_regex,
+        assert data_files, reliability_files == lib.get_data_and_reliability_lists(directory_path, data_file_regex,
                                                                                date_regex, reliability_file_regex)
 
     def test_get_files_in_time_range(self):
-        start = dt.datetime.strptime("2016150", YEAR_DAY)
-        end = dt.datetime.strptime("2016192", YEAR_DAY)
+        start = dt.datetime.strptime("2016150", lib.YEAR_DAY)
+        end = dt.datetime.strptime("2016192", lib.YEAR_DAY)
         files = ["A2016177_clipped_mosaic_250m 16 days NDVI.tif", "A2016193_clipped_mosaic_250m 16 days NDVI.tif",
                  "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                  "A2016193_clipped_mosaic_250m 16 days pixel reliability.tif"]
         date_regex = "\d{7}"
-        assert get_files_in_time_range(start,  end, files, date_regex) == [
+        assert lib.get_files_in_time_range(start,  end, files, date_regex) == [
             "A2016177_clipped_mosaic_250m 16 days NDVI.tif",
             "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif"]
 

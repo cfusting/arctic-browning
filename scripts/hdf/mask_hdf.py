@@ -1,10 +1,10 @@
 import argparse
 import sys
-
+import logging
 import numpy as np
 from pyhdf.SD import SD, SDC
 
-from utilities.lib import build_lst_mask, build_ndvi_mask, logging, build_snow_mask
+from utilities import lib
 
 NDVI = 'ndvi'
 LST = 'lst'
@@ -51,8 +51,8 @@ for fl in file_list:
     shp = dat.get().shape
     MASKED_DAT_NAME = "masked_" + args.band
     if MASKED_DAT_NAME in sd.datasets() and not args.overwrite:
-        logging.info(MASKED_DAT_NAME)
-        logging.info(sd.datasets())
+        logging.debug(MASKED_DAT_NAME)
+        logging.debug(sd.datasets())
         sys.exit('Masked data present. Exiting.')
     sds_data = None
     if MASKED_DAT_NAME not in sd.datasets():
@@ -63,11 +63,11 @@ for fl in file_list:
     sds_data.setfillvalue(fill_value)
     mask = None
     if args.type == LST:
-        mask = build_lst_mask(dat.get(), quality.get())
+        mask = lib.build_lst_mask(dat.get(), quality.get())
     elif args.type == NDVI:
-        mask = build_ndvi_mask(dat.get(), quality.get())
+        mask = lib.build_ndvi_mask(dat.get(), quality.get())
     elif args.type == SNOW:
-        mask = build_snow_mask(dat.get())
+        mask = lib.build_snow_mask(dat.get())
     masked_dat = np.ma.array(dat.get(), mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
     sds_data[:] = masked_dat.filled()
     logging.debug('Written values: ' + str(sds_data.get()))
