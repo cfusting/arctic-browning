@@ -7,5 +7,5 @@
 #PBS -q shortq
 cd ~/scratch/temperature
 ls | egrep "*.hdf$" > temp.list
-python ~/arctic-browning/scripts/mask_hdf.py -i temp.list -b LST_Day_1km -q QC_Day -t lst -v
+python ~/arctic-browning/scripts/hdf/mask_hdf.py -i temp.list -b LST_Day_1km -q QC_Day -t lst -v
 rm temp.list

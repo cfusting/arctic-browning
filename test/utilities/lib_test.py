@@ -1,8 +1,4 @@
-import pytest
-import numpy as np
-import numpy.ma as ma
 import numpy.testing as npt
-from lib import *
 
 """ In essence, I hope to test as many functions as I can that are used in temporal_statistics.py and are non-trivial.
 Because a lot of the functions have to do with filtering the data by the files used, I think it would be beneficial to

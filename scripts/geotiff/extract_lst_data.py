@@ -1,5 +1,4 @@
 import argparse
-from lib import *
 
 parser = argparse.ArgumentParser(description='Extract masked data from a geotiff.')
 parser.add_argument('-i', '--input', help="Input geotiff.", required=True)

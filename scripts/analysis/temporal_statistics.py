@@ -1,5 +1,4 @@
 import argparse
-from lib import *
 
 parser = argparse.ArgumentParser(description='Fetch temporal statistics from a list of rasters.')
 parser.add_argument('-s', '--start-year', help='YYYY', required=True, type=int)

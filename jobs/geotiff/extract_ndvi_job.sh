@@ -7,9 +7,7 @@
 #PBS -N extract-ndvi
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
-source $HOME"/.bash_profile"
-source $HOME"/geospatial/bin/activate"
-SCRIPT=$HOME"/arctic-browning/scripts/temporal_statistics.py"
+SCRIPT=$HOME"/arctic-browning/scripts/geotiff/temporal_statistics.py"
 DIRECTORY=$HOME"/scratch/ndvi_monthly/mosaics/${year}"
 NDVIOUT=$DIRECTORY"/${year}.csv"
 echo "year,tindvi,weight" > $NDVIOUT

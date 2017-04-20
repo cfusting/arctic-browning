@@ -1,8 +1,10 @@
-import gdal
 import argparse
+
+import gdal
 import numpy as np
 import numpy.ma as ma
-from lib import build_qa_mask
+
+from scripts.hdf.utilities import build_qa_mask
 
 parser = argparse.ArgumentParser(description='Fetch statistics from a raster.')
 parser.add_argument('-i', '--input', help='Input raster', required=True)

@@ -15,6 +15,6 @@ ids=$(ls | grep -oh '\.A[0-9]*[0-9]\.' | sed 's/\.//g' | sort | uniq)
 for i in $ids
 do
     ls | grep $i".*hdf$" > $i".filelist"
-    source $HOME/arctic-browning/scripts/convert_LST.sh $i".filelist"
+    source $HOME/arctic-browning/scripts/geotiff/convert_LST.sh $i".filelist"
     rm $i".filelist"
 done

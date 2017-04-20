@@ -1,12 +1,13 @@
-import re
+import logging
 import os
+import re
+import sys
+from datetime import datetime
+
 import gdal
 import numpy as np
 import numpy.ma as ma
-import sys
-import logging
-from datetime import datetime
-from QA_check import *
+
 import gdal_lib as gd
 
 TIME_AXIS = 2

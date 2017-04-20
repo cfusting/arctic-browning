@@ -1,8 +1,10 @@
-from pyhdf.SD import SD, SDC
 import argparse
-from lib import build_lst_mask, build_ndvi_mask, logging
-import numpy as np
 import sys
+
+import numpy as np
+from pyhdf.SD import SD, SDC
+
+from utilities.lib import build_lst_mask, build_ndvi_mask, logging
 
 NDVI = 'ndvi'
 LST = 'lst'

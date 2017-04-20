@@ -8,6 +8,6 @@ do
       lastday=361
     fi
     outdir="lst_pa_"$i"_"$lastday
-    qsub -v directory=/users/c/f/cfusting/scratch/temperature/mosaics,firstday=$i,lastday=$lastday,outdir=$outdir $HOME"/arctic-browning/scripts/pixel_props.sh"
+    qsub -v directory=/users/c/f/cfusting/scratch/temperature/mosaics,firstday=$i,lastday=$lastday,outdir=$outdir $HOME"/arctic-browning/scripts/plotting/pixel_proportions.sh"
     let counter=counter+32
 done
