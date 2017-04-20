@@ -44,6 +44,13 @@ def build_lst_mask(raster_array, rel_array):
     return mask
 
 
+def clean_snow_data(snow_array):
+    clean = np.zeros(snow_array.shape)
+    clean[:] = -1
+    clean[snow_array == 50] = 0  # no snow
+    clean[snow_array == 200] = 1  # snow
+
+
 def get_filenames_list(file_name):
     with open(file_name) as dat:
         data_files = dat.readlines()
