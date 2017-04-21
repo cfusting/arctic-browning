@@ -36,6 +36,7 @@ def build_matrix(modis_files, layer_name):
     columns = []
     for fl in modis_files:
         columns.append(fl.get_layer_data(layer_name).flatten())
+        logging.debug('Added MODIS data to matrix: ' + str(fl.datetime))
     logging.debug('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
     return np.vstack(columns).transpose()
 
