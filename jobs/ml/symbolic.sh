@@ -6,5 +6,5 @@
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browing
-cd $HOME"/symbolic_results"
-python $HOME"/arctic-browning/scripts/ml/symbolic_regression.py" -d $data -s 2017 -n $name
+cd $HOME/symbolic_results
+source $HOME/arctic-browning/ml/symbolic.py -d $data -s $seed -n $name
