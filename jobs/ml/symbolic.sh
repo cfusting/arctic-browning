@@ -7,4 +7,4 @@
 #PBS -q shortq
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browing
 cd $HOME/symbolic_results
-source $HOME/arctic-browning/ml/symbolic.py -d $data -s 2017 -n $name
+source $HOME/arctic-browning/ml/symbolic.py -d $data -s $seed -n $name
