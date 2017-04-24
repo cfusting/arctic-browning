@@ -20,7 +20,7 @@ parser.add_argument('-s', '--seed', help='Random seed.', required=True, type=int
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 args = parser.parse_args()
 
-NGEN = 1000
+NGEN = 3000
 POP_SIZE = 500
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
