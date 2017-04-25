@@ -10,7 +10,6 @@ from collections import defaultdict
 from functools import partial
 
 import cachetools
-from pyhdf.SD import SD
 import h5py
 import numpy
 from deap import creator, base
@@ -20,10 +19,10 @@ from gp.algorithms import afpo
 from gp.experiments import symbreg, reports, fast_evaluate
 from ndvi import constants
 from ndvi import gp_processing_tools
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
-parser.add_argument('-d', '--data', help='Path to data as a design matrix in HDF format.', required=True)
-parser.add_argument('-s', '--seed', help='Random seed.', required=True, type=int)
+parser.add_argument('-v', '--validate', help='Path to validation data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
 args = parser.parse_args()
@@ -173,11 +172,7 @@ def save_testing_results_all(front, results, file_name, begin_year=2003, end_yea
 
 numpy.random.seed(args.seed)
 random.seed(args.seed)
-data_hdf = SD(args.data)
-design_matrix = data_hdf.select("design_matrix").get()
-data_hdf.end()
-predictors = design_matrix[:, :-1]
-response = design_matrix[:, -1]
+predictors, response = lib.get_predictors_and_response(args.validate)
 NUM_DIM = predictors.shape[1]
 pset = symbreg.get_numpy_no_trig_pset(NUM_DIM)
 pset.addPrimitive(symbreg.cube, 1)
@@ -186,7 +181,6 @@ pset.addPrimitive(numpy.square, 1)
 logging.info("Reading results from {}".format(args.results))
 pareto_files = glob.glob(args.results + "/pareto_*_po_{}_*.log".format(args.name))
 logging.info(len(pareto_files))
-
 p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
 validate_p = p_transformer.transform(predictors, response)
@@ -205,9 +199,6 @@ validate_toolbox = gp_processing_tools.get_toolbox(validate_p, validate_r, pset,
 
 inds = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), validate_toolbox, pset=pset)
 logging.info("All individuals from the last pareto fronts = " + str(len(inds)))
-# inds = [ind for ind in inds if ind.complexity <= 20.0]
-# print "Only indviduals with complexity <= 20 = " + str(len(inds))
-
 non_dominated = afpo.find_pareto_front(inds)
 front = [inds[i] for i in non_dominated]
 front.sort(key=operator.attrgetter("fitness.values"))
@@ -227,6 +218,7 @@ with open("front_{}_validate_all.txt".format(args.name), "wb") as f:
         f.write(str(ind) + "\n")
         logging.info("======================")
 
+"""
 testing_results = calculate_testing_results_all(front, testing_data_fold_dir, pset.context,
                                                 begin_year=2003, end_year=2010, extends_geo_coords=USE_GEO_COORDS,
                                                 feature_transformer=p_transformer, response_transformer=r_transformer,
@@ -235,3 +227,4 @@ testing_results = calculate_testing_results_all(front, testing_data_fold_dir, ps
 save_testing_results_all(front, testing_results,
                          "{}_results_all_validate_all.csv".format(args.name),
                          begin_year=2003, end_year=2010)
+"""

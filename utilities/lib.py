@@ -4,6 +4,7 @@ import re
 import sys
 import datetime as dt
 
+from pyhdf.SD import SD
 import gdal
 import numpy as np
 import numpy.ma as ma
@@ -235,3 +236,12 @@ def save_like_geotiff(source_path, source_type, matrix, file_path):
     logging.debug("Saving Geotiff: " + file_path)
     gd.create_geotiff(file_path, matrix, driver, None, None, xsize, ysize, geot,
                       projection, datatype)
+
+
+def get_predictors_and_response(hdf_file):
+    data_hdf = SD(hdf_file)
+    design_matrix = data_hdf.select("design_matrix").get()
+    data_hdf.end()
+    predictors = design_matrix[:, :-1]
+    response = design_matrix[:, -1]
+    return predictors, response

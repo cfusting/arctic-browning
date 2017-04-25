@@ -13,6 +13,7 @@ from pyhdf.SD import SD
 from gp.algorithms import afpo, archive, operators, subset_selection
 from gp.experiments import runner
 from gp.experiments import symbreg, reports, fast_evaluate
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Run symbolic regression.')
 parser.add_argument('-d', '--data', help='Path to data as a design matrix in HDF format.', required=True)
@@ -94,11 +95,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
 
 
 random_seed = args.seed
-data_hdf = SD(args.data)
-design_matrix = data_hdf.select("design_matrix").get()
-data_hdf.end()
-predictors = design_matrix[:, :-1]
-response = design_matrix[:, -1]
+predictors, response = lib.get_predictors_and_response(args.data)
 
 pset = gp.PrimitiveSet("MAIN", predictors.shape[1])
 pset.addPrimitive(numpy.add, 2)
