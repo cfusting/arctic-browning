@@ -28,5 +28,5 @@ duration = end_date - start_date
 d = duration.days
 doo = modisSuite.downloader(PRODUCT, args.username, args.password, date=args.start_day, delta=d, tuiles=args.tiles,
                             output=args.directory)
-for x, y in doo.telechargerTout():
-    print(x, y)
+for day in doo.telechargerTout():
+    print([aFile.name for aFile in day.files])
