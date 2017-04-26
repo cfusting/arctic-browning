@@ -4,6 +4,7 @@ import random
 import operator
 import argparse
 import os
+import pickle
 
 import cachetools
 import numpy
@@ -18,23 +19,31 @@ from utilities import lib
 logging.basicConfig(level=logging.DEBUG)
 
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
-parser.add_argument('-v', '--validate', help='Path to validation data as a design matrix in HDF format.', required=True)
+parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
 args = parser.parse_args()
+
+
+def get_front(results_path, experiment_name, toolbox, primitive_set):
+    logging.info("Reading results from {}".format(results_path))
+    pareto_files = glob.glob(results_path + "/pareto_*_po_{}_*.log".format(experiment_name))
+    logging.info(len(pareto_files))
+    individuals = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), toolbox, pset=primitive_set)
+    logging.info("All individuals from the last pareto fronts = " + str(len(individuals)))
+    non_dominated = afpo.find_pareto_front(individuals)
+    front = [individuals[i] for i in non_dominated]
+    front.sort(key=operator.attrgetter("fitness.values"))
+    while front[-1].fitness.values[0] >= 1.0:
+        front.pop()
+    return front.reverse()
 
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
 predictors, response = lib.get_predictors_and_response(args.validate)
 NUM_DIM = predictors.shape[1]
-pset = symbreg.get_numpy_no_trig_pset(NUM_DIM)
-pset.addPrimitive(symbreg.cube, 1)
-pset.addPrimitive(numpy.square, 1)
-
-logging.info("Reading results from {}".format(args.results))
-pareto_files = glob.glob(args.results + "/pareto_*_po_{}_*.log".format(args.name))
-logging.info(len(pareto_files))
+pset = lib.get_validation_testing_pset(NUM_DIM)
 p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
 validate_p = p_transformer.fit_transform(predictors, response)
@@ -45,23 +54,16 @@ validate_toolbox = gp_processing_tools.get_toolbox(validate_p, validate_r, pset,
                                                    size_measure=afpo.evaluate_fitness_size_complexity,
                                                    expression_dict=cachetools.LRUCache(maxsize=100),
                                                    fitness_class=creator.ErrorSizeComplexity)
-
-individuals = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), validate_toolbox, pset=pset)
-logging.info("All individuals from the last pareto fronts = " + str(len(individuals)))
-non_dominated = afpo.find_pareto_front(individuals)
-front = [individuals[i] for i in non_dominated]
-front.sort(key=operator.attrgetter("fitness.values"))
-while front[-1].fitness.values[0] >= 1.0:
-    front.pop()
-front.reverse()
-
+front = get_front(args.results, args.name, validate_toolbox, pset)
+with open(os.path.join(args.results, args.name + "_front"), "wb") as pickle_front:
+    pickle.dump(front, pickle_front)
 with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
     for ind in front:
         logging.info("======================")
         infix_equation = symbreg.get_infix_equation(ind)
         logging.info(infix_equation)
         logging.info("Fitness = " + str(ind.fitness.values))
-        logging.info("Training error = " + str(validate_toolbox.validate(ind)))
+        logging.info("Training error = " + str(ind.fitness.values))
         logging.info(ind)
         f.write("{}\n".format(ind.fitness.values))
         f.write(str(ind) + "\n")

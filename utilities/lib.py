@@ -3,6 +3,8 @@ import os
 import re
 import sys
 import datetime as dt
+import glob
+import operator
 
 from pyhdf.SD import SD
 import gdal
@@ -11,6 +13,9 @@ import numpy.ma as ma
 
 import gdal_lib as gd
 from QA_check import qa_check, qa_check_temp
+from gp.algorithms import afpo
+from ndvi import gp_processing_tools
+from gp.experiments import symbreg
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"
@@ -245,3 +250,10 @@ def get_predictors_and_response(hdf_file):
     predictors = design_matrix[:, :-1]
     response = design_matrix[:, -1]
     return predictors, response
+
+
+def get_validation_testing_pset(dimension_number):
+    pset = symbreg.get_numpy_no_trig_pset(dimension_number)
+    pset.addPrimitive(symbreg.cube, 1)
+    pset.addPrimitive(np.square, 1)
+    return pset

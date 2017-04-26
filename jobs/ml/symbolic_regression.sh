@@ -7,4 +7,4 @@
 #PBS -M sam.kriegman@uvm.edu
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
 cd $HOME/symbolic_results
-python $HOME/arctic-browning/scripts/ml/symbolic_regression.py -d $data -s $seed -n $name
+python $HOME/arctic-browning/scripts/ml/symbolic_regression.py -t $training -s $seed -n $name
