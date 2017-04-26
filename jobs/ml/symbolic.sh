@@ -4,6 +4,6 @@
 #PBS -N symbolic
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
-export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browing
+export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
 cd $HOME/symbolic_results
 python $HOME/arctic-browning/scripts/ml/symbolic_regression.py -d $data -s $seed -n $name

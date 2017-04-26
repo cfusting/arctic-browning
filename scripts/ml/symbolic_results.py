@@ -21,10 +21,13 @@ from ndvi import constants
 from ndvi import gp_processing_tools
 from utilities import lib
 
+logging.basicConfig(level=logging.DEBUG)
+
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
 parser.add_argument('-v', '--validate', help='Path to validation data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
+parser.add_argument('-s', '--seed', help='Random seed', required=True, type=int)
 args = parser.parse_args()
 
 
