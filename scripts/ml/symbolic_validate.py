@@ -3,6 +3,7 @@ import glob
 import random
 import operator
 import argparse
+import os
 
 import cachetools
 import numpy
@@ -54,7 +55,7 @@ while front[-1].fitness.values[0] >= 1.0:
     front.pop()
 front.reverse()
 
-with open("front_{}_validate_all.txt".format(args.name), "wb") as f:
+with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
     for ind in front:
         logging.info("======================")
         infix_equation = symbreg.get_infix_equation(ind)
