@@ -17,7 +17,7 @@ from utilities import lib
 logging.basicConfig(level=logging.DEBUG)
 
 parser = argparse.ArgumentParser(description='Run symbolic regression.')
-parser.add_argument('-d', '--data', help='Path to data as a design matrix in HDF format.', required=True)
+parser.add_argument('-t', '--training', help='Path to the training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-s', '--seed', help='Random seed.', required=True, type=int)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 args = parser.parse_args()
