@@ -7,4 +7,4 @@
 #PBS -q shortq
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
 cd "$HOME/symbolic_evaluations"
-python "$HOME/arctic-browning/scripts/ml/symbolic_results.py" -v $validate -n $name -r $results -s $seed
+python "$HOME/arctic-browning/scripts/ml/symbolic_results.py" -v $validate -n $name -r $results

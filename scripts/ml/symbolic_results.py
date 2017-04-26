@@ -27,7 +27,6 @@ parser = argparse.ArgumentParser(description='Process symbolic regression result
 parser.add_argument('-v', '--validate', help='Path to validation data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
-parser.add_argument('-s', '--seed', help='Random seed', required=True, type=int)
 args = parser.parse_args()
 
 
@@ -173,8 +172,9 @@ def save_testing_results_all(front, results, file_name, begin_year=2003, end_yea
             simplified_equation = symbreg.simplify_infix_equation(infix_eq)
             writer.writerow(fitness_values + [str(len(simplified_equation))] + rounded_results)
 
-numpy.random.seed(args.seed)
-random.seed(args.seed)
+SEED = 123
+numpy.random.seed(SEED)
+random.seed(SEED)
 predictors, response = lib.get_predictors_and_response(args.validate)
 NUM_DIM = predictors.shape[1]
 pset = symbreg.get_numpy_no_trig_pset(NUM_DIM)
