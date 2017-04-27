@@ -41,7 +41,7 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
-predictors, response = lib.get_predictors_and_response(args.validate)
+predictors, response = lib.get_predictors_and_response(args.training)
 NUM_DIM = predictors.shape[1]
 pset = lib.get_validation_testing_pset(NUM_DIM)
 p_transformer = preprocessing.StandardScaler()
