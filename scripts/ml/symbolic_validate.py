@@ -36,8 +36,8 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
     front.sort(key=operator.attrgetter("fitness.values"))
     while front[-1].fitness.values[0] >= 1.0:
         front.pop()
-    return front.reverse()
-
+    front.reverse()
+    return front
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
@@ -56,7 +56,7 @@ validate_toolbox = gp_processing_tools.get_toolbox(validate_p, validate_r, pset,
                                                    fitness_class=creator.ErrorSizeComplexity)
 front = get_front(args.results, args.name, validate_toolbox, pset)
 with open(os.path.join(args.results, args.name + "_front"), "wb") as pickle_front:
-    pickle.dump(front, pickle_front)
+    pickle.dump(front, pickle_front, -1)
 with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
     for ind in front:
         logging.info("======================")
