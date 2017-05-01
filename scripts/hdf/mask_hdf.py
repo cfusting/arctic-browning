@@ -54,6 +54,7 @@ for fl in file_list:
         logging.info("Masked data present, skipping:")
         logging.debug(MASKED_DAT_NAME)
         logging.debug(sd.datasets())
+        sd.end()
     else:
         sds_data = None
         if MASKED_DAT_NAME not in sd.datasets():

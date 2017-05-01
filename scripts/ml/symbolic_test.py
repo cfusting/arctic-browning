@@ -25,10 +25,15 @@ p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
 p_transformer.fit(training_predictors, training_response)
 r_transformer.fit(training_response)
-testing_predictors, testing_response = lib.get_predictors_and_response(args.test)
+testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_predictors)
-front = pickle.load(os.path.join(args.results, args.name + "_front"))
+front = None
+front_file = os.path.join(args.results, args.name + "_front")
+with open(front_file, "rb") as pickle_front:
+    front = pickle.load(pickle_front)
+if front is None:
+  sys.exit("Could not find pareto front file: " + front_file)
 context = lib.get_validation_testing_pset(testing_predictors.shape[1]).context
 test_results = []
 for i, individual in enumerate(front):
