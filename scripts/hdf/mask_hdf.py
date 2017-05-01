@@ -51,25 +51,26 @@ for fl in file_list:
     shp = dat.get().shape
     MASKED_DAT_NAME = "masked_" + args.band
     if MASKED_DAT_NAME in sd.datasets() and not args.overwrite:
+        logging.info("Masked data present, skipping:")
         logging.debug(MASKED_DAT_NAME)
         logging.debug(sd.datasets())
-        sys.exit('Masked data present. Exiting.')
-    sds_data = None
-    if MASKED_DAT_NAME not in sd.datasets():
-        sds_data = sd.create(MASKED_DAT_NAME, DAT_SDC, shp)
     else:
-        sds_data = sd.select(MASKED_DAT_NAME)
-    fill_value = dat.getfillvalue()
-    sds_data.setfillvalue(fill_value)
-    mask = None
-    if args.type == LST:
-        mask = lib.build_lst_mask(dat.get(), quality.get())
-    elif args.type == NDVI:
-        mask = lib.build_ndvi_mask(dat.get(), quality.get())
-    elif args.type == SNOW:
-        mask = lib.build_snow_mask(dat.get())
-    masked_dat = np.ma.array(dat.get(), mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
-    sds_data[:] = masked_dat.filled()
-    logging.debug('Written values: ' + str(sds_data.get()))
-    sds_data.endaccess()
-    sd.end()
+        sds_data = None
+        if MASKED_DAT_NAME not in sd.datasets():
+            sds_data = sd.create(MASKED_DAT_NAME, DAT_SDC, shp)
+        else:
+            sds_data = sd.select(MASKED_DAT_NAME)
+        fill_value = dat.getfillvalue()
+        sds_data.setfillvalue(fill_value)
+        mask = None
+        if args.type == LST:
+            mask = lib.build_lst_mask(dat.get(), quality.get())
+        elif args.type == NDVI:
+            mask = lib.build_ndvi_mask(dat.get(), quality.get())
+        elif args.type == SNOW:
+            mask = lib.build_snow_mask(dat.get())
+        masked_dat = np.ma.array(dat.get(), mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
+        sds_data[:] = masked_dat.filled()
+        logging.debug('Written values: ' + str(sds_data.get()))
+        sds_data.endaccess()
+        sd.end()
