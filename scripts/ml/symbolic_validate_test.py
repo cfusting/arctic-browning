@@ -77,9 +77,9 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
+testing_predictors, testing_response = lib.get_predictors_and_response(args.training)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
-testing_response = r_transformer.transform(testing_predictors)
+testing_response = r_transformer.transform(testing_response)
 if args.sample_size is not None:
     subset_indices = numpy.random.choice(len(validate_predictors), args.sample_size, replace=False)
     testing_predictors = testing_predictors[subset_indices]
@@ -95,12 +95,12 @@ for i, individual in enumerate(front):
     total_nmse = mse / numpy.var(testing_response)
     test_results.append(total_nmse)
 
-with open(os.path.join(args.results, args.name + "_tests", 'wb')) as test_file:
+with open(os.path.join(args.results, args.name + "_tests"), 'wb') as test_file:
     writer = csv.writer(test_file)
     writer.writerow(["Error", "Size", "Complexity", "Simplified", "Test Error"])
-    for i, ind in front:
-        rounded_results = ["{0:.3f}".format(a) for a in test_results[i]]
+    for i, ind in enumerate(front):
+        rounded_result = "{0:.3f}".format(test_results[i])
         fitness_values = ["{0:.3f}".format(value) for value in ind.fitness.values]
         infix_eq = symbreg.get_infix_equation(ind)
         simplified_equation = symbreg.simplify_infix_equation(infix_eq)
-        writer.writerow(fitness_values + [str(len(simplified_equation))] + rounded_results)
+        writer.writerow(fitness_values + [str(len(simplified_equation))] + [rounded_result])
