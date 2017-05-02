@@ -1,4 +1,5 @@
 import logging
+import csv
 import glob
 import random
 import operator
@@ -12,7 +13,7 @@ from deap import creator, base
 from sklearn import preprocessing
 
 from gp.algorithms import afpo
-from gp.experiments import symbreg
+from gp.experiments import symbreg, fast_evaluate
 from ndvi import gp_processing_tools
 from utilities import lib
 
@@ -38,6 +39,8 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
         front.pop()
     front.reverse()
     return front
+
+# Validate
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
@@ -55,8 +58,6 @@ validate_toolbox = gp_processing_tools.get_toolbox(validate_p, validate_r, pset,
                                                    expression_dict=cachetools.LRUCache(maxsize=100),
                                                    fitness_class=creator.ErrorSizeComplexity)
 front = get_front(args.results, args.name, validate_toolbox, pset)
-with open(os.path.join(args.results, args.name + "_front"), "wb") as pickle_front:
-    pickle.dump(front, pickle_front, -1)
 with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
     for ind in front:
         logging.info("======================")
@@ -68,3 +69,27 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         f.write("{}\n".format(ind.fitness.values))
         f.write(str(ind) + "\n")
         logging.info("======================")
+
+# Test
+testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
+testing_predictors = p_transformer.transform(testing_predictors, testing_response)
+testing_response = r_transformer.transform(testing_predictors)
+context = lib.get_validation_testing_pset(testing_predictors.shape[1]).context
+test_results = []
+for i, individual in enumerate(front):
+    predicted_r = fast_evaluate.fast_numpy_evaluate(individual, context, predictors=testing_predictors,
+                                                    expression_dict=None)
+    squared_errors = numpy.square(predicted_r - testing_response)
+    mse = numpy.mean(squared_errors)
+    total_nmse = mse / numpy.var(testing_response)
+    test_results.append(total_nmse)
+
+with open(os.path.join(args.results, args.name + "_tests", 'wb')) as test_file:
+    writer = csv.writer(test_file)
+    writer.writerow(["Error", "Size", "Complexity", "Simplified", "Test Error"])
+    for i, ind in front:
+        rounded_results = ["{0:.3f}".format(a) for a in test_results[i]]
+        fitness_values = ["{0:.3f}".format(value) for value in ind.fitness.values]
+        infix_eq = symbreg.get_infix_equation(ind)
+        simplified_equation = symbreg.simplify_infix_equation(infix_eq)
+        writer.writerow(fitness_values + [str(len(simplified_equation))] + rounded_results)
