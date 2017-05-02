@@ -46,9 +46,7 @@ def get_predictors_and_response(hdf_file):
     data_hdf = SD(hdf_file)
     design_matrix = data_hdf.select("design_matrix").get()
     data_hdf.end()
-    predictors = design_matrix[:, :-1]
-    response = design_matrix[:, -1]
-    return predictors, response
+    return design_matrix[:, :-1], design_matrix[:, -1]
 
 
 def get_validation_testing_pset(dimension_number):
@@ -94,20 +92,22 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = get_predictors_and_response(args.training)
+testing_predictors, testing_response = get_predictors_and_response(args.testing)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_response)
 if args.sample_size is not None:
-    subset_indices = numpy.random.choice(len(training_predictors), args.sample_size, replace=False)
+    subset_indices = numpy.random.choice(len(testing_predictors), args.sample_size, replace=False)
     testing_predictors = testing_predictors[subset_indices]
     testing_response = testing_response[subset_indices]
-context = get_validation_testing_pset(testing_predictors.shape[1]).context
 logging.info("Testing models on: " + args.testing)
 test_results = []
-for i, individual in enumerate(front):
-    predicted_r = fast_evaluate.fast_numpy_evaluate(individual, context, predictors=testing_predictors,
-                                                    expression_dict=None)
-    test_results.append(fast_evaluate.normalized_mean_squared_error(testing_predictors, predicted_r))
+for individual in front:
+    predicted_response = fast_evaluate.fast_numpy_evaluate(individual, pset.context, predictors=testing_predictors,
+                                                           expression_dict=None)
+    squared_errors = numpy.square(predicted_response - testing_response)
+    mse = numpy.mean(squared_errors)
+    total_nmse = mse / numpy.var(testing_response)
+    test_results.append(total_nmse)
 
 with open(os.path.join(args.results, args.name + "_tests"), 'wb') as test_file:
     writer = csv.writer(test_file)

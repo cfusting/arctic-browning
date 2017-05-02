@@ -6,4 +6,4 @@
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
-python "$HOME/arctic-browning/scripts/ml/symbolic_validate_test.py" -t $training -j $testing -n $name -r $results -s 100000
+python "$HOME/arctic-browning/scripts/ml/symbolic_validate_test.py" -t $training -j $testing -n $name -r $results
