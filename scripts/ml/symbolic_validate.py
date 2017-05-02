@@ -5,7 +5,6 @@ import random
 import operator
 import argparse
 import os
-import pickle
 
 import cachetools
 import numpy
@@ -21,8 +20,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
+parser.add_argument('-j', '--testing', help='Path to testing data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
+parser.add_argument('-s', '--sample-size', help='Validate and test with a sample of the specified size.', type=int)
 args = parser.parse_args()
 
 
@@ -49,14 +50,19 @@ NUM_DIM = predictors.shape[1]
 pset = lib.get_validation_testing_pset(NUM_DIM)
 p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
-validate_p = p_transformer.fit_transform(predictors, response)
-validate_r = r_transformer.fit_transform(response)
-
+validate_predictors = p_transformer.fit_transform(predictors, response)
+validate_response = r_transformer.fit_transform(response)
+if args.sample_size is not None:
+    subset_indices = numpy.random.choice(len(validate_predictors), args.sample_size, replace=False)
+    validate_predictors = validate_predictors[subset_indices]
+    validate_response = validate_response[subset_indices]
 creator.create("ErrorSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0))
-validate_toolbox = gp_processing_tools.get_toolbox(validate_p, validate_r, pset,
+validate_toolbox = gp_processing_tools.get_toolbox(validate_predictors, validate_response, pset,
                                                    size_measure=afpo.evaluate_fitness_size_complexity,
                                                    expression_dict=cachetools.LRUCache(maxsize=100),
                                                    fitness_class=creator.ErrorSizeComplexity)
+
+logging.info("Validating models on: " + args.training)
 front = get_front(args.results, args.name, validate_toolbox, pset)
 with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
     for ind in front:
@@ -74,7 +80,12 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
 testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_predictors)
+if args.sample_size is not None:
+    subset_indices = numpy.random.choice(len(validate_predictors), args.sample_size, replace=False)
+    testing_predictors = testing_predictors[subset_indices]
+    testing_response = testing_response[subset_indices]
 context = lib.get_validation_testing_pset(testing_predictors.shape[1]).context
+logging.info("Testing models on: " + args.testing)
 test_results = []
 for i, individual in enumerate(front):
     predicted_r = fast_evaluate.fast_numpy_evaluate(individual, context, predictors=testing_predictors,
