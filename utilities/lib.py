@@ -6,7 +6,6 @@ import datetime as dt
 import glob
 import operator
 
-from pyhdf.SD import SD
 import gdal
 import numpy as np
 import numpy.ma as ma
@@ -243,17 +242,4 @@ def save_like_geotiff(source_path, source_type, matrix, file_path):
                       projection, datatype)
 
 
-def get_predictors_and_response(hdf_file):
-    data_hdf = SD(hdf_file)
-    design_matrix = data_hdf.select("design_matrix").get()
-    data_hdf.end()
-    predictors = design_matrix[:, :-1]
-    response = design_matrix[:, -1]
-    return predictors, response
 
-
-def get_validation_testing_pset(dimension_number):
-    pset = symbreg.get_numpy_no_trig_pset(dimension_number)
-    pset.addPrimitive(symbreg.cube, 1)
-    pset.addPrimitive(np.square, 1)
-    return pset

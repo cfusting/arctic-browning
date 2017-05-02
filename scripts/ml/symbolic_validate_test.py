@@ -10,11 +10,11 @@ import cachetools
 import numpy
 from deap import creator, base
 from sklearn import preprocessing
+from pyhdf.SD import SD
 
 from gp.algorithms import afpo
 from gp.experiments import symbreg, fast_evaluate
 from ndvi import gp_processing_tools
-from utilities import lib
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -41,23 +41,40 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
     front.reverse()
     return front
 
-# Validate
+
+def get_predictors_and_response(hdf_file):
+    data_hdf = SD(hdf_file)
+    design_matrix = data_hdf.select("design_matrix").get()
+    data_hdf.end()
+    predictors = design_matrix[:, :-1]
+    response = design_matrix[:, -1]
+    return predictors, response
+
+
+def get_validation_testing_pset(dimension_number):
+    pset = symbreg.get_numpy_no_trig_pset(dimension_number)
+    pset.addPrimitive(symbreg.cube, 1)
+    pset.addPrimitive(numpy.square, 1)
+    return pset
+
+
+# Validate on a subset or full training data set.
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
-predictors, response = lib.get_predictors_and_response(args.training)
+predictors, response = get_predictors_and_response(args.training)
 NUM_DIM = predictors.shape[1]
-pset = lib.get_validation_testing_pset(NUM_DIM)
+pset = get_validation_testing_pset(NUM_DIM)
 p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
-validate_predictors = p_transformer.fit_transform(predictors, response)
-validate_response = r_transformer.fit_transform(response)
+training_predictors = p_transformer.fit_transform(predictors, response)
+training_response = r_transformer.fit_transform(response)
 if args.sample_size is not None:
-    subset_indices = numpy.random.choice(len(validate_predictors), args.sample_size, replace=False)
-    validate_predictors = validate_predictors[subset_indices]
-    validate_response = validate_response[subset_indices]
+    subset_indices = numpy.random.choice(len(training_predictors), args.sample_size, replace=False)
+    training_predictors = training_predictors[subset_indices]
+    training_response = training_response[subset_indices]
 creator.create("ErrorSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0))
-validate_toolbox = gp_processing_tools.get_toolbox(validate_predictors, validate_response, pset,
+validate_toolbox = gp_processing_tools.get_toolbox(training_predictors, training_response, pset,
                                                    size_measure=afpo.evaluate_fitness_size_complexity,
                                                    expression_dict=cachetools.LRUCache(maxsize=100),
                                                    fitness_class=creator.ErrorSizeComplexity)
@@ -77,23 +94,20 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = lib.get_predictors_and_response(args.training)
+testing_predictors, testing_response = get_predictors_and_response(args.training)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_response)
 if args.sample_size is not None:
-    subset_indices = numpy.random.choice(len(validate_predictors), args.sample_size, replace=False)
+    subset_indices = numpy.random.choice(len(training_predictors), args.sample_size, replace=False)
     testing_predictors = testing_predictors[subset_indices]
     testing_response = testing_response[subset_indices]
-context = lib.get_validation_testing_pset(testing_predictors.shape[1]).context
+context = get_validation_testing_pset(testing_predictors.shape[1]).context
 logging.info("Testing models on: " + args.testing)
 test_results = []
 for i, individual in enumerate(front):
     predicted_r = fast_evaluate.fast_numpy_evaluate(individual, context, predictors=testing_predictors,
                                                     expression_dict=None)
-    squared_errors = numpy.square(predicted_r - testing_response)
-    mse = numpy.mean(squared_errors)
-    total_nmse = mse / numpy.var(testing_response)
-    test_results.append(total_nmse)
+    test_results.append(fast_evaluate.normalized_mean_squared_error(testing_predictors, predicted_r))
 
 with open(os.path.join(args.results, args.name + "_tests"), 'wb') as test_file:
     writer = csv.writer(test_file)
