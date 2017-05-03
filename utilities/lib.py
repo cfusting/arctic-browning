@@ -3,8 +3,6 @@ import os
 import re
 import sys
 import datetime as dt
-import glob
-import operator
 
 import gdal
 import numpy as np
@@ -12,9 +10,6 @@ import numpy.ma as ma
 
 import gdal_lib as gd
 from QA_check import qa_check, qa_check_temp
-from gp.algorithms import afpo
-from ndvi import gp_processing_tools
-from gp.experiments import symbreg
 
 TIME_AXIS = 2
 YEAR_DAY = "%Y%j"

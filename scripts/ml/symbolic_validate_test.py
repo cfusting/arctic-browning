@@ -12,8 +12,8 @@ from deap import creator, base
 from sklearn import preprocessing
 from pyhdf.SD import SD
 
-from gp.algorithms import afpo
-from gp.experiments import symbreg, fast_evaluate
+from gp_lib.algorithms import afpo
+from gp_lib.experiments import symbreg, fast_evaluate
 from ndvi import gp_processing_tools
 
 logging.basicConfig(level=logging.DEBUG)
