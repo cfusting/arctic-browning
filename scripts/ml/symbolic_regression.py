@@ -9,9 +9,9 @@ import numpy
 from deap import creator, base, tools, gp
 from sklearn import preprocessing
 
-from gp_lib.algorithms import afpo, archive, operators, subset_selection
-from gp_lib.experiments import runner
-from gp_lib.experiments import symbreg, reports, fast_evaluate
+from gp.algorithms import afpo, archive, operators, subset_selection
+from gp.experiments import runner
+from gp.experiments import symbreg, reports, fast_evaluate
 from utilities import lib
 
 logging.basicConfig(level=logging.DEBUG)
