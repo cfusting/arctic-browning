@@ -10,7 +10,6 @@ import cachetools
 import numpy
 from deap import creator, base
 from sklearn import preprocessing
-from pyhdf.SD import SD
 
 from gp.algorithms import afpo
 from gp.experiments import symbreg, fast_evaluate
@@ -48,17 +47,6 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
         front.pop()
     front.reverse()
     return front
-
-
-def get_predictors_and_response(hdf_file):
-    """
-    :param hdf_file:
-    :return: tuple of predictors and the response
-    """
-    data_hdf = SD(hdf_file)
-    design_matrix = data_hdf.select("design_matrix").get()
-    data_hdf.end()
-    return design_matrix[:, :-1], design_matrix[:, -1]
 
 
 def get_validation_testing_pset(dimension_number):

@@ -7,6 +7,7 @@ import datetime as dt
 import gdal
 import numpy as np
 import numpy.ma as ma
+from pyhdf.SD import SD
 
 import gdal_lib as gd
 from QA_check import qa_check, qa_check_temp
@@ -237,4 +238,12 @@ def save_like_geotiff(source_path, source_type, matrix, file_path):
                       projection, datatype)
 
 
-
+def get_predictors_and_response(hdf_file):
+    """
+    :param hdf_file:
+    :return: tuple of predictors and the response
+    """
+    data_hdf = SD(hdf_file)
+    design_matrix = data_hdf.select("design_matrix").get()
+    data_hdf.end()
+    return design_matrix[:, :-1], design_matrix[:, -1]
