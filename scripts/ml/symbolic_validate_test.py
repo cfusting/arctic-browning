@@ -28,6 +28,14 @@ args = parser.parse_args()
 
 
 def get_front(results_path, experiment_name, toolbox, primitive_set):
+    """
+    Get the pareto front.
+    :param results_path:
+    :param experiment_name: String
+    :param toolbox:
+    :param primitive_set:
+    :return: A list of individuals.
+    """
     logging.info("Reading results from {}".format(results_path))
     pareto_files = glob.glob(results_path + "/pareto_*_po_{}_*.log".format(experiment_name))
     logging.info(len(pareto_files))
@@ -43,6 +51,10 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
 
 
 def get_predictors_and_response(hdf_file):
+    """
+    :param hdf_file:
+    :return: tuple of predictors and the response
+    """
     data_hdf = SD(hdf_file)
     design_matrix = data_hdf.select("design_matrix").get()
     data_hdf.end()

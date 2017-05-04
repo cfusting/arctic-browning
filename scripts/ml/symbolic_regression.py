@@ -39,7 +39,7 @@ SUBSET_CHANGE_FREQUENCY = 10
 ERROR_FUNCTION = fast_evaluate.normalized_mean_squared_error
 
 
-def get_archive(pset, toolbox, test_predictors, test_response):
+def get_archive():
     pareto_archive = archive.ParetoFrontSavingArchive(frequency=100,
                                                       criteria_chooser=archive.
                                                       pick_fitness_size_complexity_from_fitness_age_size_complexity)
@@ -80,7 +80,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
 
-    multi_archive = get_archive(pset, toolbox, test_predictors, test_response)
+    multi_archive = get_archive()
     multi_archive.archives.append(subset_selection_archive)
     mstats = reports.configure_inf_protected_stats()
 
