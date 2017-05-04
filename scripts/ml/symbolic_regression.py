@@ -96,7 +96,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
 
 
 random_seed = args.seed
-predictors, response = lib.get_predictors_and_response(args.data)
+predictors, response = lib.get_predictors_and_response(args.training)
 
 pset = gp.PrimitiveSet("MAIN", predictors.shape[1])
 pset.addPrimitive(numpy.add, 2)
