@@ -23,7 +23,7 @@ parser.add_argument('-n', '--name', help='Data set name.', required=True)
 args = parser.parse_args()
 
 NGEN = 3000
-POP_SIZE = 500
+POP_SIZE = 1000
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
