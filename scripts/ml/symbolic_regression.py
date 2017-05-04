@@ -22,6 +22,8 @@ parser.add_argument('-s', '--seed', help='Random seed.', required=True, type=int
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 args = parser.parse_args()
 
+numpy.seterr(all='ignore')
+
 NGEN = 3000
 POP_SIZE = 1000
 TOURNAMENT_SIZE = 2
@@ -113,7 +115,7 @@ predictors = feature_transformer.fit_transform(predictors, response)
 response_transformer = preprocessing.StandardScaler()
 response = response_transformer.fit_transform(response)
 
-RANDOM_SUBSET_SIZE = None
+RANDOM_SUBSET_SIZE = 100000
 if RANDOM_SUBSET_SIZE is not None:
     subset_indices = numpy.random.choice(len(predictors), RANDOM_SUBSET_SIZE, replace=False)
     predictors = predictors[subset_indices]
