@@ -247,3 +247,33 @@ def get_predictors_and_response(hdf_file):
     design_matrix = data_hdf.select("design_matrix").get()
     data_hdf.end()
     return design_matrix[:, :-1], design_matrix[:, -1]
+
+
+def binary_logic(pixels):
+    if np.sum(pixels) >= 2:
+        return 1
+    else:
+        return 0
+
+
+def upsample_snow(A, pixel_logic, size=2):
+    """
+    Moving window algorithm to upsample a matrix.
+    :param A:
+    :param pixel_logic:
+    :param size:
+    :return: The resulting matrix
+    """
+    m, n = A.shape
+    B = np.zeros((m / size) * (n / size), dtype=A.dtype)
+    i, j = (size-1, size-1)
+    k = 0
+    while i <= m:
+        while j <= n:
+            pixels = A[i-(size-1):i+1, j-(size-1):j+1]
+            B[k] = pixel_logic(pixels)
+            k += size
+            j += size
+        i += 1
+    side = int(np.sqrt(B.shape[0]))
+    return B.reshape((side, side))
