@@ -64,13 +64,21 @@ for fl in file_list:
         fill_value = dat.getfillvalue()
         sds_data.setfillvalue(fill_value)
         mask = None
+        data = None
         if args.type == LST:
             mask = lib.build_lst_mask(dat.get(), quality.get())
+            data = dat.get()
         elif args.type == NDVI:
             mask = lib.build_ndvi_mask(dat.get(), quality.get())
+            data = dat.get()
         elif args.type == SNOW:
             mask = lib.build_snow_mask(dat.get())
-        masked_dat = np.ma.array(dat.get(), mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
+            snow = dat.get()
+            masked_snow = np.ma.array(snow, mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
+            masked_snow._sharedmask = False
+            binary_snow = lib.convert_snow_to_binary(masked_snow)
+            data = lib.upsample_snow(binary_snow, lib.masked_binary_logic)
+        masked_dat = np.ma.array(data, mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
         sds_data[:] = masked_dat.filled()
         logging.debug('Written values: ' + str(sds_data.get()))
         sds_data.endaccess()

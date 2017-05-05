@@ -17,7 +17,7 @@ class Test:
         assert ma.array(inputarray, mask=reliability).sum() == 12337
 
     def test_get_filenames_list(self):
-        files_from = "../test_data/data_list.txt"
+        files_from = "test_data/data_list.txt"
         files = ["A2016177_clipped_mosaic_250m 16 days NDVI.tif",
                  "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                  "A2016193_clipped_mosaic_250m 16 days NDVI.tif",
@@ -25,7 +25,7 @@ class Test:
         assert files == lib.get_filenames_list(files_from)
 
     def test_get_data_and_reliability_lists(self):
-        directory_path = "../test_data"
+        directory_path = "test_data"
         data_file_regex = "clipped_mosaic.*NDVI"
         reliability_file_regex = "clipped_mosaic.*Quality"
         date_regex = "\d{7}"
@@ -48,3 +48,17 @@ class Test:
             "A2016177_clipped_mosaic_250m 16 days NDVI.tif",
             "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif"]
 
+    def test_upsample_snow_binary_logic(self):
+        n = 4
+        data = np.array([[0] * n, [0] * (n / 2) + [1] * (n / 2), [1, 0, 1, 1], [0, 0, 1, 1]])
+        correct_result = np.array([[0, 1], [0, 1]])
+        result = lib.upsample_snow(data, lib.binary_logic)
+        npt.assert_array_equal(correct_result, result)
+
+    def test_upsample_snow_masked_binary_logic(self):
+        n = 4
+        data = ma.array([[0] * n, [0] * (n / 2) + [1] * (n / 2), [1, 0, 1, 1], [0, 0, 1, 1]],
+                        mask=[[1] * n, [0] * n, [0] * n, [1] * n])
+        correct_result = ma.array([[0, 1], [1, 1]])
+        result = lib.upsample_snow(data, lib.masked_binary_logic)
+        npt.assert_array_equal(correct_result, result)
