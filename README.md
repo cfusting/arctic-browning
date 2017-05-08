@@ -2,11 +2,11 @@
 The 2015 Arctic Report Card[1] showed an unusual downward trend in the Normalized Vegetation Index (NDVI) in the arctic circle and the northern reaches of Eurasia. NDVI is a measure of the earth's greenness and is thus a proxy for vegetative growth and primary productively. Most plots of NDVI span from brown (no vegetation) to green (lots of vegetation). This can be miss-leading, as brown is an indication of "not green" and not the color brown. For example bare rock and water are considered "brown".
 The cause of the recent downward trend is not know, although isolated field studies suggests extreme temperature and other events have had a significant impact[2]. This is in contrast to the previous 30 years where an upward trend has been observed. The following plot illustrates the greening and browning trends from 1982 to 2014 over the arctic circle. 
 
-![Arctic NDVI](cfusting.github.io/img/portfolio/arcticbrowning-orig.png)
+![Arctic NDVI](https://cfusting.github.io/img/portfolio/arcticbrowning-orig.png)
 
 On the left is the Max NDVI where the value represented is the maximum of the season. On the right is the Time Integrated NDVI (TI-NDVI) where the value represented is the sum of the NDVI over the growing season. TI-NDVI is a better indicator of overall vegetative growth as it takes the entire season into account and not just the maximum values. The plot below shows the trends over the arctic, North America, and Eurasia.
 
-![Arctic plot](cfusting.github.io/img/portfolio/arctic-trends.png)
+![Arctic plot](https://cfusting.github.io/img/portfolio/arctic-trends.png)
 
 Again Max NDVI is on the left and TI-NDVI on the right.
 
