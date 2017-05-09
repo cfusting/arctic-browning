@@ -15,8 +15,8 @@ We hypothesize that the relationship between LST, snow cover, and TI-NDVI is non
 ## Results
 This research is currently in progress.
 
-Literature Cited
+### Literature Cited
 
-<a name="lc-1"></a>1. Greenness 15. Arctic Program Available at: http://arctic.noaa.gov/Report-Card/Report-Card-2015/ArtMID/5037/ArticleID/221/Tundra-Greenness. (Accessed: 25th January 2017)
-<a name="lc-2"></a>2. Bjerke, J. W. et al. Record-low primary productivity and high plant damage in the Nordic Arctic Region in 2012 caused by multiple weather events and pest outbreaks. Environ. Res. Lett. 9, 84006 (2014).
+1. Greenness 15. Arctic Program Available at: http://arctic.noaa.gov/Report-Card/Report-Card-2015/ArtMID/5037/ArticleID/221/Tundra-Greenness. (Accessed: 25th January 2017)<a name="lc-1"></a>
+2. Bjerke, J. W. et al. Record-low primary productivity and high plant damage in the Nordic Arctic Region in 2012 caused by multiple weather events and pest outbreaks. Environ. Res. Lett. 9, 84006 (2014).<a name="lc-2"></a>
 
