@@ -76,8 +76,8 @@ for fl in file_list:
             snow = dat.get()
             masked_snow = np.ma.array(snow, mask=large_mask, fill_value=fill_value, dtype=DAT_NUMPY)
             masked_snow._sharedmask = False
-            binary_snow = lib.convert_snow_to_binary(masked_snow)
-            data = lib.upsample_snow(binary_snow, lib.masked_binary_logic)
+            lib.convert_snow_to_binary(masked_snow)
+            data = lib.upsample_snow(masked_snow, lib.masked_binary_logic)
             mask = data == lib.FILL_SNOW
         masked_dat = np.ma.array(data, mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
         sds_data[:] = masked_dat.filled()
