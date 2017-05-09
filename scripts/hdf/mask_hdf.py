@@ -72,12 +72,13 @@ for fl in file_list:
             mask = lib.build_ndvi_mask(dat.get(), quality.get())
             data = dat.get()
         elif args.type == SNOW:
-            mask = lib.build_snow_mask(dat.get())
+            large_mask = lib.build_snow_mask(dat.get())
             snow = dat.get()
-            masked_snow = np.ma.array(snow, mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
+            masked_snow = np.ma.array(snow, mask=large_mask, fill_value=fill_value, dtype=DAT_NUMPY)
             masked_snow._sharedmask = False
             binary_snow = lib.convert_snow_to_binary(masked_snow)
             data = lib.upsample_snow(binary_snow, lib.masked_binary_logic)
+            mask = data == lib.FILL_SNOW
         masked_dat = np.ma.array(data, mask=mask, fill_value=fill_value, dtype=DAT_NUMPY)
         sds_data[:] = masked_dat.filled()
         logging.debug('Written values: ' + str(sds_data.get()))

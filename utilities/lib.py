@@ -19,11 +19,15 @@ LST_NO_DATA = 0
 NDVI_THRESHOLD = 1200
 LST = "lst"
 NDVI = "ndvi"
+MASK_THRESHOLD = 2
+SNOW = 1
+NO_SNOW = 0
+FILL_SNOW = 2
 
 
 def convert_snow_to_binary(snow_array):
-    snow_array[snow_array == 50] = 0
-    snow_array[snow_array == 200] = 1
+    snow_array[snow_array == 50] = NO_SNOW  # no snow
+    snow_array[snow_array == 200] = SNOW  # snow
 
 
 def build_snow_mask(snow_array):
@@ -254,39 +258,40 @@ def get_predictors_and_response(hdf_file):
     return design_matrix[:, :-1], design_matrix[:, -1]
 
 
-def binary_logic(pixels, size):
-    if pixels.sum() >= size:
-        return 1
+def binary_logic(pixels):
+    if pixels.sum() >= pixels.size / MASK_THRESHOLD:
+        return SNOW
     else:
-        return 0
+        return NO_SNOW
 
 
-def masked_binary_logic(masked_pixels, size):
+def masked_binary_logic(masked_pixels):
     mask = masked_pixels.mask
     observations = masked_pixels.size - mask.sum()
-    if masked_pixels.sum() >= size / observations:
-        return 1
+    if observations == 0:
+        return FILL_SNOW
+    if masked_pixels.sum() >= observations / MASK_THRESHOLD:
+        return SNOW
     else:
-        return 0
+        return NO_SNOW
 
 
 def upsample_snow(data, pixel_logic, size=2):
     """
     Moving window algorithm to upsample a matrix.
-    :param data:
-    :param pixel_logic:
-    :param size:
-    :return: The resulting matrix
-    """
+    :param data: An 2x2 matrix where m,n are even.
+    :param pixel_logic: Function deciding the output of a window of pixels.
+    :param size: The size of the side of a square window.
+    :return: The resulting matrix where 0 is no snow, 1 is snow, 2 is NA """
     m, n = data.shape
-    result = ma.zeros((m / size) * (n / size), dtype=data.dtype)
+    result = np.zeros((m / size) * (n / size), dtype=data.dtype)
     i = size - 1
     k = 0
     while i < m:
         j = size - 1
         while j < n:
             pixels = data[i - (size - 1):i + 1, j - (size - 1):j + 1]
-            result[k] = pixel_logic(pixels, size)
+            result[k] = pixel_logic(pixels)
             k += 1
             j += size
         i += size
