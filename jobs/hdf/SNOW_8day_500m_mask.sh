@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1,pmem=8gb,pvmem=8gb
 #PBS -l walltime=03:00:00
-#PBS -N lst_mask
+#PBS -N snow_mask
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
