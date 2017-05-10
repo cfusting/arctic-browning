@@ -1,0 +1,10 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=1,pmem=8gb,pvmem=8gb
+#PBS -l walltime=30:00:00
+#PBS -N snow_upsample
+#PBS -o /users/c/f/cfusting/job_logs
+#PBS -e /users/c/f/cfusting/job_logs
+export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
+cd ~/modis_data/snow_8day_500m
+find `pwd` -name "*hdf" > hdfs.list
+python ~/arctic-browning/scripts/hdf/upsample_snow.py -i "$HOME/modis_data/snow_8day_500m/hdfs.list" -v

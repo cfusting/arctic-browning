@@ -28,6 +28,9 @@ NDVI_END = 245
 LST_LAYER = 'masked_LST_Day_1km'
 SNOW_LAYER = 'masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
+LST_NO_DATA = 0
+NDVI_NO_DATA = -3000
+SNOW_NO_DATA = 255
 
 
 def build_matrix(modis_files, layer_name):
@@ -73,7 +76,7 @@ def getdt(yr, doy):
     return dt.datetime.strptime(str(yr) + str(doy), '%Y%j')
 
 
-def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name):
+def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
     logging.debug("Number of LST files: " + str(len(data_files)))
     rows = []
@@ -82,7 +85,9 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         filtered = get_relative_datetimes(data_files, getdt(year, t0),
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
         rows.append(build_matrix(filtered, data_set_name))
-    return np.vstack(rows)
+    matrix = np.vstack(rows)
+    masked_matrix = np.ma.masked_equal(matrix, fill_value)
+    return masked_matrix
 
 
 def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
@@ -92,7 +97,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
         ndvi_filtered = filter(lambda x: getdt(year, ndvi_start) <= x.datetime <= getdt(year, ndvi_end), ndvi_files)
         ndvi_rows.append(build_matrix(ndvi_filtered, NDVI_LAYER))
     ndvi_stack = np.vstack(ndvi_rows)
-    ndvi_masked = np.ma.masked_equal(ndvi_stack, -3000)
+    ndvi_masked = np.ma.masked_equal(ndvi_stack, NDVI_NO_DATA)
     ndvi_vector = ndvi_masked.mean(axis=1)
     logging.debug('NDVI matrix constructed. Shape: ' + str(ndvi_vector.shape))
     rows = ndvi_vector.shape[0]
@@ -107,11 +112,9 @@ def build_design_matrix(*matrices):
     return dm
 
 lst_matrix = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                    LST_LAYER)
+                                    LST_LAYER, LST_NO_DATA)
 snow_matrix = build_predictor_matrix(args.snow, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                     SNOW_LAYER)
-lst_masked = np.ma.masked_equal(lst_matrix, 0)
-logging.debug('LST matrix constructed. Shape: ' + str(lst_masked.shape))
+                                     SNOW_LAYER, SNOW_NO_DATA)
 ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
 design_matrix = build_design_matrix(lst_matrix, snow_matrix, ndvi_matrix)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
