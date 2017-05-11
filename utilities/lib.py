@@ -19,10 +19,10 @@ LST_NO_DATA = 0
 NDVI_THRESHOLD = 1200
 LST = "lst"
 NDVI = "ndvi"
-MASK_THRESHOLD = 2
+SNOW_MASK_THRESHOLD = 2
 SNOW = 1
 NO_SNOW = 0
-FILL_SNOW = 2
+FILL_SNOW = 255
 
 
 def convert_snow_to_binary(snow_array):
@@ -259,7 +259,7 @@ def get_predictors_and_response(hdf_file):
 
 
 def binary_logic(pixels):
-    if pixels.sum() >= pixels.size / MASK_THRESHOLD:
+    if pixels.sum() >= pixels.size / SNOW_MASK_THRESHOLD:
         return SNOW
     else:
         return NO_SNOW
@@ -270,7 +270,7 @@ def masked_binary_logic(masked_pixels):
     observations = masked_pixels.size - mask.sum()
     if observations == 0:
         return FILL_SNOW
-    if masked_pixels.sum() >= observations / MASK_THRESHOLD:
+    if masked_pixels.sum() >= observations / SNOW_MASK_THRESHOLD:
         return SNOW
     else:
         return NO_SNOW

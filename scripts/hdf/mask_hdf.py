@@ -22,13 +22,9 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
-LST_NUMPY = np.uint16
 LST_SDC = SDC.UINT16
-NDVI_NUMPY = np.int16
 NDVI_SDC = SDC.INT16
-SNOW_NUMPY = np.uint8
 SNOW_SDC = SDC.UINT8
-DAT_NUMPY = None
 DAT_SDC = None
 
 if args.type == LST:
