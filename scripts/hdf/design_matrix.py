@@ -30,7 +30,7 @@ elif args.verbose:
 NDVI_START = 152
 NDVI_END = 245
 LST_LAYER = 'masked_LST_Day_1km'
-SNOW_LAYER = 'upsampledmasked_Maximum_Snow_Extent'
+SNOW_LAYER = 'upsampled_masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
 LST_NO_DATA = 0
 NDVI_NO_DATA = -3000
