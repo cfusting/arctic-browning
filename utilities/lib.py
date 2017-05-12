@@ -21,19 +21,21 @@ LST = "lst"
 NDVI = "ndvi"
 SNOW_MASK_THRESHOLD = 2
 SNOW = 1
+PRODUCT_SNOW = 200
 NO_SNOW = 0
+PRODUCT_NO_SNOW = 25
 FILL_SNOW = 255
 
 
 def convert_snow_to_binary(snow_array):
-    snow_array[snow_array == 50] = NO_SNOW  # no snow
-    snow_array[snow_array == 200] = SNOW  # snow
+    snow_array[snow_array == PRODUCT_NO_SNOW] = NO_SNOW  # no snow
+    snow_array[snow_array == PRODUCT_SNOW] = SNOW  # snow
 
 
 def build_snow_mask(snow_array):
     mask = np.ones(snow_array.shape, dtype=bool)
-    mask[snow_array == 50] = False  # no snow
-    mask[snow_array == 200] = False  # snow
+    mask[snow_array == PRODUCT_NO_SNOW] = False  # no snow
+    mask[snow_array == PRODUCT_SNOW] = False  # snow
     return mask
 
 

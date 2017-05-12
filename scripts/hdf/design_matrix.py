@@ -7,6 +7,7 @@ import numpy as np
 from pyhdf.SD import SD, SDC
 
 import modis.modisfile as modis
+from utilities import lib
 
 parser = argparse.ArgumentParser(description='Create design matrix.')
 parser.add_argument('-l', '--lst-files', help='File containing LST file paths.', required=True)
@@ -35,7 +36,6 @@ SNOW_LAYER = 'upsampled_masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
 LST_NO_DATA = 0
 NDVI_NO_DATA = -3000
-SNOW_NO_DATA = 255
 
 
 def build_matrix(modis_files, layer_name):
@@ -131,7 +131,7 @@ def build_design_matrix(*matrices):
 lst_matrix = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
                                     LST_LAYER, LST_NO_DATA)
 snow_matrix = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                     SNOW_LAYER, SNOW_NO_DATA)
+                                     SNOW_LAYER, lib.FILL_SNOW)
 ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
 design_matrix = build_design_matrix(lst_matrix, snow_matrix, ndvi_matrix)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
