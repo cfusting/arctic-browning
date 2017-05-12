@@ -4,7 +4,10 @@
 #PBS -N symbolic
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
-#PBS -M sam.kriegman@uvm.edu
-export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
-cd $HOME/symbolic_results
-python $HOME/arctic-browning/scripts/ml/symbolic_regression.py -t $training -s $seed -n $name
+export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
+cd $ARCTIC_RESULTS_HOME
+config=$name"_config.log"
+cp $ARCTIC_HOME/experiments/ferret.py $config
+echo ----DATA---- >> $config
+echo $training >> $config
+python $ARCTIC_HOME/scripts/ml/symbolic_regression.py -t $training -s $seed -n $name

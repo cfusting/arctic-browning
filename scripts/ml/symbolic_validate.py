@@ -15,6 +15,8 @@ from gp.algorithms import afpo
 from gp.experiments import symbreg, fast_evaluate
 from ndvi import gp_processing_tools
 
+from utilities import lib
+
 logging.basicConfig(level=logging.DEBUG)
 
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
@@ -60,7 +62,7 @@ def get_validation_testing_pset(dimension_number):
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
-predictors, response = get_predictors_and_response(args.training)
+predictors, response = lib.get_predictors_and_response(args.training)
 NUM_DIM = predictors.shape[1]
 pset = get_validation_testing_pset(NUM_DIM)
 p_transformer = preprocessing.StandardScaler()
@@ -92,7 +94,7 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = get_predictors_and_response(args.testing)
+testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_response)
 if args.sample_size is not None:
