@@ -34,9 +34,13 @@ MAX_SIZE = 200
 XOVER_PROB = 0.9
 MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
+MIN_GEN_GROW = 1
+MAX_GEN_GROW = 6
 
 SUBSET_SIZE = 100000
 SUBSET_CHANGE_FREQUENCY = 10
+
+RANDOM_SUBSET_SIZE = 100000
 
 ERROR_FUNCTION = fast_evaluate.normalized_mean_squared_error
 
@@ -65,7 +69,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
 
-    toolbox.register("grow", gp.genGrow, pset=pset, min_=1, max_=6)
+    toolbox.register("grow", gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW)
     toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
@@ -115,7 +119,6 @@ predictors = feature_transformer.fit_transform(predictors, response)
 response_transformer = preprocessing.StandardScaler()
 response = response_transformer.fit_transform(response)
 
-RANDOM_SUBSET_SIZE = 100000
 if RANDOM_SUBSET_SIZE is not None:
     subset_indices = numpy.random.choice(len(predictors), RANDOM_SUBSET_SIZE, replace=False)
     predictors = predictors[subset_indices]
