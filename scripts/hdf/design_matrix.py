@@ -14,7 +14,7 @@ parser.add_argument('-s', '--snow-files', help='File containing SNOW file paths.
 parser.add_argument('-y', '--first-year', help='First year.', required=True, type=int)
 parser.add_argument('-j', '--last-year', help='Last year.', required=True, type=int)
 parser.add_argument('-t', '--t0', help='The day of the year considered t0.', required=True, type=int)
-parser.add_argument('-d', '--delta', help='Number of days back from t0 to consider.', required=True, type=int)
+parser.add_argument('-a', '--delta', help='Number of days back from t0 to consider.', required=True, type=int)
 parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', required=True, type=int)
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
