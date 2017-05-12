@@ -109,7 +109,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
 
 
 def build_design_matrix(*matrices):
-    design_masked = np.ma.concatenate(*matrices, axis=1)
+    design_masked = np.ma.concatenate(matrices, axis=1)
     dm = np.ma.compress_rows(design_masked)
     logging.debug("Design Matrix shape: " + str(dm.shape))
     logging.debug(str(dm))
