@@ -85,6 +85,10 @@ def get_masked_row_num(matrix):
     return len(cols_masked[cols_masked == 0])
 
 
+def get_masked_col_num(matrix):
+    return matrix.mask.sum(axis=0)
+
+
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
     logging.debug("Number of LST files: " + str(len(data_files)))
@@ -98,6 +102,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
     logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
+    logging.info("Row missing data sums: " + str(get_masked_col_num(masked_matrix)))
     return masked_matrix
 
 
