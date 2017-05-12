@@ -24,7 +24,7 @@ args = parser.parse_args()
 if args.debug:
     logging.basicConfig(level=logging.DEBUG)
 elif args.verbose:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
 
 NDVI_START = 152
@@ -117,7 +117,7 @@ def build_design_matrix(*matrices):
 
 lst_matrix = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
                                     LST_LAYER, LST_NO_DATA)
-snow_matrix = build_predictor_matrix(args.snow, args.first_year, args.last_year, args.t0, args.delta, args.eta,
+snow_matrix = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
                                      SNOW_LAYER, SNOW_NO_DATA)
 ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
 design_matrix = build_design_matrix(lst_matrix, snow_matrix, ndvi_matrix)
