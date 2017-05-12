@@ -16,17 +16,21 @@ parser.add_argument('-j', '--last-year', help='Last year.', required=True, type=
 parser.add_argument('-t', '--t0', help='The day of the year considered t0.', required=True, type=int)
 parser.add_argument('-d', '--delta', help='Number of days back from t0 to consider.', required=True, type=int)
 parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', required=True, type=int)
-parser.add_argument('-v', '--verbose', help='Verbose.', action='store_true')
+parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
+parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
 parser.add_argument('-o', '--out-file', help='Name of HDF file to save the design matrix.', required=True)
 args = parser.parse_args()
 
-if args.verbose:
+if args.debug:
     logging.basicConfig(level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+
 
 NDVI_START = 152
 NDVI_END = 245
 LST_LAYER = 'masked_LST_Day_1km'
-SNOW_LAYER = 'masked_Maximum_Snow_Extent'
+SNOW_LAYER = 'upsampledmasked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
 LST_NO_DATA = 0
 NDVI_NO_DATA = -3000
@@ -43,8 +47,8 @@ def build_matrix(modis_files, layer_name):
     columns = []
     for fl in modis_files:
         columns.append(fl.get_layer_data(layer_name).flatten())
-        logging.debug('Added MODIS data to matrix: ' + str(fl.datetime))
-    logging.debug('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
+        logging.info('Added MODIS data to matrix: ' + str(fl.datetime))
+    logging.info('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
     return np.vstack(columns).transpose()
 
 
@@ -81,7 +85,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     logging.debug("Number of LST files: " + str(len(data_files)))
     rows = []
     for year in range(first_year, last_year + 1):
-        logging.debug("Processing year: " + str(year))
+        logging.info("Processing year: " + str(year))
         filtered = get_relative_datetimes(data_files, getdt(year, t0),
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
         rows.append(build_matrix(filtered, data_set_name))

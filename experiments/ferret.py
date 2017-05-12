@@ -11,7 +11,7 @@ from gp.experiments import reports, fast_evaluate, symbreg
 import utils
 
 NGEN = 3000
-POP_SIZE = 1000
+POP_SIZE = 500
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
@@ -25,6 +25,8 @@ MAX_GEN_GROW = 6
 SUBSET_SIZE = 100000
 SUBSET_CHANGE_FREQUENCY = 10
 ERROR_FUNCTION = fast_evaluate.normalized_mean_squared_error
+RANDOM_SUBSET_SIZE = 100000
+ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, test_predictors=None, test_response=None):
