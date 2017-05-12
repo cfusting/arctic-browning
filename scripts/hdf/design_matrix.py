@@ -102,7 +102,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
     logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
-    logging.info("Row missing data sums: " + str(get_masked_col_num(masked_matrix)))
+    logging.info("Row missing data sums: " + str(get_masked_col_num(masked_matrix) / masked_matrix.shape[0]))
     return masked_matrix
 
 
