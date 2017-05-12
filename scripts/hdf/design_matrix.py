@@ -103,7 +103,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
     ndvi_stack = np.vstack(ndvi_rows)
     ndvi_masked = np.ma.masked_equal(ndvi_stack, NDVI_NO_DATA)
     ndvi_vector = ndvi_masked.mean(axis=1)
-    logging.debug('NDVI matrix constructed. Shape: ' + str(ndvi_vector.shape))
+    logging.info('NDVI matrix constructed. Shape: ' + str(ndvi_vector.shape))
     rows = ndvi_vector.shape[0]
     return ndvi_vector.reshape(rows, 1)
 
@@ -111,7 +111,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
 def build_design_matrix(*matrices):
     design_masked = np.ma.concatenate(matrices, axis=1)
     dm = np.ma.compress_rows(design_masked)
-    logging.debug("Design Matrix shape: " + str(dm.shape))
+    logging.info("Design Matrix shape: " + str(dm.shape))
     logging.debug(str(dm))
     return dm
 
