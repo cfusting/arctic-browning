@@ -21,6 +21,7 @@ parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', 
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
 parser.add_argument('-o', '--out-file', help='Name of HDF file to save the design matrix.', required=True)
+parser.add_argument('-m', '--missing-ratio', help='Remove variables missing more than this amount of data.', type=float)
 args = parser.parse_args()
 
 if args.debug:
@@ -36,7 +37,6 @@ SNOW_LAYER = 'upsampled_masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
 LST_NO_DATA = 0
 NDVI_NO_DATA = -3000
-MISSING_THRESHOLD = .5
 
 
 def build_matrix(modis_files, layer_name):
@@ -103,14 +103,15 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     matrix = np.vstack(rows)
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
-    logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
     logging.info("Percent missing data in columns: " + str(missing_percent))
-    missing_values = missing_percent >= MISSING_THRESHOLD
-    missing_indices = missing_values.nonzero()
-    logging.info("Deleting columns: " + str(missing_indices))
-    cleaned_matrix = np.delete(masked_matrix, missing_indices)
-    masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
-    logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
+    if args.missing_ratio:
+        missing_values = missing_percent >= args.missing_ratio
+        missing_indices = missing_values.nonzero()
+        logging.info("Deleting columns: " + str(missing_indices))
+        cleaned_matrix = np.delete(masked_matrix, missing_indices)
+        masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
+        logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
+    logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
     return masked_matrix
 
 
