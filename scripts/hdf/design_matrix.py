@@ -36,6 +36,7 @@ SNOW_LAYER = 'upsampled_masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
 LST_NO_DATA = 0
 NDVI_NO_DATA = -3000
+MISSING_THRESHOLD = .5
 
 
 def build_matrix(modis_files, layer_name):
@@ -86,7 +87,7 @@ def get_masked_row_num(matrix):
     return len(cols_masked[cols_masked == 0])
 
 
-def get_masked_col_num(matrix):
+def get_masked_col_sums(matrix):
     return matrix.mask.sum(axis=0)
 
 
@@ -101,9 +102,15 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         rows.append(build_matrix(filtered, data_set_name))
     matrix = np.vstack(rows)
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
+    missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
     logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
+    logging.info("Percent missing data in columns: " + str(missing_percent))
+    missing_values = missing_percent >= MISSING_THRESHOLD
+    missing_indices = missing_values.nonzero()
+    logging.info("Deleting columns: " + str(missing_indices))
+    cleaned_matrix = np.delete(masked_matrix, missing_indices)
+    masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
     logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
-    logging.info("Row missing data sums: " + str(get_masked_col_num(masked_matrix) / masked_matrix.shape[0]))
     return masked_matrix
 
 
