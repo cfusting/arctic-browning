@@ -105,11 +105,12 @@ def find_means(mat, snow_mean):
 
 
 def find_missing(mat, missing_ratio):
-    missing_percent = get_masked_col_sums(mat) / mat.shape[0]
-    logging.info("Percent missing data in columns: " + str(missing_percent))
-    missing_indices = np.nonzero(missing_percent >= missing_ratio)[0]
+    missing_proportion = get_masked_col_sums(mat) / mat.shape[0]
+    logging.info("Proportion missing data in columns: " + str(missing_proportion))
+    missing_indices = np.nonzero(missing_proportion >= missing_ratio)[0]
     if missing_ratio and len(missing_indices) != 0:
         logging.info("Deleting columns with missing ratio >= : " + str(missing_ratio))
+        logging.info(str(missing_indices))
         return missing_indices
     else:
         return []
@@ -134,7 +135,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     if data_set_name == SNOW_LAYER:
         indices_to_delete.append(find_means(masked_matrix, args.snow_mean))
     indices_to_delete.append(find_missing(masked_matrix, args.missing_ratio))
-    indices_to_delete = np.unique(indices_to_delete)
+    indices_to_delete = np.unique(np.array(indices_to_delete))
     cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
     masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
     new_available_rows = get_unmasked_row_num(masked_matrix)
