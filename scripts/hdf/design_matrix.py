@@ -35,8 +35,6 @@ NDVI_END = 245
 LST_LAYER = 'masked_LST_Day_1km'
 SNOW_LAYER = 'upsampled_masked_Maximum_Snow_Extent'
 NDVI_LAYER = 'masked_1 km monthly NDVI'
-LST_NO_DATA = 0
-NDVI_NO_DATA = -3000
 
 
 def build_matrix(modis_files, layer_name):
@@ -101,6 +99,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
         rows.append(build_matrix(filtered, data_set_name))
     matrix = np.vstack(rows)
+    logging.info("Predictor matrix built with unique values: " + np.unique(matrix))
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
     missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
@@ -110,7 +109,8 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         logging.info("Deleting columns: " + str(missing_indices))
         cleaned_matrix = np.delete(masked_matrix, missing_indices, axis=1)
         masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
-    logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
+    logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
+    logging.info("Column means: " + str(masked_matrix.mean(axis=0)))
     return masked_matrix
 
 
@@ -121,7 +121,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
         ndvi_filtered = filter(lambda x: getdt(year, ndvi_start) <= x.datetime <= getdt(year, ndvi_end), ndvi_files)
         ndvi_rows.append(build_matrix(ndvi_filtered, NDVI_LAYER))
     ndvi_stack = np.vstack(ndvi_rows)
-    ndvi_masked = np.ma.masked_equal(ndvi_stack, NDVI_NO_DATA)
+    ndvi_masked = np.ma.masked_equal(ndvi_stack, lib.NDVI_NO_DATA)
     ndvi_vector = ndvi_masked.mean(axis=1)
     logging.info('NDVI matrix constructed. Shape: ' + str(ndvi_vector.shape))
     rows = ndvi_vector.shape[0]
@@ -137,7 +137,7 @@ def build_design_matrix(*matrices):
     return dm
 
 lst_matrix = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                    LST_LAYER, LST_NO_DATA)
+                                    LST_LAYER, lib.LST_NO_DATA)
 snow_matrix = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
                                      SNOW_LAYER, lib.FILL_SNOW)
 ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
