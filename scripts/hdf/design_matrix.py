@@ -92,26 +92,27 @@ def get_masked_col_sums(matrix):
     return matrix.mask.sum(axis=0)
 
 
-def remove_means(mat, fill_value, snow_mean):
+def find_means(mat, snow_mean):
     col_means = mat.mean(axis=0)
     logging.info("Column means: " + str(col_means))
     mean_indices = np.nonzero(col_means >= snow_mean)[0]
     if snow_mean and len(mean_indices) != 0:
         logging.info("Deleting columns with mean >=: " + snow_mean)
         logging.info(str(mean_indices))
-        cleaned_matrix = np.delete(mat, mean_indices, axis=1)
-        return np.ma.masked_equal(cleaned_matrix, fill_value)
+        return mean_indices
+    else:
+        return []
 
 
-def remove_missing(mat, fill_value, missing_ratio):
+def find_missing(mat, missing_ratio):
     missing_percent = get_masked_col_sums(mat) / mat.shape[0]
     logging.info("Percent missing data in columns: " + str(missing_percent))
     missing_indices = np.nonzero(missing_percent >= missing_ratio)[0]
     if missing_ratio and len(missing_indices) != 0:
         logging.info("Deleting columns with missing ratio >= : " + missing_ratio)
-        logging.info(str(missing_indices))
-        cleaned_matrix = np.delete(mat, missing_indices, axis=1)
-        return np.ma.masked_equal(cleaned_matrix, fill_value)
+        return missing_indices
+    else:
+        return []
 
 
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
@@ -126,12 +127,17 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     matrix = np.vstack(rows)
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Predictor matrix built with unique values: " + str(np.unique(matrix)))
-    logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
+    available_rows = get_unmasked_row_num(masked_matrix)
+    row_num = masked_matrix.shape[0]
+    logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
+    indices_to_delete = []
     if data_set_name == SNOW_LAYER:
-        masked_matrix = remove_means(masked_matrix, fill_value, args.snow_mean)
-        logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
-    masked_matrix = remove_missing(masked_matrix, fill_value, args.missing_ratio)
-    logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
+        indices_to_delete.append(find_means(masked_matrix, args.snow_mean))
+    indices_to_delete.append(find_missing(masked_matrix, args.missing_ratio))
+    cleaned_matrix = np.delete(masked_matrix, np.unique(indices_to_delete), axis=1)
+    masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
+    new_available_rows = get_unmasked_row_num(masked_matrix)
+    logging.info("New proportion of rows without missing values: " + str(new_available_rows / row_num))
     logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
     return masked_matrix
 
