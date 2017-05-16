@@ -133,8 +133,8 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
     indices_to_delete = []
     if data_set_name == SNOW_LAYER:
-        indices_to_delete = indices_to_delete + find_means(masked_matrix, args.snow_mean)
-    indices_to_delete = indices_to_delete + find_missing(masked_matrix, args.missing_ratio)
+        indices_to_delete.extend(find_means(masked_matrix, args.snow_mean))
+    indices_to_delete.extend(find_missing(masked_matrix, args.missing_ratio))
     indices_to_delete = np.unique(indices_to_delete)
     logging.info("Deleting columns: " + str(indices_to_delete))
     cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
