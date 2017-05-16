@@ -104,12 +104,10 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
     logging.info("Percent missing data in columns: " + str(missing_percent))
-    missing_values = missing_percent >= args.missing_ratio
-    missing_indices = missing_values.nonzero()
-    logging.debug("Missing indices: " + str(missing_indices))
-    if args.missing_ratio and missing_indices:
+    missing_indices = np.nonzero(missing_percent >= args.missing_ratio)[0]
+    if args.missing_ratio and len(missing_indices) != 0:
         logging.info("Deleting columns: " + str(missing_indices))
-        cleaned_matrix = np.delete(masked_matrix, missing_indices)
+        cleaned_matrix = np.delete(masked_matrix, missing_indices, axis=1)
         masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
         logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
     logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
