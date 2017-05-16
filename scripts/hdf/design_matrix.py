@@ -21,7 +21,8 @@ parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', 
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
 parser.add_argument('-o', '--out-file', help='Name of HDF file to save the design matrix.', required=True)
-parser.add_argument('-m', '--missing-ratio', help='Remove variables missing more than this amount of data.', type=float)
+parser.add_argument('-m', '--missing-ratio', help='Remove variables missing at least this amount of data.', type=float)
+parser.add_argument('-z', '--snow-mean', help='Remove snow variables with mean at least this large.', type=float)
 args = parser.parse_args()
 
 if args.debug:
@@ -91,6 +92,28 @@ def get_masked_col_sums(matrix):
     return matrix.mask.sum(axis=0)
 
 
+def remove_means(mat, fill_value, snow_mean):
+    col_means = mat.mean(axis=0)
+    logging.info("Column means: " + str(col_means))
+    mean_indices = np.nonzero(col_means >= snow_mean)[0]
+    if snow_mean and len(mean_indices) != 0:
+        logging.info("Deleting columns with mean >=: " + snow_mean)
+        logging.info(str(mean_indices))
+        cleaned_matrix = np.delete(mat, mean_indices, axis=1)
+        return np.ma.masked_equal(cleaned_matrix, fill_value)
+
+
+def remove_missing(mat, fill_value, missing_ratio):
+    missing_percent = get_masked_col_sums(mat) / mat.shape[0]
+    logging.info("Percent missing data in columns: " + str(missing_percent))
+    missing_indices = np.nonzero(missing_percent >= missing_ratio)[0]
+    if missing_ratio and len(missing_indices) != 0:
+        logging.info("Deleting columns with missing ratio >= : " + missing_ratio)
+        logging.info(str(missing_indices))
+        cleaned_matrix = np.delete(mat, missing_indices, axis=1)
+        return np.ma.masked_equal(cleaned_matrix, fill_value)
+
+
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
     logging.debug("Number of HDF files: " + str(len(data_files)))
@@ -101,18 +124,15 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
         rows.append(build_matrix(filtered, data_set_name))
     matrix = np.vstack(rows)
-    logging.info("Predictor matrix built with unique values: " + str(np.unique(matrix)))
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
+    logging.info("Predictor matrix built with unique values: " + str(np.unique(matrix)))
     logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
-    missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
-    logging.info("Percent missing data in columns: " + str(missing_percent))
-    missing_indices = np.nonzero(missing_percent >= args.missing_ratio)[0]
-    if args.missing_ratio and len(missing_indices) != 0:
-        logging.info("Deleting columns: " + str(missing_indices))
-        cleaned_matrix = np.delete(masked_matrix, missing_indices, axis=1)
-        masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
+    if data_set_name == SNOW_LAYER:
+        masked_matrix = remove_means(masked_matrix, fill_value, args.snow_mean)
+        logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
+    masked_matrix = remove_missing(masked_matrix, fill_value, args.missing_ratio)
+    logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
     logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
-    logging.info("Column means: " + str(masked_matrix.mean(axis=0)))
     return masked_matrix
 
 
