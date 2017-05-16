@@ -97,7 +97,7 @@ def find_means(mat, snow_mean):
     logging.info("Column means: " + str(col_means))
     mean_indices = np.nonzero(col_means >= snow_mean)[0]
     if snow_mean and len(mean_indices) != 0:
-        logging.info("Deleting columns with mean >=: " + snow_mean)
+        logging.info("Deleting columns with mean >=: " + str(snow_mean))
         logging.info(str(mean_indices))
         return mean_indices
     else:
@@ -109,7 +109,7 @@ def find_missing(mat, missing_ratio):
     logging.info("Percent missing data in columns: " + str(missing_percent))
     missing_indices = np.nonzero(missing_percent >= missing_ratio)[0]
     if missing_ratio and len(missing_indices) != 0:
-        logging.info("Deleting columns with missing ratio >= : " + missing_ratio)
+        logging.info("Deleting columns with missing ratio >= : " + str(missing_ratio))
         return missing_indices
     else:
         return []
