@@ -135,11 +135,11 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     if data_set_name == SNOW_LAYER:
         indices_to_delete.append(find_means(masked_matrix, args.snow_mean))
     indices_to_delete.append(find_missing(masked_matrix, args.missing_ratio))
-    indices_to_delete = np.unique(np.array(indices_to_delete))
+    indices_to_delete = np.unique(indices_to_delete)
+    logging.info("Deleting columns: " + str(indices_to_delete))
     cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
     masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
     new_available_rows = get_unmasked_row_num(masked_matrix)
-    logging.info("Deleted columns: " + str(indices_to_delete))
     logging.info("New proportion of rows without missing values: " + str(new_available_rows / row_num))
     logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
     return masked_matrix
