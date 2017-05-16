@@ -82,7 +82,7 @@ def getdt(yr, doy):
     return dt.datetime.strptime(str(yr) + str(doy), '%Y%j')
 
 
-def get_masked_row_num(matrix):
+def get_unmasked_row_num(matrix):
     cols_masked = matrix.mask.sum(axis=1)
     return len(cols_masked[cols_masked == 0])
 
@@ -93,7 +93,7 @@ def get_masked_col_sums(matrix):
 
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
-    logging.debug("Number of LST files: " + str(len(data_files)))
+    logging.debug("Number of HDF files: " + str(len(data_files)))
     rows = []
     for year in range(first_year, last_year + 1):
         logging.info("Processing year: " + str(year))
@@ -102,6 +102,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         rows.append(build_matrix(filtered, data_set_name))
     matrix = np.vstack(rows)
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
+    logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
     missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
     logging.info("Percent missing data in columns: " + str(missing_percent))
     missing_indices = np.nonzero(missing_percent >= args.missing_ratio)[0]
@@ -109,7 +110,6 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         logging.info("Deleting columns: " + str(missing_indices))
         cleaned_matrix = np.delete(masked_matrix, missing_indices, axis=1)
         masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
-        logging.info("Rows without missing values: " + str(get_masked_row_num(masked_matrix)))
     logging.info("Built predictor matrix with shape: " + str(masked_matrix.shape))
     return masked_matrix
 
@@ -130,6 +130,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
 
 def build_design_matrix(*matrices):
     design_masked = np.ma.concatenate(matrices, axis=1)
+    logging.info("Removing rows with missing values.")
     dm = np.ma.compress_rows(design_masked)
     logging.info("Design Matrix shape: " + str(dm.shape))
     logging.debug(str(dm))
