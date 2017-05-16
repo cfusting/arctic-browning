@@ -33,5 +33,6 @@ sds_data = sd.create("upsampled_" + args.layer, SNOW_SDC, (1200, 1200))
 sds_data.setfillvalue(snow.getfillvalue())
 logging.info("Writing upsampled data from: " + args.file)
 sds_data[:] = data
+logging.debug("Wrote data with values: " + str(np.unique(sds_data)))
 sds_data.endaccess()
 sd.end()

@@ -46,8 +46,10 @@ def build_matrix(modis_files, layer_name):
     """
     columns = []
     for fl in modis_files:
-        columns.append(fl.get_layer_data(layer_name).flatten())
+        data = fl.get_layer_data(layer_name).flatten()
+        columns.append(data)
         logging.info('Added MODIS data to matrix: ' + str(fl.datetime))
+        logging.info("Possible values: " + str(np.unique(data)))
     logging.info('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
     return np.vstack(columns).transpose()
 
@@ -99,7 +101,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
         rows.append(build_matrix(filtered, data_set_name))
     matrix = np.vstack(rows)
-    logging.info("Predictor matrix built with unique values: " + np.unique(matrix))
+    logging.info("Predictor matrix built with unique values: " + str(np.unique(matrix)))
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Rows without missing values: " + str(get_unmasked_row_num(masked_matrix)))
     missing_percent = get_masked_col_sums(masked_matrix) / masked_matrix.shape[0]
