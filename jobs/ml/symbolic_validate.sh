@@ -5,5 +5,6 @@
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
-export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
-python "$HOME/arctic-browning/scripts/ml/symbolic_validate.py" -n $name -t $MODIS_DATA_HOME/training_matrix.hdf -j MODIS_DATA_HOME/testing_matrix.hdf -r $ARCTIC_RESULTS_HOME
+source $HOME/.bash_profile
+export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
+python "$ARCTIC_HOME/scripts/ml/symbolic_validate.py" -n $name -t $ARCTIC_DATA_HOME/training_matrix.hdf -j $ARCTIC_DATA_HOME/testing_matrix.hdf -r $ARCTIC_RESULTS_HOME

@@ -12,5 +12,5 @@ python $ARCTIC_HOME/scripts/hdf/design_matrix.py \
 -l $MODIS_DATA_HOME"/lst_8day_1km/hdfs.list" \
 -n $MODIS_DATA_HOME"/ndvi_monthly_1km/hdfs.list" \
 -s $MODIS_DATA_HOME"/snow_8day_500m/hdfs.list" \
--y 2015 -j 2016 -t 255 -a 365 -e 0 -o $ARCTIC_DATA_HOME/test_matrix.hdf -v \
+-y 2015 -j 2016 -t 255 -a 365 -e 0 -o $ARCTIC_DATA_HOME/testing_matrix.hdf -v \
 -r 40 44 -x 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 43 44
