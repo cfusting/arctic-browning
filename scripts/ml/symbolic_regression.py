@@ -34,7 +34,7 @@ if experiment.RANDOM_SUBSET_SIZE is not None:
     subset_indices = numpy.random.choice(len(predictors), experiment.RANDOM_SUBSET_SIZE, replace=False)
     predictors = predictors[subset_indices]
     response = response[subset_indices]
-get_toolbox_with_pset = partial(experiment.get_toolbox, pset=pset)
+get_toolbox_with_pset = partial(experiment.get_toolbox, pset=pset, design_matrix=predictors)
 runner.run_data(random_seed, predictors, response, [get_toolbox_with_pset], experiment.ALGORITHM_NAMES,
                 dataset_name=args.name,
                 logging_level=logging.INFO)

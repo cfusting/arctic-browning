@@ -23,6 +23,10 @@ parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
 parser.add_argument('-o', '--out-file', help='Name of HDF file to save the design matrix.', required=True)
 parser.add_argument('-m', '--missing-ratio', help='Remove variables missing at least this amount of data.', type=float)
 parser.add_argument('-z', '--snow-mean', help='Remove snow variables with mean at least this large.', type=float)
+parser.add_argument('-r', '--remove-lst-columns', nargs='+', help='Remove *only* these columns from the LST matrix.',
+                    type=int)
+parser.add_argument('-x', '--remove-snow-columns', nargs='+', help='Remove *only* these columns from the snow matrix.',
+                    type=int)
 args = parser.parse_args()
 
 if args.debug:
@@ -116,6 +120,14 @@ def find_missing(mat, missing_ratio):
         return []
 
 
+def dynamically_remove_columns(mat, data_set, snow_mean, missing_ratio):
+    indices = []
+    if data_set == SNOW_LAYER:
+        indices.extend(find_means(mat, snow_mean))
+    indices.extend(find_missing(mat, missing_ratio))
+    return indices
+
+
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
     logging.debug("Number of HDF files: " + str(len(data_files)))
@@ -131,17 +143,20 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     available_rows = get_unmasked_row_num(masked_matrix)
     row_num = masked_matrix.shape[0]
     logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
-    indices_to_delete = []
-    if data_set_name == SNOW_LAYER:
-        indices_to_delete.extend(find_means(masked_matrix, args.snow_mean))
-    indices_to_delete.extend(find_missing(masked_matrix, args.missing_ratio))
-    indices_to_delete = np.unique(indices_to_delete)
-    logging.info("Deleting columns: " + str(indices_to_delete))
-    cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
-    masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
-    new_available_rows = get_unmasked_row_num(masked_matrix)
-    logging.info("New proportion of rows without missing values: " + str(new_available_rows / row_num))
-    logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
+    if data_set_name == LST_LAYER and args.remove_lst_columns:
+        indices_to_delete = args.remove_lst_columns
+    elif data_set_name == SNOW_LAYER and args.remove_snow_columns:
+        indices_to_delete = args.remove_snow_columns
+    else:
+        indices_to_delete = dynamically_remove_columns(masked_matrix, data_set_name, args.snow_mean, args.missing_ratio)
+    if len(indices_to_delete) != 0:
+        indices_to_delete = np.unique(indices_to_delete)
+        logging.info("Deleting columns: " + str(indices_to_delete))
+        cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
+        masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
+        new_available_rows = get_unmasked_row_num(masked_matrix)
+        logging.info("New proportion of rows without missing values: " + str(new_available_rows / row_num))
+        logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
     return masked_matrix
 
 

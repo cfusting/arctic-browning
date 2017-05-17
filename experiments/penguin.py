@@ -3,10 +3,12 @@ import random
 
 import cachetools
 import numpy
+from functools import partial
 
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
+from gp.parametrized import simple_parametrized_terminals as sp
 
 import utils
 
@@ -33,7 +35,8 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
-    toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT)
+    toolbox.register("expr", sp.generate_parametrized_expression,
+                     partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), design_matrix)
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
@@ -52,8 +55,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", ERROR_FUNCTION)
-    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset, context=pset.context,
-                     subset_selection_archive=subset_selection_archive,
+    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
@@ -69,7 +71,8 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
 
 
 def get_pset(num_predictors):
-    pset = gp.PrimitiveSet("MAIN", num_predictors)
+    pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors)
+    pset.add_parametrized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
     pset.addPrimitive(numpy.multiply, 2)
@@ -79,4 +82,3 @@ def get_pset(num_predictors):
     pset.addPrimitive(numpy.square, 1)
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
     return pset
-
