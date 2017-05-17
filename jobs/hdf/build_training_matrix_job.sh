@@ -6,12 +6,7 @@
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
 source ~/.bash_profile
-cd ~/modis_data/lst_8day_1km
-find `pwd` -name "*hdf" > hdfs.list
-cd ~/modis_data/ndvi_monthly_1km
-find `pwd` -name "*hdf" > hdfs.list
-cd ~/modis_data/snow_8day_500m
-find `pwd` -name "*hdf" > hdfs.list
+uphdfs
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
 python $ARCTIC_HOME"/scripts/hdf/design_matrix.py" \
 -l $MODIS_DATA_HOME"/lst_8day_1km/hdfs.list" \
