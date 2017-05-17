@@ -31,12 +31,12 @@ RANDOM_SUBSET_SIZE = 100000
 ALGORITHM_NAMES = ["afsc_po"]
 
 
-def get_toolbox(predictors, response, pset, test_predictors=None, test_response=None, design_matrix=None):
+def get_toolbox(predictors, response, pset, test_predictors=None, test_response=None):
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
     toolbox.register("expr", sp.generate_parametrized_expression,
-                     partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), design_matrix)
+                     partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), predictors)
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
@@ -45,7 +45,8 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
     toolbox.register("mate", operators.one_point_xover_biased, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    toolbox.register("grow", gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW)
+    toolbox.register("grow", sp.generate_parametrized_expression,
+                     partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW), predictors)
     toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
@@ -54,8 +55,8 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
                                                                              predictors=predictors, response=response,
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
-    toolbox.register("error_func", ERROR_FUNCTION)
-    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context,
+    toolbox.register("error_func", partial(ERROR_FUNCTION, response))
+    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
