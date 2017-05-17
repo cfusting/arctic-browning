@@ -4,6 +4,7 @@
 #PBS -N symbolic
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
+source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
 cd $ARCTIC_RESULTS_HOME
 config=$name"_config.log"

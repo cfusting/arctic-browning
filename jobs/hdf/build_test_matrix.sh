@@ -5,6 +5,7 @@
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
+source ~/.bash_profile
 cd ~/modis_data/lst_8day_1km
 find `pwd` -name "*hdf" > hdfs.list
 cd ~/modis_data/ndvi_monthly_1km
