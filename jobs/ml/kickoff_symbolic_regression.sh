@@ -1,8 +1,8 @@
 #!/bin/bash
-# usage training_data name runs
-for i in `seq 1 $3`
+# usage: source kickoff_symbolic_regression experiment_name num_runs
+for i in `seq 1 $2`
 do
 	seed=$RANDOM
-	qsub -v training=$1,seed=$seed,name=$2 "$ARCTIC_HOME/jobs/ml/symbolic_regression.sh"
-	echo "Run $i: $2 started with seed $seed"
+	qsub -v training=$ARCTIC_DATA_HOME/training_matrix.hdf,seed=$seed,name=$1 "$ARCTIC_HOME/jobs/ml/symbolic_regression.sh"
+	echo "Run $i: $1 started with seed $seed"
 done
