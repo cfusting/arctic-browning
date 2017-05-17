@@ -58,7 +58,7 @@ def get_validation_testing_pset(dimension_number):
     return pset
 
 
-# Validate on a subset or full training data set.
+# Validate on a subset of full training data set.
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
