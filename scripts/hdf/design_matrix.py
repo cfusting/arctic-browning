@@ -50,13 +50,15 @@ def build_matrix(modis_files, layer_name):
     :return: A matrix with each Modis file as a column.
     """
     columns = []
+    day_of_years = []
     for fl in modis_files:
         data = fl.get_layer_data(layer_name).flatten()
         columns.append(data)
+        day_of_years.append(fl.datetime.strftime('%j'))
         logging.info('Added MODIS data to matrix: ' + str(fl.datetime))
         logging.info("Possible values: " + str(np.unique(data)))
     logging.info('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
-    return np.vstack(columns).transpose()
+    return np.vstack(columns).transpose(), day_of_years
 
 
 def get_relative_datetimes(datetimes, t0, td, te):
@@ -128,16 +130,25 @@ def dynamically_remove_columns(mat, data_set, snow_mean, missing_ratio):
     return indices
 
 
+def get_average_day_of_year(day_of_years):
+    return np.mean(day_of_years, axis=0).round().astype(int)
+
+
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
     data_files = [modis.ModisFile(line.rstrip('\n')) for line in open(file_paths)]
     logging.debug("Number of HDF files: " + str(len(data_files)))
     rows = []
+    day_of_year = []
     for year in range(first_year, last_year + 1):
         logging.info("Processing year: " + str(year))
         filtered = get_relative_datetimes(data_files, getdt(year, t0),
                                           dt.timedelta(days=delta), dt.timedelta(days=eta))
-        rows.append(build_matrix(filtered, data_set_name))
+        mat, doys = build_matrix(filtered, data_set_name)
+        rows.append(mat)
+        day_of_year.append(doys)
     matrix = np.vstack(rows)
+    average_day_of_year = get_average_day_of_year(day_of_year)
+    logging.info("Average day of year: " + str(average_day_of_year))
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
     logging.info("Predictor matrix built with unique values: " + str(np.unique(matrix)))
     available_rows = get_unmasked_row_num(masked_matrix)
@@ -151,13 +162,14 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         indices_to_delete = dynamically_remove_columns(masked_matrix, data_set_name, args.snow_mean, args.missing_ratio)
     if len(indices_to_delete) != 0:
         indices_to_delete = np.unique(indices_to_delete)
+        average_day_of_year_cleaned = [el for i, el in enumerate(average_day_of_year) if i not in indices_to_delete]
         logging.info("Deleting columns: " + str(indices_to_delete))
         cleaned_matrix = np.delete(masked_matrix, indices_to_delete, axis=1)
         masked_matrix = np.ma.masked_equal(cleaned_matrix, fill_value)
         new_available_rows = get_unmasked_row_num(masked_matrix)
         logging.info("New proportion of rows without missing values: " + str(new_available_rows / row_num))
         logging.info("Built cleaned predictor matrix with shape: " + str(masked_matrix.shape))
-    return masked_matrix
+    return masked_matrix, average_day_of_year_cleaned
 
 
 def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
@@ -182,10 +194,10 @@ def build_design_matrix(*matrices):
     logging.debug(str(dm))
     return dm
 
-lst_matrix = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                    LST_LAYER, lib.LST_NO_DATA)
-snow_matrix = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0, args.delta, args.eta,
-                                     SNOW_LAYER, lib.FILL_SNOW)
+lst_matrix, lst_day_of_year = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
+                                                     args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)
+snow_matrix, snow_day_of_year = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0,
+                                                       args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW)
 ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
 design_matrix = build_design_matrix(lst_matrix, snow_matrix, ndvi_matrix)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
@@ -195,6 +207,12 @@ sds.last_year = args.last_year
 sds.t0 = args.t0
 sds.delta = args.delta
 sds.eta = args.eta
+sds.missing_ratio = args.missing_ratio
+sds.snow_mean = args.snow_mean
+sds.removed_lst_columns = ",".join(args.remove_lst_columns)
+sds.removed_snow_columns = ",".join(args.remove_snow_columns)
+sds.lst_days = ",".join(lst_day_of_year)
+sds.snow_days = ",".join(snow_day_of_year)
 sds[:] = design_matrix
 sds.endaccess()
 sd.end()

@@ -260,6 +260,16 @@ def get_predictors_and_response(hdf_file):
     return design_matrix[:, :-1], design_matrix[:, -1]
 
 
+def get_lst_and_snow_days(hdf_file):
+    data_hdf = SD(hdf_file)
+    sds = data_hdf.select("design_matrix")
+    lst_days = [int(x) for x in sds.lst_days.split(",")]
+    snow_days = [int(x) for x in sds.snow_days.split(",")]
+    sds.endaccess()
+    data_hdf.end()
+    return lst_days, snow_days
+
+
 def binary_logic(pixels):
     if pixels.sum() >= pixels.size / SNOW_MASK_THRESHOLD:
         return SNOW

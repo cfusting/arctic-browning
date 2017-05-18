@@ -25,7 +25,8 @@ numpy.seterr(all='ignore')
 
 random_seed = args.seed
 predictors, response = lib.get_predictors_and_response(args.training)
-pset = experiment.get_pset(predictors.shape[1])
+lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
+pset = experiment.get_pset(predictors.shape[1], lst_days, snow_days)
 feature_transformer = preprocessing.StandardScaler()
 predictors = feature_transformer.fit_transform(predictors, response)
 response_transformer = preprocessing.StandardScaler()

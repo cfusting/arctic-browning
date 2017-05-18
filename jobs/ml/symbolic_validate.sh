@@ -7,4 +7,4 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
-python "$ARCTIC_HOME/scripts/ml/symbolic_validate.py" -n $name -t $ARCTIC_DATA_HOME/training_matrix.hdf -j $ARCTIC_DATA_HOME/testing_matrix.hdf -r $ARCTIC_RESULTS_HOME
+python "$ARCTIC_HOME/scripts/ml/symbolic_validate.py" -n $name -t $ARCTIC_DATA_HOME/training_matrix.hdf -j $ARCTIC_DATA_HOME/testing_matrix.hdf -r $ARCTIC_RESULTS_HOME/temperature_snow

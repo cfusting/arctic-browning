@@ -68,7 +68,7 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
     return toolbox
 
 
-def get_pset(num_predictors):
+def get_pset(num_predictors, lst_days, snow_days):
     pset = gp.PrimitiveSet("MAIN", num_predictors)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
@@ -78,5 +78,6 @@ def get_pset(num_predictors):
     pset.addPrimitive(symbreg.cube, 1)
     pset.addPrimitive(numpy.square, 1)
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
+    pset.renameArguments(**utils.get_lst_and_snow_variable_names(lst_days, snow_days))
     return pset
 
