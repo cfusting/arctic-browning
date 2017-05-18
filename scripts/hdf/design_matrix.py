@@ -54,7 +54,7 @@ def build_matrix(modis_files, layer_name):
     for fl in modis_files:
         data = fl.get_layer_data(layer_name).flatten()
         columns.append(data)
-        day_of_years.append(fl.datetime.strftime('%j'))
+        day_of_years.append(int(fl.datetime.strftime('%j')))
         logging.info('Added MODIS data to matrix: ' + str(fl.datetime))
         logging.info("Possible values: " + str(np.unique(data)))
     logging.info('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
@@ -131,7 +131,7 @@ def dynamically_remove_columns(mat, data_set, snow_mean, missing_ratio):
 
 
 def get_average_day_of_year(day_of_years):
-    return np.mean(day_of_years, axis=0).round().astype(int)
+    return np.mean(np.array(day_of_years), axis=0).round().astype(int)
 
 
 def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, data_set_name, fill_value):
@@ -147,6 +147,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
         rows.append(mat)
         day_of_year.append(doys)
     matrix = np.vstack(rows)
+    logging.debug(str(day_of_year))
     average_day_of_year = get_average_day_of_year(day_of_year)
     logging.info("Average day of year: " + str(average_day_of_year))
     masked_matrix = np.ma.masked_equal(matrix, fill_value)
