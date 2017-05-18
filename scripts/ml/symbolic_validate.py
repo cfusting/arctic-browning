@@ -5,6 +5,7 @@ import random
 import operator
 import argparse
 import os
+import importlib
 
 import cachetools
 import numpy
@@ -17,15 +18,19 @@ from ndvi import gp_processing_tools
 
 from utilities import lib
 
-logging.basicConfig(level=logging.DEBUG)
-
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-j', '--testing', help='Path to testing data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
 parser.add_argument('-s', '--sample-size', help='Validate and test with a sample of the specified size.', type=int)
+parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
+
+experiment = importlib.import_module("experiments." + args.name)
+
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
 
 
 def get_front(results_path, experiment_name, toolbox, primitive_set):
@@ -50,21 +55,14 @@ def get_front(results_path, experiment_name, toolbox, primitive_set):
     front.reverse()
     return front
 
-
-def get_validation_testing_pset(dimension_number):
-    pset = symbreg.get_numpy_no_trig_pset(dimension_number)
-    pset.addPrimitive(symbreg.cube, 1)
-    pset.addPrimitive(numpy.square, 1)
-    return pset
-
-
 # Validate on a subset of full training data set.
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
 predictors, response = lib.get_predictors_and_response(args.training)
+lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
 NUM_DIM = predictors.shape[1]
-pset = get_validation_testing_pset(NUM_DIM)
+pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
 p_transformer = preprocessing.StandardScaler()
 r_transformer = preprocessing.StandardScaler()
 training_predictors = p_transformer.fit_transform(predictors, response)

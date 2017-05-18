@@ -155,6 +155,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     available_rows = get_unmasked_row_num(masked_matrix)
     row_num = masked_matrix.shape[0]
     logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
+    average_day_of_year_cleaned = average_day_of_year
     if data_set_name == LST_LAYER and args.remove_lst_columns:
         indices_to_delete = args.remove_lst_columns
     elif data_set_name == SNOW_LAYER and args.remove_snow_columns:
