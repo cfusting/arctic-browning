@@ -155,6 +155,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     available_rows = get_unmasked_row_num(masked_matrix)
     row_num = masked_matrix.shape[0]
     logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
+    average_day_of_year_cleaned = average_day_of_year
     if data_set_name == LST_LAYER and args.remove_lst_columns:
         indices_to_delete = args.remove_lst_columns
     elif data_set_name == SNOW_LAYER and args.remove_snow_columns:
@@ -178,7 +179,8 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
     ndvi_rows = []
     for year in range(first_year, last_year + 1):
         ndvi_filtered = filter(lambda x: getdt(year, ndvi_start) <= x.datetime <= getdt(year, ndvi_end), ndvi_files)
-        ndvi_rows.append(build_matrix(ndvi_filtered, NDVI_LAYER))
+        mat, ndvi_days = build_matrix(ndvi_filtered, NDVI_LAYER)
+        ndvi_rows.append(mat)
     ndvi_stack = np.vstack(ndvi_rows)
     ndvi_masked = np.ma.masked_equal(ndvi_stack, lib.NDVI_NO_DATA)
     ndvi_vector = ndvi_masked.mean(axis=1)
@@ -210,10 +212,12 @@ sds.delta = args.delta
 sds.eta = args.eta
 sds.missing_ratio = args.missing_ratio
 sds.snow_mean = args.snow_mean
-sds.removed_lst_columns = ",".join(args.remove_lst_columns)
-sds.removed_snow_columns = ",".join(args.remove_snow_columns)
-sds.lst_days = ",".join(lst_day_of_year)
-sds.snow_days = ",".join(snow_day_of_year)
+if args.remove_lst_columns:
+    sds.removed_lst_columns = ",".join(str(x) for x in args.remove_lst_columns)
+if args.remove_snow_columns:
+    sds.removed_snow_columns = ",".join(str(x) for x in args.remove_snow_columns)
+sds.lst_days = ",".join(str(x) for x in lst_day_of_year)
+sds.snow_days = ",".join(str(x) for x in snow_day_of_year)
 sds[:] = design_matrix
 sds.endaccess()
 sd.end()
