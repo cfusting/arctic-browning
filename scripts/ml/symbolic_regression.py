@@ -37,5 +37,4 @@ if experiment.RANDOM_SUBSET_SIZE is not None:
     response = response[subset_indices]
 get_toolbox_with_pset = partial(experiment.get_toolbox, pset=pset)
 runner.run_data(random_seed, predictors, response, [get_toolbox_with_pset], experiment.ALGORITHM_NAMES,
-                dataset_name=args.name,
-                logging_level=logging.INFO)
+                dataset_name=args.name, logging_level=logging.INFO)
