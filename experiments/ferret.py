@@ -29,7 +29,7 @@ RANDOM_SUBSET_SIZE = 100000
 ALGORITHM_NAMES = ["afsc_po"]
 
 
-def get_toolbox(predictors, response, pset, test_predictors=None, test_response=None):
+def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()

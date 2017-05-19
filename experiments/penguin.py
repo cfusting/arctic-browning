@@ -1,4 +1,5 @@
 import operator
+import math
 import random
 
 import cachetools
@@ -31,12 +32,14 @@ RANDOM_SUBSET_SIZE = 100000
 ALGORITHM_NAMES = ["afsc_po"]
 
 
-def get_toolbox(predictors, response, pset, test_predictors=None, test_response=None):
+def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
+    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
-    toolbox.register("expr", sp.generate_parametrized_expression,
-                     partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), predictors)
+    toolbox.register("expr", sp.generate_parameterized_expression,
+                     partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), variable_type_indices,
+                     utils.get_variable_names(lst_days, snow_days))
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
@@ -45,8 +48,9 @@ def get_toolbox(predictors, response, pset, test_predictors=None, test_response=
     toolbox.register("mate", operators.one_point_xover_biased, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    toolbox.register("grow", sp.generate_parametrized_expression,
-                     partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW), predictors)
+    toolbox.register("grow", sp.generate_parameterized_expression,
+                     partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW), variable_type_indices,
+                     utils.get_variable_names(lst_days, snow_days))
     toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
