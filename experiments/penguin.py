@@ -9,7 +9,7 @@ from functools import partial
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
-from gp.parametrized import simple_parametrized_terminals as sp
+from gp.parameterized import simple_parameterized_terminals as sp
 
 import utils
 
@@ -60,7 +60,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", partial(ERROR_FUNCTION, response))
-    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
+    toolbox.register("evaluate_error", sp.simple_parameterized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
@@ -76,8 +76,8 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
 
 
 def get_pset(num_predictors, lst_days, snow_days):
-    pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors)
-    pset.add_parametrized_terminal(sp.RangeOperationTerminal)
+    pset = sp.SimpleParameterizedPrimitiveSet("MAIN", num_predictors)
+    pset.add_parameterized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
     pset.addPrimitive(numpy.multiply, 2)
