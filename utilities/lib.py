@@ -4,10 +4,10 @@ import re
 import sys
 import datetime as dt
 
-from pyhdf.SD import SD
 import gdal
 import numpy as np
 import numpy.ma as ma
+from pyhdf.SD import SD
 
 import gdal_lib as gd
 from QA_check import qa_check, qa_check_temp
@@ -19,12 +19,23 @@ LST_NO_DATA = 0
 NDVI_THRESHOLD = 1200
 LST = "lst"
 NDVI = "ndvi"
+SNOW_MASK_THRESHOLD = 2
+SNOW = 1
+PRODUCT_SNOW = 200
+NO_SNOW = 0
+PRODUCT_NO_SNOW = 25
+FILL_SNOW = 255
+
+
+def convert_snow_to_binary(snow_array):
+    snow_array[snow_array == PRODUCT_NO_SNOW] = NO_SNOW  # no snow
+    snow_array[snow_array == PRODUCT_SNOW] = SNOW  # snow
 
 
 def build_snow_mask(snow_array):
     mask = np.ones(snow_array.shape, dtype=bool)
-    mask[snow_array == 50] = False  # no snow
-    mask[snow_array == 200] = False  # snow
+    mask[snow_array == PRODUCT_NO_SNOW] = False  # no snow
+    mask[snow_array == PRODUCT_SNOW] = False  # snow
     return mask
 
 
@@ -239,9 +250,62 @@ def save_like_geotiff(source_path, source_type, matrix, file_path):
 
 
 def get_predictors_and_response(hdf_file):
+    """
+    :param hdf_file:
+    :return: tuple of predictors and the response
+    """
     data_hdf = SD(hdf_file)
     design_matrix = data_hdf.select("design_matrix").get()
     data_hdf.end()
-    predictors = design_matrix[:, :-1]
-    response = design_matrix[:, -1]
-    return predictors, response
+    return design_matrix[:, :-1], design_matrix[:, -1]
+
+
+def get_lst_and_snow_days(hdf_file):
+    data_hdf = SD(hdf_file)
+    sds = data_hdf.select("design_matrix")
+    lst_days = [int(x) for x in sds.lst_days.split(",")]
+    snow_days = [int(x) for x in sds.snow_days.split(",")]
+    sds.endaccess()
+    data_hdf.end()
+    return lst_days, snow_days
+
+
+def binary_logic(pixels):
+    if pixels.sum() >= pixels.size / SNOW_MASK_THRESHOLD:
+        return SNOW
+    else:
+        return NO_SNOW
+
+
+def masked_binary_logic(masked_pixels):
+    mask = masked_pixels.mask
+    observations = masked_pixels.size - mask.sum()
+    if observations == 0:
+        return FILL_SNOW
+    if masked_pixels.sum() >= observations / SNOW_MASK_THRESHOLD:
+        return SNOW
+    else:
+        return NO_SNOW
+
+
+def upsample_snow(data, pixel_logic, size=2):
+    """
+    Moving window algorithm to upsample a matrix.
+    :param data: An 2x2 matrix where m,n are even.
+    :param pixel_logic: Function deciding the output of a window of pixels.
+    :param size: The size of the side of a square window.
+    :return: The resulting matrix where 0 is no snow, 1 is snow, 2 is NA """
+    m, n = data.shape
+    result = np.zeros((m / size) * (n / size), dtype=data.dtype)
+    i = size - 1
+    k = 0
+    while i < m:
+        j = size - 1
+        while j < n:
+            pixels = data[i - (size - 1):i + 1, j - (size - 1):j + 1]
+            result[k] = pixel_logic(pixels)
+            k += 1
+            j += size
+        i += size
+    side = int(np.sqrt(result.shape[0]))
+    return result.reshape((side, side))

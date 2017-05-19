@@ -2,3 +2,4 @@ logs
 results
 .idea
 .cache
+*.pyc
