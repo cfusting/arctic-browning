@@ -9,7 +9,7 @@ from functools import partial
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
-from gp.parameterized import simple_parameterized_terminals as sp
+from gp.parametrized import simple_parametrized_terminals as sp
 
 import utils
 
@@ -37,7 +37,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
-    toolbox.register("expr", sp.generate_parameterized_expression,
+    toolbox.register("expr", sp.generate_parametrized_expression,
                      partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), variable_type_indices,
                      utils.get_variable_names(lst_days, snow_days))
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
@@ -48,7 +48,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("mate", operators.one_point_xover_biased, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    toolbox.register("grow", sp.generate_parameterized_expression,
+    toolbox.register("grow", sp.generate_parametrized_expression,
                      partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW), variable_type_indices,
                      utils.get_variable_names(lst_days, snow_days))
     toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
@@ -60,7 +60,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", partial(ERROR_FUNCTION, response))
-    toolbox.register("evaluate_error", sp.simple_parameterized_evaluate, context=pset.context, predictors=predictors,
+    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
@@ -76,8 +76,10 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
 
 
 def get_pset(num_predictors, lst_days, snow_days):
-    pset = sp.SimpleParameterizedPrimitiveSet("MAIN", num_predictors)
-    pset.add_parameterized_terminal(sp.RangeOperationTerminal)
+    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+    pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices,
+                                              utils.get_variable_names(lst_days, snow_days))
+    pset.add_parametrized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
     pset.addPrimitive(numpy.multiply, 2)

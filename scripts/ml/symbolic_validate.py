@@ -33,27 +33,27 @@ if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
 
-def get_front(results_path, experiment_name, toolbox, primitive_set):
+def get_front(results_path, experiment_name, toolbox, pset):
     """
     Get the pareto front.
     :param results_path:
     :param experiment_name: String
     :param toolbox:
-    :param primitive_set:
+    :param pset:
     :return: A list of individuals.
     """
     logging.info("Reading results from {}".format(results_path))
     pareto_files = glob.glob(results_path + "/pareto_*_po_{}_*.log".format(experiment_name))
     logging.info(len(pareto_files))
-    individuals = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), toolbox, pset=primitive_set)
+    individuals = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), toolbox, pset=pset)
     logging.info("All individuals from the last pareto fronts = " + str(len(individuals)))
     non_dominated = afpo.find_pareto_front(individuals)
-    front = [individuals[i] for i in non_dominated]
-    front.sort(key=operator.attrgetter("fitness.values"))
-    while front[-1].fitness.values[0] >= 1.0:
-        front.pop()
-    front.reverse()
-    return front
+    ft = [individuals[d] for d in non_dominated]
+    ft.sort(key=operator.attrgetter("fitness.values"))
+    while ft[-1].fitness.values[0] >= 1.0:
+        ft.pop()
+    ft.reverse()
+    return ft
 
 # Validate on a subset of full training data set.
 SEED = 123
