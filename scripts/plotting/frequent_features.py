@@ -2,6 +2,7 @@ import argparse
 import os
 import glob
 import logging
+import importlib
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -14,37 +15,42 @@ from deap import gp, base
 from gp.experiments import symbreg
 from ndvi import gp_processing_tools
 
-from utilities.gp_lib import get_pset
+from utilities import lib
 
-logging.basicConfig(level=logging.DEBUG)
-parser = argparse.ArgumentParser(description='Run symbolic regression.')
+parser = argparse.ArgumentParser(description='Plot feature frequency.')
+parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
-parser.add_argument('-f', '--feature-number', help='Number of features.', required=True, type=int)
+parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
 
+experiment = importlib.import_module("experiments." + args.name)
 
-def plot_frequent_features(features, feature_counts, feature_performances, num_plotted_features, plot_file,
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+
+
+def plot_frequent_features(feats, feature_counts, feature_performances, num_plotted_features, plot_file,
                            feature_names=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 20))
     ax1.set_title("Feature frequency")
     if feature_names is not None:
-        for i in range(len(features)):
+        for i in range(len(feats)):
             for arg in reversed(range(0, len(feature_names))):
-                features[i] = features[i].replace("ARG{}".format(arg), feature_names[arg])
-    sns.barplot(feature_counts[:num_plotted_features], features[:num_plotted_features], ax=ax1)
+                feats[i] = feats[i].replace("ARG{}".format(arg), feature_names[arg])
+    sns.barplot(feature_counts[:num_plotted_features], feats[:num_plotted_features], ax=ax1)
     ax2.set_xlim(numpy.min(feature_performances[:num_plotted_features]) - 0.01,
                  numpy.max(feature_performances[:num_plotted_features]) + 0.01)
     ax2.set_title("E(error | feature)")
-    sns.barplot(feature_performances[:num_plotted_features], features[:num_plotted_features], ax=ax2)
+    sns.barplot(feature_performances[:num_plotted_features], feats[:num_plotted_features], ax=ax2)
     plt.savefig(plot_file)
 
 
-def get_feature_stats(front):
+def get_feature_stats(ft):
     term_frequency = defaultdict(int)
     term_coefficients = defaultdict(float)
     term_performances = defaultdict(list)
-    for ind in front:
+    for ind in ft:
         infix_equation = symbreg.get_infix_equation(ind)
         simplified = symbreg.simplify_infix_equation(infix_equation)
         if ind.fitness.values[-1] > 10:
@@ -71,13 +77,14 @@ def get_feature_stats(front):
     term_performances = [numpy.mean(term_performances[term]) for term in most_frequent_terms]
     return most_frequent_terms, term_counts, term_performances
 
-FEATURES_NAMES = ["LST_{}".format(x) for x in range(args.feature_number)]
-
-pset = get_pset(args.feature_number)
+predictors, response = lib.get_predictors_and_response(args.training)
+lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
+NUM_DIM = predictors.shape[1]
+pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
 creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity)
 pareto_files = glob.glob(args.results + "/pareto_afsc_po_*.log")
-logging.debug("Number of pareto files = {}".format(len(pareto_files)))
+logging.info("Number of pareto files = {}".format(len(pareto_files)))
 front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset)
 logging.info("Number of pareto front solutions = {}".format(len(front)))
 features, counts, performances = get_feature_stats(front)
@@ -85,4 +92,4 @@ with open(os.path.join(args.results, "features_{}.txt".format(args.name)), "wb")
     for feature in features:
         f.write("{}\n".format(feature))
 plot_frequent_features(features, counts, performances, 51,
-                       os.path.join(args.results, "new_features_{}.pdf".format(args.name)), FEATURES_NAMES)
+                       os.path.join(args.results, "new_features_{}.pdf".format(args.name)))
