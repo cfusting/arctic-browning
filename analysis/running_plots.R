@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Dropbox/arctic-browning/analysis/")
+# setwd("~/Dropbox/arctic-browning/analysis/")
 DATA_DIR <- "~/symbolic_results"
 
 getDataFrame <- function(experiment.name) {
