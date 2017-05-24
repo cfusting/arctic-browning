@@ -35,7 +35,7 @@ ALGORITHM_NAMES = ["afsc_po"]
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
     variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
-    creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
+    creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
     toolbox.register("expr", sp.generate_parametrized_expression,
                      partial(gp.genFull, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT), variable_type_indices,
@@ -72,6 +72,23 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                      archive=multi_archive, calc_pareto_front=False, verbose=False, reevaluate_population=True)
     toolbox.register("save", reports.save_log_to_csv)
     toolbox.decorate("save", reports.save_archive(multi_archive))
+    return toolbox
+
+
+def get_validation_toolbox(predictors, response, pset, size_measure=None, fitness_class=None, expression_dict=None):
+    toolbox = base.Toolbox()
+    if fitness_class is None:
+        creator.create("ErrorSize", base.Fitness, weights=(-1.0, -1.0))
+        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorSize)
+    else:
+        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
+    toolbox.register("validate_func", partial(ERROR_FUNCTION, response))
+    toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
+                     error_function=toolbox.validate_func, expression_dict=expression_dict)
+    if size_measure is None:
+        toolbox.register("validate", afpo.evaluate_fitness_size, error_func=toolbox.validate_error)
+    else:
+        toolbox.register("validate", size_measure, error_func=toolbox.validate_error)
     return toolbox
 
 

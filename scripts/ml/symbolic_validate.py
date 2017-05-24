@@ -72,10 +72,10 @@ if args.sample_size is not None:
     training_predictors = training_predictors[subset_indices]
     training_response = training_response[subset_indices]
 creator.create("ErrorSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0))
-validate_toolbox = gp_processing_tools.get_toolbox(training_predictors, training_response, pset,
-                                                   size_measure=afpo.evaluate_fitness_size_complexity,
-                                                   expression_dict=cachetools.LRUCache(maxsize=100),
-                                                   fitness_class=creator.ErrorSizeComplexity)
+validate_toolbox = experiment.get_validation_toolbox(training_predictors, training_response, pset,
+                                                     size_measure=afpo.evaluate_fitness_size_complexity,
+                                                     expression_dict=cachetools.LRUCache(maxsize=100),
+                                                     fitness_class=creator.ErrorSizeComplexity)
 
 logging.info("Validating models on: " + args.training)
 front = get_front(args.results, args.name, validate_toolbox, pset)
@@ -100,14 +100,13 @@ if args.sample_size is not None:
     testing_predictors = testing_predictors[subset_indices]
     testing_response = testing_response[subset_indices]
 logging.info("Testing models on: " + args.testing)
+testing_toolbox = experiment.get_validation_toolbox(testing_predictors, testing_response, pset,
+                                                    size_measure=afpo.evaluate_fitness_size_complexity,
+                                                    expression_dict=cachetools.LRUCache(maxsize=100),
+                                                    fitness_class=creator.ErrorSizeComplexity)
 test_results = []
 for individual in front:
-    predicted_response = fast_evaluate.fast_numpy_evaluate(individual, pset.context, predictors=testing_predictors,
-                                                           expression_dict=None)
-    squared_errors = numpy.square(predicted_response - testing_response)
-    mse = numpy.mean(squared_errors)
-    total_nmse = mse / numpy.var(testing_response)
-    test_results.append(total_nmse)
+    test_results.append(testing_toolbox.validate_error(individual)[0])
 
 with open(os.path.join(args.results, args.name + "_tests"), 'wb') as test_file:
     writer = csv.writer(test_file)
