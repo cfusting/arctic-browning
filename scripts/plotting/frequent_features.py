@@ -81,11 +81,10 @@ predictors, response = lib.get_predictors_and_response(args.training)
 lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
 NUM_DIM = predictors.shape[1]
 pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
-creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
-creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity)
 pareto_files = glob.glob(args.results + "/pareto_afsc_po_*.log")
 logging.info("Number of pareto files = {}".format(len(pareto_files)))
-front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset)
+validation_toolbox = experiment.get_validation_toolbox(predictors, response, pset)
+front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset, toolbox=validation_toolbox)
 logging.info("Number of pareto front solutions = {}".format(len(front)))
 features, counts, performances = get_feature_stats(front)
 with open(os.path.join(args.results, "features_{}.txt".format(args.name)), "wb") as f:
