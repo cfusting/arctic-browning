@@ -1,5 +1,4 @@
 import operator
-import math
 import random
 
 import cachetools
@@ -96,7 +95,6 @@ def get_pset(num_predictors, lst_days, snow_days):
     variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
     pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices,
                                               utils.get_variable_names(lst_days, snow_days))
-    pset.add_parametrized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
     pset.addPrimitive(numpy.multiply, 2)
