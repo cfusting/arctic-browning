@@ -9,8 +9,6 @@ import matplotlib.pyplot as plt
 import numpy
 import seaborn as sns
 import sympy
-from deap import creator
-from deap import gp, base
 
 from gp.experiments import symbreg
 from ndvi import gp_processing_tools
