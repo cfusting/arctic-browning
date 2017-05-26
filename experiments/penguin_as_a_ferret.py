@@ -24,10 +24,9 @@ MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
-SUBSET_SIZE = 100000
+SUBSET_SIZE = 50000
 SUBSET_CHANGE_FREQUENCY = 10
-ERROR_FUNCTION = fast_evaluate.normalized_mean_squared_error
-RANDOM_SUBSET_SIZE = 100000
+ERROR_FUNCTION = fast_evaluate.mean_squared_error
 ALGORITHM_NAMES = ["afsc_po"]
 
 
@@ -58,8 +57,10 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                                                                              predictors=predictors, response=response,
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
-    toolbox.register("error_func", partial(ERROR_FUNCTION, response))
-    toolbox.register("evaluate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
+    toolbox.register("error_func", ERROR_FUNCTION)
+    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset,
+                     get_node_semantics=sp.get_node_semantics, context=pset.context,
+                     subset_selection_archive=subset_selection_archive,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
@@ -81,7 +82,7 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
         creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorSize)
     else:
         creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
-    toolbox.register("validate_func", partial(ERROR_FUNCTION, response))
+    toolbox.register("validate_func", partial(ERROR_FUNCTION, response=response))
     toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.validate_func, expression_dict=expression_dict)
     if size_measure is None:

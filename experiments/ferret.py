@@ -7,6 +7,7 @@ import numpy
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
+from gp.semantic import semantics
 
 import utils
 
@@ -22,10 +23,9 @@ MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
-SUBSET_SIZE = 100000
+SUBSET_SIZE = 50000
 SUBSET_CHANGE_FREQUENCY = 10
-ERROR_FUNCTION = fast_evaluate.normalized_mean_squared_error
-RANDOM_SUBSET_SIZE = 100000
+ERROR_FUNCTION = fast_evaluate.mean_squared_error
 ALGORITHM_NAMES = ["afsc_po"]
 
 
@@ -52,7 +52,8 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", ERROR_FUNCTION)
-    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset, context=pset.context,
+    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset,
+                     get_node_semantics=semantics.get_node_semantics, context=pset.context,
                      subset_selection_archive=subset_selection_archive,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
