@@ -11,7 +11,7 @@ from gp.semantic import semantics
 
 import utils
 
-NGEN = 3000
+NGEN = 5000
 POP_SIZE = 500
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
@@ -23,7 +23,7 @@ MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
-SUBSET_SIZE = 50000
+SUBSET_SIZE = 10000
 SUBSET_CHANGE_FREQUENCY = 10
 ERROR_FUNCTION = fast_evaluate.mean_squared_error
 ALGORITHM_NAMES = ["afsc_po"]

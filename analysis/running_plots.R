@@ -3,7 +3,7 @@ rm(list=ls())
 DATA_DIR <- "~/symbolic_results"
 
 getDataFrame <- function(experiment.name) {
-  files <- list.files(DATA_DIR, pattern = paste("^afsc_po_", experiment.name, sep=""),
+  files <- list.files(DATA_DIR, pattern = paste("^afsc_po_", experiment.name, "_\\d+.log", sep=""),
                       full.names = TRUE)
   for(file in files) {
     cat("Matched file:", file, "\n")
@@ -26,6 +26,9 @@ getDataFrame <- function(experiment.name) {
 penguin <- getDataFrame("penguin") 
 ferret <- getDataFrame("ferret") 
 penguin.ferret <- getDataFrame("penguin_as_a_ferret")
+
+summary(diff(penguin$cpu_time))
+summary(diff(ferret$cpu_time))
 
 library(ggplot2)
 
@@ -51,6 +54,11 @@ ggplot(ferret, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend =
 
 ggplot(penguin, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(0, 80)
+
+ggplot(penguin.ferret, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Penguin as a Ferret Experiment", subtitle = "Without Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 80)
 

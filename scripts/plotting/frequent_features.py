@@ -50,13 +50,16 @@ def get_feature_stats(ft):
     term_performances = defaultdict(list)
     for ind in ft:
         infix_equation = symbreg.get_infix_equation(ind)
+        logging.debug("Got infix equation for individual: " + str(infix_equation))
         simplified = symbreg.simplify_infix_equation(infix_equation)
+        logging.debug("Got simplified equation for individual: " + str(simplified))
         if ind.fitness.values[-1] > 10:
             terms = sympy.expand(simplified, deep=False).as_ordered_terms()
         else:
             terms = sympy.expand(simplified).as_ordered_terms()
 
         for term in terms:
+            logging.debug("Looking at term: " + str(term))
             coef, t = term.as_coeff_Mul()
             t = str(t)
             if len(t) > 100:
@@ -64,8 +67,11 @@ def get_feature_stats(ft):
             if "log" in t or "exp" in t:
                 t = symbreg.simplify_logexp_args(t)
             term_frequency[t] += 1
+            logging.debug("Added count for feature: " + str(t))
             term_coefficients[t] += coef
+            logging.debug("Added count for coefficient : " + str(coef))
             term_performances[t].append(ind.fitness.values[0])
+            logging.debug("Added feature performance: " + str(ind.fitness.values[0]))
 
     most_frequent_terms = sorted(term_frequency, key=term_frequency.get, reverse=True)
     for term in most_frequent_terms:

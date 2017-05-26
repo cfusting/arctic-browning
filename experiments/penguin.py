@@ -12,7 +12,7 @@ from gp.parametrized import simple_parametrized_terminals as sp
 
 import utils
 
-NGEN = 3000
+NGEN = 5000
 POP_SIZE = 500
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
@@ -24,7 +24,7 @@ MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
-SUBSET_SIZE = 50000
+SUBSET_SIZE = 10000
 SUBSET_CHANGE_FREQUENCY = 10
 ERROR_FUNCTION = fast_evaluate.mean_squared_error
 ALGORITHM_NAMES = ["afsc_po"]
@@ -82,7 +82,7 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
         creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorSize)
     else:
         creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
-    toolbox.register("validate_func", partial(ERROR_FUNCTION, response))
+    toolbox.register("validate_func", partial(ERROR_FUNCTION, response=response))
     toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.validate_func, expression_dict=expression_dict)
     if size_measure is None:
