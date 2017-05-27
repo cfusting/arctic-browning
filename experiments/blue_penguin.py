@@ -1,5 +1,6 @@
 import operator
 import random
+import math
 
 import cachetools
 import numpy
@@ -19,8 +20,8 @@ MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
 MAX_HEIGHT = 17
 MAX_SIZE = 200
-XOVER_PROB = 0.9
-MUT_PROB = 0.1
+XOVER_PROB = 0.7
+MUT_PROB = 0.3
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
@@ -47,11 +48,12 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
     toolbox.register("grow", sp.generate_parametrized_expression,
-                     partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
+                     partial(gp.genHalfAndHalf, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
                      variable_type_indices, utils.get_variable_names(lst_days, snow_days))
     toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
+    toolbox.decorate("mutate", sp.evolve_parametrized_expression(math.sqrt))
     expression_dict = cachetools.LRUCache(maxsize=1000)
     subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
                                                                              predictors=predictors, response=response,
