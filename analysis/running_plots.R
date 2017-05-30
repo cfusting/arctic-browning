@@ -25,18 +25,24 @@ getDataFrame <- function(experiment.name) {
 }
 
 penguin <- getDataFrame("penguin") 
+blue.penguin <- getDataFrame("blue_penguin")
 ferret <- getDataFrame("ferret") 
 
 library(ggplot2)
-XMAX <- max(penguin$generation, ferret$generation)
+XMAX <- max(penguin$generation, ferret$generation, blue.penguin$generation)
 
 ggplot(ferret, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Ferret Experiment", subtitle = "Without Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(penguin, aes(generation, avg_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+ggplot(penguin, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(.4, 1) + xlim(0, XMAX)
+
+ggplot(blue.penguin, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Blue Penguin Experiment", subtitle = "With Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
