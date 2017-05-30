@@ -1,4 +1,5 @@
 from gp.algorithms import archive
+from sklearn import preprocessing
 
 
 def get_archive():
@@ -31,3 +32,11 @@ def get_lst_and_snow_variable_names(lst_days, snow_days):
     args = first_args.copy()
     args.update(second_args)
     return args
+
+
+def transform_features(predictors, response):
+    feature_transformer = preprocessing.StandardScaler()
+    predictors_transformed = feature_transformer.fit_transform(predictors, response)
+    response_transformer = preprocessing.StandardScaler()
+    response_transformed = response_transformer.fit_transform(response)
+    return predictors_transformed, response_transformed

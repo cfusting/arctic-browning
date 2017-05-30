@@ -22,6 +22,10 @@ parser.add_argument('-r', '--results', help='Path to results directory.', requir
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
 
+sympy.expand('1').as_ordered_terms()
+#sympy.expand('1.05155285846630e-893291872982').as_ordered_terms()
+#symbreg.simplify_logexp_args('0.109592784551375*lst_321*(0.22637*lst_105 + 0.47855*lst_89 + 0.1083293635*snow_137**2 - 0.1083293635*log(lst_273))')
+
 experiment = importlib.import_module("experiments." + args.name)
 
 if args.verbose:
@@ -51,6 +55,8 @@ def get_feature_stats(ft):
     for ind in ft:
         infix_equation = symbreg.get_infix_equation(ind)
         logging.debug("Got infix equation for individual: " + str(infix_equation))
+        if str(infix_equation) == 'exp((((log(-0.05739)) ^ 3) ^ 3) ^ 3)':
+            continue
         simplified = symbreg.simplify_infix_equation(infix_equation)
         logging.debug("Got simplified equation for individual: " + str(simplified))
         if ind.fitness.values[-1] > 10:
@@ -85,9 +91,10 @@ predictors, response = lib.get_predictors_and_response(args.training)
 lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
 NUM_DIM = predictors.shape[1]
 pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
-pareto_files = glob.glob(args.results + "/pareto_afsc_po_*.log")
+predictors_transformed, response_transformed = experiment.transform_features(predictors, response)
+pareto_files = glob.glob(args.results + "/pareto_afsc_po_{}_*.log".format(args.name))
 logging.info("Number of pareto files = {}".format(len(pareto_files)))
-validation_toolbox = experiment.get_validation_toolbox(predictors, response, pset)
+validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
 front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset, toolbox=validation_toolbox)
 logging.info("Number of pareto front solutions = {}".format(len(front)))
 features, counts, performances = get_feature_stats(front)

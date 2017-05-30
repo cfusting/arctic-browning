@@ -92,6 +92,10 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
     return toolbox
 
 
+def transform_features(predictors, response):
+    return utils.transform_features(predictors, response)
+
+
 def get_pset(num_predictors, lst_days, snow_days):
     variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
     pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices,

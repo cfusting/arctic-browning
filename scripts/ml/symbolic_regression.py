@@ -4,7 +4,6 @@ from functools import partial
 import argparse
 
 import numpy
-from sklearn import preprocessing
 
 from gp.experiments import runner
 from utilities import lib
@@ -27,10 +26,7 @@ random_seed = args.seed
 predictors, response = lib.get_predictors_and_response(args.training)
 lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
 pset = experiment.get_pset(predictors.shape[1], lst_days, snow_days)
-feature_transformer = preprocessing.StandardScaler()
-predictors = feature_transformer.fit_transform(predictors, response)
-response_transformer = preprocessing.StandardScaler()
-response = response_transformer.fit_transform(response)
+predictors_transformed, response_transformed = experiment.transform_features(predictors, response)
 get_toolbox_with_pset = partial(experiment.get_toolbox, pset=pset, lst_days=lst_days, snow_days=snow_days)
-runner.run_data(random_seed, predictors, response, [get_toolbox_with_pset], experiment.ALGORITHM_NAMES,
-                dataset_name=args.name, logging_level=logging.INFO)
+runner.run_data(random_seed, predictors_transformed, response_transformed, [get_toolbox_with_pset],
+                experiment.ALGORITHM_NAMES, dataset_name=args.name, logging_level=logging.INFO)

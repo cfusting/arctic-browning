@@ -9,6 +9,7 @@ export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
 cd $ARCTIC_RESULTS_HOME
 config=$name"_config.log"
 cp $ARCTIC_HOME/experiments/$name.py $config
+cp $ARCTIC_HOME/experiments/utils.py utils.py
 echo ----DATA---- >> $config
 echo $training >> $config
 python $ARCTIC_HOME/scripts/ml/symbolic_regression.py -t $training -s $seed -n $name

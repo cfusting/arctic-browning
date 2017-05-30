@@ -88,6 +88,10 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
     return toolbox
 
 
+def transform_features(predictors, response):
+    return utils.transform_features(predictors, response)
+
+
 def get_pset(num_predictors, lst_days, snow_days):
     pset = gp.PrimitiveSet("MAIN", num_predictors)
     pset.addPrimitive(numpy.add, 2)
