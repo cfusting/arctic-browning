@@ -78,7 +78,8 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
     else:
         creator.create("Individual", gp.PrimitiveTree, fitness=fitness_class)
     toolbox.register("validate_func", partial(ERROR_FUNCTION, response=response))
-    toolbox.register("validate_error", fast_evaluate.fast_numpy_evaluate, context=pset.context, predictors=predictors,
+    toolbox.register("validate_error", fast_evaluate.fast_numpy_evaluate,
+                     get_node_semantics=semantics.get_node_semantics, context=pset.context, predictors=predictors,
                      error_function=toolbox.validate_func, expression_dict=expression_dict)
     if size_measure is None:
         toolbox.register("validate", afpo.evaluate_fitness_size, error_func=toolbox.validate_error)
