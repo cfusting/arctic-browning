@@ -13,7 +13,7 @@ from deap import creator, base
 from sklearn import preprocessing
 
 from gp.algorithms import afpo
-from gp.experiments import symbreg, fast_evaluate
+from gp.experiments import symbreg
 from ndvi import gp_processing_tools
 
 from utilities import lib
@@ -44,7 +44,9 @@ def get_front(results_path, experiment_name, toolbox, pset):
     """
     logging.info("Reading results from {}".format(results_path))
     pareto_files = glob.glob(results_path + "/pareto_*_po_{}_*.log".format(experiment_name))
-    logging.info(len(pareto_files))
+    logging.info('Number of files: ' + str(len(pareto_files)))
+    for k in pareto_files:
+        logging.info(k)
     individuals = gp_processing_tools.validate_pareto_optimal_inds(sorted(pareto_files), toolbox, pset=pset)
     logging.info("All individuals from the last pareto fronts = " + str(len(individuals)))
     non_dominated = afpo.find_pareto_front(individuals)

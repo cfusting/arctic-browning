@@ -46,16 +46,6 @@ ggplot(blue.penguin, aes(generation, min_fitness, colour = seed)) + geom_line(sh
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(ferret, aes(generation, avg_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Ferret Experiment", subtitle = "Without Temporal Range Operation") +
-  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
-  ylim(.4, 1) + xlim(0, XMAX)
-
-ggplot(penguin, aes(generation, avg_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
-  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
-  ylim(.4, 1) + xlim(0, XMAX)
-
 ggplot(ferret, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Ferret Experiment", subtitle = "Without Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
@@ -63,6 +53,11 @@ ggplot(ferret, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend =
 
 ggplot(penguin, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(0, 80)
+
+ggplot(blue.penguin, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Blue Penguin Experiment", subtitle = "With Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 80)
 

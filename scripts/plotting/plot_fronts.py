@@ -17,8 +17,7 @@ parser = argparse.ArgumentParser(description='Plot feature frequency.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
-parser.add_argument('-s', '--seeds', nargs='+', help='List of seeds related to the pareto files to process.',
-                    required=True)
+parser.add_argument('-s', '--seeds', nargs='+', help='List of seeds related to the pareto files to process.')
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
 
@@ -37,8 +36,14 @@ validate_toolbox = experiment.get_validation_toolbox(predictors, response, pset,
                                                      fitness_class=creator.ErrorSizeComplexity)
 pareto_files = glob.glob(args.results + "/pareto_*_po_{}_*.log".format(args.name))
 filtered_files = []
-for s in args.seeds:
-    filtered_files.extend([x for x in pareto_files if s in x])
+if args.seeds:
+    for s in args.seeds:
+        filtered_files.extend([x for x in pareto_files if s in x])
+else:
+    filtered_files = pareto_files
+logging.info("Number of pareto files: " +str(len(filtered_files)))
+for k in filtered_files:
+    logging.info(k)
 all_inds = dict()
 for f in filtered_files:
     last_front = gp_processing_tools.get_last_pareto_front(f)

@@ -22,10 +22,6 @@ parser.add_argument('-r', '--results', help='Path to results directory.', requir
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
 
-sympy.expand('1').as_ordered_terms()
-#sympy.expand('1.05155285846630e-893291872982').as_ordered_terms()
-#symbreg.simplify_logexp_args('0.109592784551375*lst_321*(0.22637*lst_105 + 0.47855*lst_89 + 0.1083293635*snow_137**2 - 0.1083293635*log(lst_273))')
-
 experiment = importlib.import_module("experiments." + args.name)
 
 if args.verbose:
