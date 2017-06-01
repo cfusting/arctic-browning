@@ -24,52 +24,52 @@ getDataFrame <- function(experiment.name) {
   return(df)
 }
 
-penguin <- getDataFrame("penguin") 
-blue.penguin <- getDataFrame("blue_penguin")
-ferret <- getDataFrame("ferret") 
+exp1 <- getDataFrame("control_duck") 
+exp2 <- getDataFrame("duck")
+exp3 <- getDataFrame("") 
 
 library(ggplot2)
-XMAX <- max(penguin$generation, ferret$generation, blue.penguin$generation)
+XMAX <- max(exp1$generation, exp2$generation)
 
-ggplot(ferret, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Ferret Experiment", subtitle = "Without Temporal Range Operation") +
+ggplot(exp1, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Control", subtitle = "Without Temporal Range Mutation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(penguin, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp2, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Experiment", subtitle = "With Temporal Range Mutation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(blue.penguin, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Blue Penguin Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp2, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Blue exp1 Experiment", subtitle = "With Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(ferret, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Ferret Experiment", subtitle = "Without Temporal Range Operation") +
+ggplot(exp1, aes(generation, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Control", subtitle = "Without Temporal Range Mutation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 80)
 
-ggplot(penguin, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp2, aes(generation, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Experiment", subtitle = "With Temporal Range Mutation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 80)
 
-ggplot(blue.penguin, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Blue Penguin Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp2, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Blue exp1 Experiment", subtitle = "With Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 80)
 
-ggplot(penguin, aes(avg_size, min_fitness, colour = seed)) + geom_point(show.legend = FALSE) +
-  labs(title = "Penguin Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp1, aes(avg_size, min_fitness, colour = seed)) + geom_point(show.legend = FALSE) +
+  labs(title = "exp1 Experiment", subtitle = "With Temporal Range Operation") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
 
-penguin.agg <- aggregate(penguin, by = list(penguin$seed), FUN = min)
-penguin.stuck.seeds <- as.numeric(subset(penguin.agg, penguin.agg$min_fitness >= .57)$seed)
-penguin.stuck <- subset(penguin, seed %in% penguin.stuck.seeds)
+exp1.agg <- aggregate(exp1, by = list(exp1$seed), FUN = min)
+exp1.stuck.seeds <- as.numeric(subset(exp1.agg, exp1.agg$min_fitness >= .57)$seed)
+exp1.stuck <- subset(exp1, seed %in% exp1.stuck.seeds)
 
-ggplot(penguin.stuck, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Penguin Experiment", 
+ggplot(exp1.stuck, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "exp1 Experiment", 
        subtitle = "Runs where min fitness is greater than or equal to .57") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))

@@ -1,4 +1,5 @@
 import operator
+import math
 import random
 
 import cachetools
@@ -9,18 +10,20 @@ from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
 from gp.parametrized import simple_parametrized_terminals as sp
+from gp.parametrized import mutation
+from gp.algorithms import archive
 
 import utils
 
-NGEN = 5000
-POP_SIZE = 500
+NGEN = 10
+POP_SIZE = 100
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
 MAX_HEIGHT = 17
 MAX_SIZE = 200
 XOVER_PROB = 0
-MUT_PROB = 0.8
+MUT_PROB = 1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
@@ -49,9 +52,19 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("grow", sp.generate_parametrized_expression,
                      partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
                      variable_type_indices, utils.get_variable_names(lst_days, snow_days))
-    toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
+    mutations = [partial(sp.mutate_single_parametrized_node, stdev_calc=math.sqrt),
+                 partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
+    probs = [.4, .4]
+    toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
+    mutation_stats_archive = archive.MutationStatsArchive(partial(fast_evaluate.fast_numpy_evaluate,
+                                                                  context=pset.context,
+                                                                  predictors=predictors,
+                                                                  get_node_semantics=sp.get_node_semantics,
+                                                                  error_function=partial(ERROR_FUNCTION,
+                                                                                         response=response)))
+    toolbox.decorate("mutate", operators.stats_collector(archive=mutation_stats_archive))
     expression_dict = cachetools.LRUCache(maxsize=1000)
     subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
                                                                              predictors=predictors, response=response,
@@ -65,6 +78,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
     multi_archive.archives.append(subset_selection_archive)
+    multi_archive.archives.append(mutation_stats_archive)
     mstats = reports.configure_parametrized_inf_protected_stats()
     pop = toolbox.population(n=POP_SIZE)
     toolbox.register("run", afpo.pareto_optimization, population=pop, toolbox=toolbox, xover_prob=XOVER_PROB,
