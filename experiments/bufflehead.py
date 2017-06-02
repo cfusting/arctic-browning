@@ -65,8 +65,6 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    mutation_stats_archive = archive.MutationStatsArchive(evaluate_function)
-    toolbox.decorate("mutate", operators.stats_collector(archive=mutation_stats_archive))
     expression_dict = cachetools.LRUCache(maxsize=1000)
     subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
                                                                              predictors=predictors, response=response,
@@ -80,7 +78,6 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
     multi_archive.archives.append(subset_selection_archive)
-    multi_archive.archives.append(mutation_stats_archive)
     mstats = reports.configure_parametrized_inf_protected_stats()
     pop = toolbox.population(n=POP_SIZE)
     toolbox.register("run", afpo.pareto_optimization, population=pop, toolbox=toolbox, xover_prob=XOVER_PROB,
