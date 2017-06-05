@@ -40,3 +40,7 @@ def transform_features(predictors, response):
     response_transformer = preprocessing.StandardScaler()
     response_transformed = response_transformer.fit_transform(response)
     return predictors_transformed, response_transformed
+
+
+def get_variable_type_indices(lst_days, snow_days):
+    return [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]

@@ -1,5 +1,4 @@
 import operator
-import math
 import random
 
 import cachetools
@@ -11,7 +10,6 @@ from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
 from gp.parametrized import simple_parametrized_terminals as sp
 from gp.parametrized import mutation
-from gp.algorithms import archive
 
 import utils
 
@@ -34,7 +32,7 @@ ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
-    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+    variable_type_indices = utils.get_variable_type_indices(lst_days, snow_days)
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
@@ -52,12 +50,18 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("grow", sp.generate_parametrized_expression,
                      partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
                      variable_type_indices, utils.get_variable_names(lst_days, snow_days))
-    evaluate_function = partial(fast_evaluate.fast_numpy_evaluate,
-                                context=pset.context,
-                                predictors=predictors,
+    toolbox.register("error_func", ERROR_FUNCTION)
+    expression_dict = cachetools.LRUCache(maxsize=1000)
+    subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
+                                                                             predictors=predictors, response=response,
+                                                                             subset_size=SUBSET_SIZE,
+                                                                             expression_dict=expression_dict)
+    evaluate_function = partial(subset_selection.fast_numpy_evaluate_subset,
                                 get_node_semantics=sp.get_node_semantics,
-                                error_function=partial(ERROR_FUNCTION,
-                                                       response=response))
+                                context=pset.context,
+                                subset_selection_archive=subset_selection_archive,
+                                error_function=toolbox.error_func,
+                                expression_dict=expression_dict)
     mutations = [partial(sp.mutate_single_parametrized_node_optimal, evaluate_function=evaluate_function,
                          optimization_objective_function=min),
                  partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
@@ -65,16 +69,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    expression_dict = cachetools.LRUCache(maxsize=1000)
-    subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
-                                                                             predictors=predictors, response=response,
-                                                                             subset_size=SUBSET_SIZE,
-                                                                             expression_dict=expression_dict)
-    toolbox.register("error_func", ERROR_FUNCTION)
-    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset,
-                     get_node_semantics=sp.get_node_semantics, context=pset.context,
-                     subset_selection_archive=subset_selection_archive,
-                     error_function=toolbox.error_func, expression_dict=expression_dict)
+    toolbox.register("evaluate_error", evaluate_function)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
     multi_archive.archives.append(subset_selection_archive)
