@@ -58,23 +58,21 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    mutation_stats_archive = archive.MutationStatsArchive(partial(fast_evaluate.fast_numpy_evaluate,
-                                                                  context=pset.context,
-                                                                  predictors=predictors,
-                                                                  get_node_semantics=sp.get_node_semantics,
-                                                                  error_function=partial(ERROR_FUNCTION,
-                                                                                         response=response)))
-    toolbox.decorate("mutate", operators.stats_collector(archive=mutation_stats_archive))
     expression_dict = cachetools.LRUCache(maxsize=1000)
     subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=SUBSET_CHANGE_FREQUENCY,
                                                                              predictors=predictors, response=response,
                                                                              subset_size=SUBSET_SIZE,
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", ERROR_FUNCTION)
-    toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset,
-                     get_node_semantics=sp.get_node_semantics, context=pset.context,
-                     subset_selection_archive=subset_selection_archive,
-                     error_function=toolbox.error_func, expression_dict=expression_dict)
+    evaluate_function = partial(subset_selection.fast_numpy_evaluate_subset,
+                                get_node_semantics=sp.get_node_semantics,
+                                context=pset.context,
+                                subset_selection_archive=subset_selection_archive,
+                                error_function=toolbox.error_func,
+                                expression_dict=expression_dict)
+    mutation_stats_archive = archive.MutationStatsArchive(evaluate_function)
+    toolbox.decorate("mutate", operators.stats_collector(archive=mutation_stats_archive))
+    toolbox.register("evaluate_error", evaluate_function)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
     multi_archive.archives.append(subset_selection_archive)

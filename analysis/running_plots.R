@@ -26,10 +26,10 @@ getDataFrame <- function(experiment.name) {
 
 exp1 <- getDataFrame("control_duck") 
 exp2 <- getDataFrame("duck")
-exp3 <- getDataFrame("") 
+exp3 <- getDataFrame("mallard") 
 
 library(ggplot2)
-XMAX <- max(exp1$generation, exp2$generation)
+XMAX <- max(exp1$generation, exp2$generation, exp3$generation)
 
 ggplot(exp1, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "Control", subtitle = "Without Temporal Range Mutation") +
@@ -41,8 +41,8 @@ ggplot(exp2, aes(generation, min_fitness, colour = seed)) + geom_line(show.legen
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
-ggplot(exp2, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Blue exp1 Experiment", subtitle = "With Temporal Range Operation") +
+ggplot(exp3, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Experiment 2", subtitle = "With Temporal Range Operation, small mutations") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
@@ -72,4 +72,9 @@ exp1.stuck <- subset(exp1, seed %in% exp1.stuck.seeds)
 ggplot(exp1.stuck, aes(cpu_time, avg_size, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = "exp1 Experiment", 
        subtitle = "Runs where min fitness is greater than or equal to .57") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+ggplot(subset(exp3, seed == 6016), 
+       aes(generation, avg_parametrized, colour = seed)) + geom_line(show.legend = FALSE) +
+  labs(title = "Mallard", subtitle = "Average Proportion of RangeOperations in Trees") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
