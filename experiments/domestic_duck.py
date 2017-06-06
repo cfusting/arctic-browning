@@ -1,14 +1,16 @@
 import operator
-from functools import partial
+import math
 import random
 
 import cachetools
 import numpy
+from functools import partial
 
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
-from gp.semantic import semantics
+from gp.parametrized import simple_parametrized_terminals as sp
+from gp.parametrized import mutation
 
 import utils
 
@@ -19,8 +21,8 @@ MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
 MAX_HEIGHT = 17
 MAX_SIZE = 200
-XOVER_PROB = 0.9
-MUT_PROB = 0.1
+XOVER_PROB = 0
+MUT_PROB = 1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
@@ -31,10 +33,13 @@ ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
+    variable_type_indices = utils.get_variable_type_indices(lst_days, snow_days)
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
-    creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
+    creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
-    toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT)
+    toolbox.register("expr", sp.generate_parametrized_expression,
+                     partial(gp.genHalfAndHalf, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT),
+                     variable_type_indices, utils.get_variable_names(lst_days, snow_days))
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
@@ -43,8 +48,13 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("mate", operators.one_point_xover_biased, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
-    toolbox.register("grow", gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW)
-    toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
+    toolbox.register("grow", sp.generate_parametrized_expression,
+                     partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
+                     variable_type_indices, utils.get_variable_names(lst_days, snow_days))
+    mutations = [partial(sp.mutate_parametrized_nodes, stdev_calc=math.sqrt),
+                 partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
+    probs = [.4, .4]
+    toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
     expression_dict = cachetools.LRUCache(maxsize=1000)
@@ -54,7 +64,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
                                                                              expression_dict=expression_dict)
     toolbox.register("error_func", ERROR_FUNCTION)
     toolbox.register("evaluate_error", subset_selection.fast_numpy_evaluate_subset,
-                     get_node_semantics=semantics.get_node_semantics, context=pset.context,
+                     get_node_semantics=sp.get_node_semantics, context=pset.context,
                      subset_selection_archive=subset_selection_archive,
                      error_function=toolbox.error_func, expression_dict=expression_dict)
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
@@ -74,12 +84,11 @@ def get_validation_toolbox(predictors, response, pset, size_measure=None, fitnes
     toolbox = base.Toolbox()
     if fitness_class is None:
         creator.create("ErrorSize", base.Fitness, weights=(-1.0, -1.0))
-        creator.create("Individual", gp.PrimitiveTree, fitness=creator.ErrorSize)
+        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorSize)
     else:
-        creator.create("Individual", gp.PrimitiveTree, fitness=fitness_class)
+        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
     toolbox.register("validate_func", partial(ERROR_FUNCTION, response=response))
-    toolbox.register("validate_error", fast_evaluate.fast_numpy_evaluate,
-                     get_node_semantics=semantics.get_node_semantics, context=pset.context, predictors=predictors,
+    toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
                      error_function=toolbox.validate_func, expression_dict=expression_dict)
     if size_measure is None:
         toolbox.register("validate", afpo.evaluate_fitness_size, error_func=toolbox.validate_error)
@@ -93,7 +102,10 @@ def transform_features(predictors, response):
 
 
 def get_pset(num_predictors, lst_days, snow_days):
-    pset = gp.PrimitiveSet("MAIN", num_predictors)
+    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+    pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices,
+                                              utils.get_variable_names(lst_days, snow_days))
+    pset.add_parametrized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
     pset.addPrimitive(numpy.multiply, 2)
@@ -104,4 +116,3 @@ def get_pset(num_predictors, lst_days, snow_days):
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
     pset.renameArguments(**utils.get_lst_and_snow_variable_names(lst_days, snow_days))
     return pset
-

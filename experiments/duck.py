@@ -1,5 +1,4 @@
 import operator
-import math
 import random
 
 import cachetools
@@ -10,7 +9,6 @@ from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
 from gp.parametrized import simple_parametrized_terminals as sp
-from gp.parametrized import mutation
 
 import utils
 
@@ -22,18 +20,18 @@ MAX_DEPTH_INIT = 6
 MAX_HEIGHT = 17
 MAX_SIZE = 200
 XOVER_PROB = 0
-MUT_PROB = 1
+MUT_PROB = 0.8
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
-SUBSET_SIZE = 100000
+SUBSET_SIZE = 20000
 SUBSET_CHANGE_FREQUENCY = 10
 ERROR_FUNCTION = fast_evaluate.mean_squared_error
 ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
-    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+    variable_type_indices = utils.get_variable_type_indices(lst_days, snow_days)
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
@@ -51,10 +49,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("grow", sp.generate_parametrized_expression,
                      partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
                      variable_type_indices, utils.get_variable_names(lst_days, snow_days))
-    mutations = [partial(sp.mutate_parametrized_nodes, stdev_calc=math.sqrt),
-                 partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
-    probs = [.4, .4]
-    toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=probs)
+    toolbox.register("mutate", operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)
     toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=MAX_HEIGHT))
     toolbox.decorate("mutate", operators.static_limit(key=len, max_value=MAX_SIZE))
     expression_dict = cachetools.LRUCache(maxsize=1000)
@@ -70,7 +65,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
     multi_archive = utils.get_archive()
     multi_archive.archives.append(subset_selection_archive)
-    mstats = reports.configure_inf_protected_stats()
+    mstats = reports.configure_parametrized_inf_protected_stats()
     pop = toolbox.population(n=POP_SIZE)
     toolbox.register("run", afpo.pareto_optimization, population=pop, toolbox=toolbox, xover_prob=XOVER_PROB,
                      mut_prob=MUT_PROB, ngen=NGEN, tournament_size=TOURNAMENT_SIZE, num_randoms=1, stats=mstats,

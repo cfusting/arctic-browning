@@ -34,7 +34,7 @@ ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
-    variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+    variable_type_indices = utils.get_variable_type_indices(lst_days, snow_days)
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
