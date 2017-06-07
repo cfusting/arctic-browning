@@ -24,8 +24,8 @@ getDataFrame <- function(experiment.name) {
   return(df)
 }
 
-exp1 <- getDataFrame("control_duck") 
-exp2 <- getDataFrame("duck")
+exp1 <- getDataFrame("duck") 
+exp2 <- getDataFrame("domestic_duck")
 exp3 <- getDataFrame("mallard") 
 
 library(ggplot2)
@@ -37,12 +37,12 @@ ggplot(exp1, aes(generation, min_fitness, colour = seed)) + geom_line(show.legen
   ylim(.4, 1) + xlim(0, XMAX)
 
 ggplot(exp2, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Experiment", subtitle = "With Temporal Range Mutation") +
+  labs(title = "Experiment", subtitle = "Mutate All Parametrized Nodes") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
 ggplot(exp3, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
-  labs(title = "Experiment 2", subtitle = "With Temporal Range Operation, small mutations") +
+  labs(title = "Experiment 2", subtitle = "Mutate Single Parametrized Node.") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(.4, 1) + xlim(0, XMAX)
 
