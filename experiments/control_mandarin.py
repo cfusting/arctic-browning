@@ -1,12 +1,10 @@
 import operator
 import random
-import logging
 
 import cachetools
 import numpy
 from functools import partial
 
-from gp.experiments import runner
 from deap import creator, base, tools, gp
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
@@ -14,15 +12,15 @@ from gp.parametrized import simple_parametrized_terminals as sp
 
 import utils
 
-NGEN = 100
-POP_SIZE = 50
+NGEN = 1000
+POP_SIZE = 100
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6
 MAX_HEIGHT = 17
 MAX_SIZE = 200
-XOVER_PROB = 0
-MUT_PROB = 0.8
+XOVER_PROB = 0.9
+MUT_PROB = 0.1
 INTERNAL_NODE_SELECTION_BIAS = 0.9
 MIN_GEN_GROW = 1
 MAX_GEN_GROW = 6
@@ -77,23 +75,6 @@ def get_toolbox(predictors, response, pset, variable_type_indices, variable_name
     return toolbox
 
 
-def get_validation_toolbox(predictors, response, pset, size_measure=None, fitness_class=None, expression_dict=None):
-    toolbox = base.Toolbox()
-    if fitness_class is None:
-        creator.create("ErrorSize", base.Fitness, weights=(-1.0, -1.0))
-        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorSize)
-    else:
-        creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
-    toolbox.register("validate_func", partial(ERROR_FUNCTION, response=response))
-    toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
-                     error_function=toolbox.validate_func, expression_dict=expression_dict)
-    if size_measure is None:
-        toolbox.register("validate", afpo.evaluate_fitness_size, error_func=toolbox.validate_error)
-    else:
-        toolbox.register("validate", size_measure, error_func=toolbox.validate_error)
-    return toolbox
-
-
 def transform_features(predictors, response):
     return utils.transform_features(predictors, response)
 
@@ -108,24 +89,5 @@ def get_pset(num_predictors, variable_type_indices, names):
     pset.addPrimitive(symbreg.cube, 1)
     pset.addPrimitive(numpy.square, 1)
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
-    kwargs = {'ARG0': 'X0', 'ARG1': 'X1', 'ARG2': 'X2', 'ARG3': 'X3', 'ARG4': 'X4'}
-    pset.renameArguments(**kwargs)
+    pset.renameArguments(**utils.get_simple_variable_dict(num_predictors))
     return pset
-
-
-def main():
-    random_seed = 2017
-    dat = numpy.genfromtxt('/home/cfusting/Dropbox/arctic-browning/analysis/data/construction.csv',
-                           delimiter=',', skip_header=True)
-    predictors = dat[:, :-1]
-    response = dat[:, -1]
-    variable_names = ['X0', 'X1', 'X2', 'X3', 'X4']
-    variable_type_indices = [4]
-    pset = get_pset(5, variable_type_indices, variable_names)
-    get_toolbox_with_pset = partial(get_toolbox, pset=pset, variable_type_indices=variable_type_indices,
-                                    variable_names=variable_names)
-    runner.run_data(random_seed, predictors, response, [get_toolbox_with_pset],
-                    ALGORITHM_NAMES, dataset_name='control_mandarin', logging_level=logging.INFO)
-
-if __name__ == '__main__':
-    main()

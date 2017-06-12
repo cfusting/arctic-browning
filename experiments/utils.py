@@ -34,6 +34,16 @@ def get_lst_and_snow_variable_names(lst_days, snow_days):
     return args
 
 
+def get_simple_variable_names(num_vars):
+    return ['X' + str(x) for x in range(0, num_vars)]
+
+
+def get_simple_variable_dict(num_vars):
+    args = ['ARG' + str(x) for x in range(0, num_vars)]
+    simple = get_simple_variable_names(num_vars)
+    return dict(zip(args, simple))
+
+
 def transform_features(predictors, response):
     feature_transformer = preprocessing.StandardScaler()
     predictors_transformed = feature_transformer.fit_transform(predictors, response)
