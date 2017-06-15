@@ -1,8 +1,8 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
 DATA_DIR <- "~/symbolic_results/tests"
-EXP1 = "linear_combination_control_mandarin"
-EXP2 = "linear_combination_mandarin"
+EXP1 = "simulation_control_mandarin"
+EXP2 = "simulation_mandarin"
 EXP1.name = "Control"
 EXP2.name = "Mandarin"
 EXP1.SUB = "Without Range Operator"
@@ -39,10 +39,10 @@ XMAX.avg <- max(exps$generation)
 YMAX.fitness.avg <- max(exps$min_fitness)
 YMAX.size.avg <- max(exps$avg_size)
 ggplot(exps, aes(generation, min_fitness, colour = experiment)) + geom_line() +
-  labs(title = "Minimum Fitness Averaged Over Seeds", subtitle = EXP1.SUB) +
+  labs(title = "Minimum Fitness Averaged Over Seeds") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, YMAX.fitness.avg) + xlim(0, XMAX.avg)
 ggplot(exps, aes(generation, avg_size, colour = experiment)) + geom_line() +
-  labs(title = "Average Size Averaged Over Seeds", subtitle = EXP1.SUB) +
+  labs(title = "Average Size Averaged Over Seeds") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, YMAX.size.avg) + xlim(0, XMAX.avg)

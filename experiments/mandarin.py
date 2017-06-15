@@ -15,8 +15,8 @@ from gp.algorithms import archive
 
 import utils
 
-NGEN = 1000
-POP_SIZE = 100
+NGEN = 5000
+POP_SIZE = 500
 TOURNAMENT_SIZE = 2
 MIN_DEPTH_INIT = 1
 MAX_DEPTH_INIT = 6

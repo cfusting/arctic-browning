@@ -50,35 +50,13 @@ computeMediumTarget <- function(dat) {
 }
 
 buildNormalData <- function(n, mean, stdev, multiplier, values) {
-  n <- 10000
-  m <- 60
-  d <- 3
-  s <- 5
-  r <- c(1,2,3,4,5,6)
   dat <- data.frame(
-    X0 = rnorm(n, mean = m + r[1] * s, sd = d),
-    X1 = rnorm(n, mean = m + r[2] * s, sd = d),
-    X2 = rnorm(n, mean = m + r[3] * s, sd = d),
-    X3 = rnorm(n, mean = m + r[4] * s, sd = d),
-    X4 = rnorm(n, mean = m + r[5] * s, sd = d),
-    X5 = rnorm(n, mean = m + r[6] * s, sd = d)
-  )
-  return(dat)
-}
-
-buildNormalData <- function(n, mean, stdev, multiplier, values) {
-  n <- 10000
-  m <- 60
-  d <- 3
-  s <- 5
-  r <- c(1,2,3,4,5,6)
-  dat <- data.frame(
-    X0 = rnorm(n, mean = m + r[1] * s, sd = d),
-    X1 = rnorm(n, mean = m + r[2] * s, sd = d),
-    X2 = rnorm(n, mean = m + r[3] * s, sd = d),
-    X3 = rnorm(n, mean = m + r[4] * s, sd = d),
-    X4 = rnorm(n, mean = m + r[5] * s, sd = d),
-    X5 = rnorm(n, mean = m + r[6] * s, sd = d)
+    X0 = rnorm(n, mean = mean + values[1] * multiplier, sd = stdev),
+    X1 = rnorm(n, mean = mean + values[2] * multiplier, sd = stdev),
+    X2 = rnorm(n, mean = mean + values[3] * multiplier, sd = stdev),
+    X3 = rnorm(n, mean = mean + values[4] * multiplier, sd = stdev),
+    X4 = rnorm(n, mean = mean + values[5] * multiplier, sd = stdev),
+    X5 = rnorm(n, mean = mean + values[6] * multiplier, sd = stdev)
   )
   return(dat)
 }
