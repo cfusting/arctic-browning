@@ -12,4 +12,4 @@ cp $ARCTIC_HOME/experiments/$name.py $config
 cp $ARCTIC_HOME/experiments/utils.py $name"_utils.py"
 echo ----DATA---- >> $config
 echo $training >> $config
-python $ARCTIC_HOME/scripts/ml/symbolic_regression.py -t $training -s $seed -n $name
+python $ARCTIC_HOME/scripts/ml/symbolic_regression.py -t $training -s $seed -e $experiment
