@@ -35,7 +35,7 @@ class Mandarin(ex.Experiment):
         self.INTERNAL_NODE_SELECTION_BIAS = 0.9
         self.MIN_GEN_GROW = 1
         self.MAX_GEN_GROW = 6
-        self.SUBSET_SIZE = 6
+        self.SUBSET_SIZE = None
         self.SUBSET_CHANGE_FREQUENCY = 10
         self.ERROR_FUNCTION = fast_evaluate.mean_squared_error
         self.ALGORITHM_NAMES = ["afsc_po"]
@@ -88,8 +88,9 @@ class Mandarin(ex.Experiment):
         mstats = reports.configure_parametrized_inf_protected_stats()
         pop = toolbox.population(n=self.POP_SIZE)
         toolbox.register("run", afpo.pareto_optimization, population=pop, toolbox=toolbox, xover_prob=self.XOVER_PROB,
-                         mut_prob=self.MUT_PROB, ngen=self.NGEN, tournament_size=self.TOURNAMENT_SIZE, num_randoms=1, stats=mstats,
-                         archive=multi_archive, calc_pareto_front=False, verbose=False, reevaluate_population=True)
+                         mut_prob=self.MUT_PROB, ngen=self.NGEN, tournament_size=self.TOURNAMENT_SIZE, num_randoms=1,
+                         stats=mstats, archive=multi_archive, calc_pareto_front=False, verbose=False,
+                         reevaluate_population=True)
         toolbox.register("save", reports.save_log_to_csv)
         toolbox.decorate("save", reports.save_archive(multi_archive))
         return toolbox
