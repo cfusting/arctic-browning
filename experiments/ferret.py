@@ -6,6 +6,9 @@ import cachetools
 import numpy
 
 from deap import creator, base, tools, gp
+
+import utilities.learning_data
+import utilities.lib
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
 from gp.semantic import semantics
@@ -102,6 +105,6 @@ def get_pset(num_predictors, lst_days, snow_days):
     pset.addPrimitive(symbreg.cube, 1)
     pset.addPrimitive(numpy.square, 1)
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
-    pset.renameArguments(**utils.get_lst_and_snow_variable_names(lst_days, snow_days))
+    pset.renameArguments(**utilities.learning_data.get_lst_and_snow_variable_dict(lst_days, snow_days))
     return pset
 

@@ -6,6 +6,8 @@ from sklearn.metrics import r2_score, mean_squared_error
 from pyhdf.SD import SD, SDC
 from sklearn import preprocessing
 
+import utilities.learning_data
+import utilities.lib
 from utilities import lib
 from experiments import utils
 
@@ -40,9 +42,9 @@ training_response_transformed = response_transformer.fit_transform(training_resp
 testing_predictors_transformed = feature_transformer.transform(testing_predictors, testing_response)
 testing_response_transformed = response_transformer.transform(testing_response)
 
-lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
-lst_names = utils.get_lst_names(lst_days)
-snow_names = utils.get_snow_names(snow_days)
+lst_days, snow_days = utilities.learning_data.get_lst_and_snow_days(args.training)
+lst_names = utilities.learning_data.get_lst_names(lst_days)
+snow_names = utilities.learning_data.get_snow_names(snow_days)
 variable_names = lst_names + snow_names
 
 l1 = [.1, .5, .7, .9, .95, .99, 1]

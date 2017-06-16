@@ -1,6 +1,6 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA_DIR <- "~/symbolic_results/tests"
+DATA_DIR <- "~/symbolic_results"
 EXP1 = "simulation_control_mandarin"
 EXP2 = "simulation_mandarin"
 EXP1.name = "Control"
@@ -45,4 +45,18 @@ ggplot(exps, aes(generation, min_fitness, colour = experiment)) + geom_line() +
 ggplot(exps, aes(generation, avg_size, colour = experiment)) + geom_line() +
   labs(title = "Average Size Averaged Over Seeds") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
-  ylim(0, YMAX.size.avg) + xlim(0, XMAX.avg)
+  ylim(0, YMAX.size.avg) + xlim(0, XMAX.avg) 
+
+min(exp1.avg$min_fitness)
+min(exp2.avg$min_fitness)
+min(exp1.avg$avg_fitness)
+min(exp2.avg$avg_fitness)
+
+ggplot(exps, aes(generation, log(avg_fitness) / max(log(avg_fitness)), colour = experiment)) + 
+  geom_point() + labs(title = "Average Fitness Averaged Over Seeds") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(0, 1) + xlim(0, XMAX.avg)
+ggplot(exps, aes(generation, avg_parametrized, colour = experiment)) + 
+  geom_line() + labs(title = "Average Parametrized Terminals Averaged Over Seeds") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(0, 1) + xlim(0, XMAX.avg)

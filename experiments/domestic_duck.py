@@ -7,6 +7,9 @@ import numpy
 from functools import partial
 
 from deap import creator, base, tools, gp
+
+import utilities.learning_data
+import utilities.lib
 from gp.algorithms import afpo, operators, subset_selection
 from gp.experiments import reports, fast_evaluate, symbreg
 from gp.parametrized import simple_parametrized_terminals as sp
@@ -33,13 +36,13 @@ ALGORITHM_NAMES = ["afsc_po"]
 
 
 def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors=None, test_response=None):
-    variable_type_indices = utils.get_variable_type_indices(lst_days, snow_days)
+    variable_type_indices = utilities.learning_data.get_variable_type_indices(lst_days, snow_days)
     creator.create("ErrorAgeSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0, -1.0))
     creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=creator.ErrorAgeSizeComplexity, age=int)
     toolbox = base.Toolbox()
     toolbox.register("expr", sp.generate_parametrized_expression,
                      partial(gp.genHalfAndHalf, pset=pset, min_=MIN_DEPTH_INIT, max_=MAX_DEPTH_INIT),
-                     variable_type_indices, utils.get_variable_names(lst_days, snow_days))
+                     variable_type_indices, utilities.learning_data.get_hdf_variable_names(lst_days, snow_days))
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
@@ -50,7 +53,7 @@ def get_toolbox(predictors, response, pset, lst_days, snow_days, test_predictors
     toolbox.decorate("mate", operators.static_limit(key=len, max_value=MAX_SIZE))
     toolbox.register("grow", sp.generate_parametrized_expression,
                      partial(gp.genGrow, pset=pset, min_=MIN_GEN_GROW, max_=MAX_GEN_GROW),
-                     variable_type_indices, utils.get_variable_names(lst_days, snow_days))
+                     variable_type_indices, utilities.learning_data.get_hdf_variable_names(lst_days, snow_days))
     mutations = [partial(sp.mutate_parametrized_nodes, stdev_calc=math.sqrt),
                  partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
     probs = [.4, .4]
@@ -104,7 +107,7 @@ def transform_features(predictors, response):
 def get_pset(num_predictors, lst_days, snow_days):
     variable_type_indices = [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
     pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices,
-                                              utils.get_variable_names(lst_days, snow_days))
+                                             utilities.learning_data.get_hdf_variable_names(lst_days, snow_days))
     pset.add_parametrized_terminal(sp.RangeOperationTerminal)
     pset.addPrimitive(numpy.add, 2)
     pset.addPrimitive(numpy.subtract, 2)
@@ -114,5 +117,5 @@ def get_pset(num_predictors, lst_days, snow_days):
     pset.addPrimitive(symbreg.cube, 1)
     pset.addPrimitive(numpy.square, 1)
     pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
-    pset.renameArguments(**utils.get_lst_and_snow_variable_names(lst_days, snow_days))
+    pset.renameArguments(**utilities.learning_data.get_lst_and_snow_variable_dict(lst_days, snow_days))
     return pset

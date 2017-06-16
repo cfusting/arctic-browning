@@ -12,6 +12,7 @@ import numpy
 from deap import creator, base
 from sklearn import preprocessing
 
+import utilities.learning_data
 from gp.algorithms import afpo
 from gp.experiments import symbreg
 from ndvi import gp_processing_tools
@@ -61,8 +62,8 @@ def get_front(results_path, experiment_name, toolbox, pset):
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
-predictors, response = lib.get_predictors_and_response(args.training)
-lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
+predictors, response = utilities.learning_data.get_predictors_and_response(args.training)
+lst_days, snow_days = utilities.learning_data.get_lst_and_snow_days(args.training)
 NUM_DIM = predictors.shape[1]
 pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
 p_transformer = preprocessing.StandardScaler()
@@ -94,7 +95,7 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = lib.get_predictors_and_response(args.testing)
+testing_predictors, testing_response = utilities.learning_data.get_predictors_and_response(args.testing)
 testing_predictors = p_transformer.transform(testing_predictors, testing_response)
 testing_response = r_transformer.transform(testing_response)
 if args.sample_size is not None:

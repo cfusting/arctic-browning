@@ -1,13 +1,14 @@
+import datetime as dt
+import importlib
 import logging
 import os
 import re
 import sys
-import datetime as dt
+import glob
 
 import gdal
 import numpy as np
 import numpy.ma as ma
-from pyhdf.SD import SD
 
 import gdal_lib as gd
 from QA_check import qa_check, qa_check_temp
@@ -249,27 +250,6 @@ def save_like_geotiff(source_path, source_type, matrix, file_path):
                       projection, datatype)
 
 
-def get_predictors_and_response(hdf_file):
-    """
-    :param hdf_file:
-    :return: tuple of predictors and the response
-    """
-    data_hdf = SD(hdf_file)
-    design_matrix = data_hdf.select("design_matrix").get()
-    data_hdf.end()
-    return design_matrix[:, :-1], design_matrix[:, -1]
-
-
-def get_lst_and_snow_days(hdf_file):
-    data_hdf = SD(hdf_file)
-    sds = data_hdf.select("design_matrix")
-    lst_days = [int(x) for x in sds.lst_days.split(",")]
-    snow_days = [int(x) for x in sds.snow_days.split(",")]
-    sds.endaccess()
-    data_hdf.end()
-    return lst_days, snow_days
-
-
 def binary_logic(pixels):
     if pixels.sum() >= pixels.size / SNOW_MASK_THRESHOLD:
         return SNOW
@@ -309,3 +289,13 @@ def upsample_snow(data, pixel_logic, size=2):
         i += size
     side = int(np.sqrt(result.shape[0]))
     return result.reshape((side, side))
+
+
+def get_pareto_files(results_path, experiment, data_set_name):
+    return glob.glob(results_path + "/pareto_*_po_{}_*.log".format(data_set_name + '_' + experiment))
+
+
+def get_experiment(experiment):
+    mod = importlib.import_module("experiments." + experiment)
+    return getattr(mod, mod.NAME)()
+

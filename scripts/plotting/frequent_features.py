@@ -1,6 +1,5 @@
 import argparse
 import os
-import glob
 import logging
 import importlib
 from collections import defaultdict
@@ -10,19 +9,20 @@ import numpy
 import seaborn as sns
 import sympy
 
+from utilities import learning_data, lib
 from gp.experiments import symbreg
 from ndvi import gp_processing_tools
 
-from utilities import lib
 
 parser = argparse.ArgumentParser(description='Plot feature frequency.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
+parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
 
-experiment = importlib.import_module("experiments." + args.name)
+experiment = lib.get_experiment(args.experiment)
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
@@ -83,19 +83,21 @@ def get_feature_stats(ft):
     term_performances = [numpy.mean(term_performances[term]) for term in most_frequent_terms]
     return most_frequent_terms, term_counts, term_performances
 
-predictors, response = lib.get_predictors_and_response(args.training)
-lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
-NUM_DIM = predictors.shape[1]
-pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
-predictors_transformed, response_transformed = experiment.transform_features(predictors, response)
-pareto_files = glob.glob(args.results + "/pareto_afsc_po_{}_*.log".format(args.name))
+training_data = learning_data.LearningData()
+training_data.from_file(args.training)
+pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
+                           training_data.variable_names, training_data.variable_dict)
+predictors_transformed, response_transformed = experiment.transform_features(training_data.predictors,
+                                                                             training_data.response)
+pareto_files = lib.get_pareto_files(args.results, args.experiment, args.name)
 logging.info("Number of pareto files = {}".format(len(pareto_files)))
 validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
 front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset, toolbox=validation_toolbox)
 logging.info("Number of pareto front solutions = {}".format(len(front)))
 features, counts, performances = get_feature_stats(front)
-with open(os.path.join(args.results, "features_{}.txt".format(args.name)), "wb") as f:
+identifier = args.experiment + '_' + args.name
+with open(os.path.join(args.results, "features_{}.txt".format(identifier)), "wb") as f:
     for feature in features:
         f.write("{}\n".format(feature))
 plot_frequent_features(features, counts, performances, 51,
-                       os.path.join(args.results, "new_features_{}.pdf".format(args.name)))
+                       os.path.join(args.results, "new_features_{}.pdf".format(identifier)))

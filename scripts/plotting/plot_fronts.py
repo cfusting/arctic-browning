@@ -2,7 +2,6 @@ import argparse
 import logging
 import importlib
 import cachetools
-import glob
 
 import pygraphviz as pgv
 from deap import creator, base
@@ -11,10 +10,11 @@ from gp.algorithms import afpo
 from ndvi import gp_processing_tools
 from gp.parametrized import simple_parametrized_terminals as sp
 
-from utilities import lib
+from utilities import learning_data, lib
 
 parser = argparse.ArgumentParser(description='Plot feature frequency.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
+parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
 parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
 parser.add_argument('-s', '--seeds', nargs='+', help='List of seeds related to the pareto files to process.')
@@ -24,24 +24,24 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
-experiment = importlib.import_module("experiments." + args.name)
-
-predictors, response = lib.get_predictors_and_response(args.training)
-lst_days, snow_days = lib.get_lst_and_snow_days(args.training)
-pset = experiment.get_pset(predictors.shape[1], lst_days, snow_days)
+experiment = lib.get_experiment(args.experiment)
+training_data = learning_data.LearningData()
+training_data.from_file(args.training)
+pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
+                           training_data.variable_names, training_data.variable_dict)
 creator.create("ErrorSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0))
-validate_toolbox = experiment.get_validation_toolbox(predictors, response, pset,
+validate_toolbox = experiment.get_validation_toolbox(training_data.predictors, training_data.response, pset,
                                                      size_measure=afpo.evaluate_fitness_size_complexity,
                                                      expression_dict=cachetools.LRUCache(maxsize=100),
                                                      fitness_class=creator.ErrorSizeComplexity)
-pareto_files = glob.glob(args.results + "/pareto_*_po_{}_*.log".format(args.name))
+pareto_files = lib.get_pareto_files(args.results, args.experiment, args.name)
 filtered_files = []
 if args.seeds:
     for s in args.seeds:
         filtered_files.extend([x for x in pareto_files if s in x])
 else:
     filtered_files = pareto_files
-logging.info("Number of pareto files: " +str(len(filtered_files)))
+logging.info("Number of pareto files: " + str(len(filtered_files)))
 for k in filtered_files:
     logging.info(k)
 all_inds = dict()
