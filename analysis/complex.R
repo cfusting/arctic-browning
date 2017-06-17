@@ -11,7 +11,7 @@ simulation <- function(dat) {
   return(res)
 }
 
-dat <- matrix(rnorm(1000*60, mean = 60, sd = 15), ncol=60)
+dat <- matrix(rnorm(100000*60, mean = 60, sd = 15), ncol=60)
 
 Y <- simulation(dat)
 synthetic <- cbind(dat, Y)
