@@ -1,12 +1,13 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
 DATA_DIR <- "~/symbolic_results"
-EXP1 = "simulation_control_mandarin"
-EXP2 = "simulation_mandarin"
-EXP1.name = "Control"
-EXP2.name = "Mandarin"
-EXP1.SUB = "Without Range Operator"
-EXP2.SUB = "With Range Operator"
+DATA.SET <- "complex"
+EXP1 <- paste(DATA.SET, "control_mandarin", sep = "_")
+EXP2 <- paste(DATA.SET, "mandarin", sep = "_")
+EXP1.name <- "Control"
+EXP2.name <- "Mandarin"
+EXP1.SUB <- "Without Range Operator"
+EXP2.SUB <- "With Range Operator"
 exp1 <- getDataFrame(EXP1) 
 exp2 <- getDataFrame(EXP2)
 library(ggplot2)

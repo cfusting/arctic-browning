@@ -32,7 +32,7 @@ class ControlMandarin(abstract_experiment.Experiment):
         self.INTERNAL_NODE_SELECTION_BIAS = 0.9
         self.MIN_GEN_GROW = 1
         self.MAX_GEN_GROW = 6
-        self.SUBSET_SIZE = None
+        self.SUBSET_SIZE = 200
         self.SUBSET_CHANGE_FREQUENCY = 10
         self.ERROR_FUNCTION = fast_evaluate.mean_squared_error
         self.ALGORITHM_NAMES = ["afsc_po"]

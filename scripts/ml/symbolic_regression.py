@@ -24,7 +24,6 @@ numpy.seterr(all='ignore')
 random_seed = args.seed
 training_data = learning_data.LearningData()
 training_data.from_csv(args.training)
-experiment.SUBSET_SIZE = training_data.num_observations
 transformed_predictors, transformed_response = experiment.transform_features(training_data.predictors,
                                                                              training_data.response)
 pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,

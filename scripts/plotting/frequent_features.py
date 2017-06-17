@@ -53,6 +53,8 @@ def get_feature_stats(ft):
         logging.debug("Got infix equation for individual: " + str(infix_equation))
         if str(infix_equation) == 'exp((((log(-0.05739)) ^ 3) ^ 3) ^ 3)':
             continue
+        elif str(infix_equation) == '((0.12148 * (((0.12148 * (((X50 - X10) + X15) + (((X42 - X6) + ((X33 + X36) + ((X9 - X7) + (X51 - X19)))) + X58))) + ((X58) ^ 2)) + ((0.44711 * X58) ^ 3))) ^ 3) ^ 3':
+            continue
         simplified = symbreg.simplify_infix_equation(infix_equation)
         logging.debug("Got simplified equation for individual: " + str(simplified))
         if ind.fitness.values[-1] > 10:
