@@ -3,7 +3,8 @@ source("~/Dropbox/arctic-browning/analysis/lib.R")
 
 
 simulation <- function(dat) {
-  res <- apply(dat[,1:20], 1, sum) + apply(dat[,13:25], 1, max)
+  res <- apply(dat[,1:20], 1, sum) + 
+    apply(dat[,13:25], 1, max)
   return(res)
 }
 

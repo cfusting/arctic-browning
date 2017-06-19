@@ -2,7 +2,7 @@ from gp.parametrized import simple_parametrized_terminals as sp
 
 from experiments import mandarin
 
-NAME = "WhistlingDuck"
+NAME = 'WhistlingDuck'
 
 
 class WhistlingDuck(mandarin.Mandarin):

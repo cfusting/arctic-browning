@@ -7,7 +7,7 @@ from gp.parametrized import mutation
 
 from experiments import control
 
-NAME = "Mandarin"
+NAME = 'Mandarin'
 
 
 class Mandarin(control.Control):

@@ -8,6 +8,8 @@ from gp.parametrized import mutation
 
 from experiments import mandarin
 
+NAME = 'Bufflehead'
+
 
 class Bufflehead(mandarin.Mandarin):
 

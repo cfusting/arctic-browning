@@ -12,9 +12,10 @@ from gp.experiments import reports, fast_evaluate, symbreg
 from gp.parametrized import simple_parametrized_terminals as sp
 from gp.algorithms import archive
 
-import utils, abstract_experiment
+import utils
+import abstract_experiment
 
-NAME = "Control"
+NAME = 'Control'
 
 
 class Control(abstract_experiment.Experiment):
@@ -33,7 +34,7 @@ class Control(abstract_experiment.Experiment):
         self.INTERNAL_NODE_SELECTION_BIAS = 0.9
         self.MIN_GEN_GROW = 1
         self.MAX_GEN_GROW = 6
-        self.SUBSET_SIZE = 20000
+        self.SUBSET_SIZE = 1000
         self.SUBSET_CHANGE_FREQUENCY = 10
         self.ERROR_FUNCTION = fast_evaluate.mean_squared_error
         self.ALGORITHM_NAMES = ["afsc_po"]
