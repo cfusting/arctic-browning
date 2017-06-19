@@ -34,5 +34,5 @@ get_toolbox_with_pset = partial(experiment.get_toolbox, pset=pset,
                                 variable_type_indices=training_data.variable_type_indices,
                                 variable_names=training_data.variable_names)
 runner.run_data(random_seed, transformed_predictors, transformed_response, [get_toolbox_with_pset],
-                experiment.ALGORITHM_NAMES, dataset_name=lib.get_identifier(args.training, args.experiment),
+                experiment.ALGORITHM_NAMES, dataset_name=lib.get_identifier(training_data.name, args.experiment),
                 logging_level=logging.INFO)
