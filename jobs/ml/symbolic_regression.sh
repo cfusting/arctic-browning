@@ -11,4 +11,4 @@ mkdir ${ARCTIC_RESULTS_HOME}/${folder}
 cd ${ARCTIC_RESULTS_HOME}/${folder}
 config=${folder}_config
 cp -r ${ARCTIC_HOME}/experiments ${config}
-echo ${ARCTIC_HOME}/scripts/ml/symbolic_regression.py -t "${ARCTIC_DATA}/${training}" -s ${seed} -e ${experiment} -p ${split}
+python ${ARCTIC_HOME}/scripts/ml/symbolic_regression.py -t "${ARCTIC_DATA}/${training}" -s ${seed} -e ${experiment} -p ${split}
