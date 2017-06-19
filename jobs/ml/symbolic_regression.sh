@@ -7,9 +7,9 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
-folder=${training}_${name}
+folder="${training}_${name}"
 mkdir ${ARCTIC_RESULTS_HOME}/${folder}
 cd ${ARCTIC_RESULTS_HOME}/${folder}
 config=${folder}_config
-cp ${ARCTIC_HOME}/experiments ${config}
+cp -r ${ARCTIC_HOME}/experiments ${config}
 python ${ARCTIC_HOME}/scripts/ml/symbolic_regression.py -t ${ARCTIC_DATA}/${training} -s ${seed} -e ${experiment} -p ${split}
