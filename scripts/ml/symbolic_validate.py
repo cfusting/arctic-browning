@@ -5,14 +5,12 @@ import random
 import operator
 import argparse
 import os
-import importlib
 
 import cachetools
 import numpy
 from deap import creator, base
-from sklearn import preprocessing
 
-import utilities.learning_data
+from utilities import learning_data
 from gp.algorithms import afpo
 from gp.experiments import symbreg
 from ndvi import gp_processing_tools
@@ -20,31 +18,22 @@ from ndvi import gp_processing_tools
 from utilities import lib
 
 parser = argparse.ArgumentParser(description='Process symbolic regression results.')
-parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
-parser.add_argument('-j', '--testing', help='Path to testing data as a design matrix in HDF format.', required=True)
-parser.add_argument('-n', '--name', help='Data set name.', required=True)
+parser.add_argument('-t', '--training', help='Path to training data.', required=True)
+parser.add_argument('-j', '--testing', help='Path to testing data.', required=True)
+parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory', required=True)
-parser.add_argument('-s', '--sample-size', help='Validate and test with a sample of the specified size.', type=int)
-parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
+parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
 args = parser.parse_args()
 
-experiment = importlib.import_module("experiments." + args.name)
+experiment = lib.get_experiment(args.experiment)
 
-if args.verbose:
+if args.debug:
     logging.basicConfig(level=logging.DEBUG)
 
 
-def get_front(results_path, experiment_name, toolbox, pset):
-    """
-    Get the pareto front.
-    :param results_path:
-    :param experiment_name: String
-    :param toolbox:
-    :param pset:
-    :return: A list of individuals.
-    """
+def get_front(results_path, data_set_name, toolbox, pset):
     logging.info("Reading results from {}".format(results_path))
-    pareto_files = glob.glob(results_path + "/pareto_*_po_{}_*.log".format(experiment_name))
+    pareto_files = lib.get_pareto_files(args.results, args.experiment, data_set_name)
     logging.info('Number of files: ' + str(len(pareto_files)))
     for k in pareto_files:
         logging.info(k)
@@ -62,27 +51,22 @@ def get_front(results_path, experiment_name, toolbox, pset):
 SEED = 123
 numpy.random.seed(SEED)
 random.seed(SEED)
-predictors, response = utilities.learning_data.get_predictors_and_response(args.training)
-lst_days, snow_days = utilities.learning_data.get_lst_and_snow_days(args.training)
-NUM_DIM = predictors.shape[1]
-pset = experiment.get_pset(NUM_DIM, lst_days, snow_days)
-p_transformer = preprocessing.StandardScaler()
-r_transformer = preprocessing.StandardScaler()
-training_predictors = p_transformer.fit_transform(predictors, response)
-training_response = r_transformer.fit_transform(response)
-if args.sample_size is not None:
-    subset_indices = numpy.random.choice(len(training_predictors), args.sample_size, replace=False)
-    training_predictors = training_predictors[subset_indices]
-    training_response = training_response[subset_indices]
+training_data = learning_data.LearningData()
+training_data.from_file(args.training)
+identifier = lib.get_identifier(training_data.name, args.experiment)
+pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
+                           training_data.variable_names, training_data.variable_dict)
+transformed_predictors, transformed_response, predictor_transformer, response_transformer = \
+    experiment.transform_features(training_data.predictors, training_data.response)
 creator.create("ErrorSizeComplexity", base.Fitness, weights=(-1.0, -1.0, -1.0))
-validate_toolbox = experiment.get_validation_toolbox(training_predictors, training_response, pset,
+validate_toolbox = experiment.get_validation_toolbox(transformed_predictors, transformed_response, pset,
                                                      size_measure=afpo.evaluate_fitness_size_complexity,
                                                      expression_dict=cachetools.LRUCache(maxsize=100),
                                                      fitness_class=creator.ErrorSizeComplexity)
 
 logging.info("Validating models on: " + args.training)
-front = get_front(args.results, args.name, validate_toolbox, pset)
-with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.name)), "wb") as f:
+front = get_front(args.results, training_data.name, validate_toolbox, pset)
+with open(os.path.join(args.results, "front_{}_validate_all.txt".format(identifier)), "wb") as f:
     for ind in front:
         logging.info("======================")
         infix_equation = symbreg.get_infix_equation(ind)
@@ -95,15 +79,13 @@ with open(os.path.join(args.results, "front_{}_validate_all.txt".format(args.nam
         logging.info("======================")
 
 # Test
-testing_predictors, testing_response = utilities.learning_data.get_predictors_and_response(args.testing)
-testing_predictors = p_transformer.transform(testing_predictors, testing_response)
-testing_response = r_transformer.transform(testing_response)
-if args.sample_size is not None:
-    subset_indices = numpy.random.choice(len(testing_predictors), args.sample_size, replace=False)
-    testing_predictors = testing_predictors[subset_indices]
-    testing_response = testing_response[subset_indices]
+testing_data = learning_data.LearningData()
+testing_data.from_file(args.testing)
+transformed_testing_predictors, transformed_testing_response = \
+    experiment.transform_features(testing_data.predictors, testing_data.response, predictor_transformer,
+                                  response_transformer)[0:2]
 logging.info("Testing models on: " + args.testing)
-testing_toolbox = experiment.get_validation_toolbox(testing_predictors, testing_response, pset,
+testing_toolbox = experiment.get_validation_toolbox(transformed_testing_predictors, transformed_testing_response, pset,
                                                     size_measure=afpo.evaluate_fitness_size_complexity,
                                                     expression_dict=cachetools.LRUCache(maxsize=100),
                                                     fitness_class=creator.ErrorSizeComplexity)
@@ -111,7 +93,7 @@ test_results = []
 for individual in front:
     test_results.append(testing_toolbox.validate_error(individual)[0])
 
-with open(os.path.join(args.results, args.name + "_tests"), 'wb') as test_file:
+with open(os.path.join(args.results, identifier + "_tests"), 'wb') as test_file:
     writer = csv.writer(test_file)
     writer.writerow(["Error", "Size", "Complexity", "Simplified", "Test Error"])
     for i, ind in enumerate(front):

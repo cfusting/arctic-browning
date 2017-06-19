@@ -15,7 +15,6 @@ from utilities import learning_data, lib
 parser = argparse.ArgumentParser(description='Plot feature frequency.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
-parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
 parser.add_argument('-s', '--seeds', nargs='+', help='List of seeds related to the pareto files to process.')
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
@@ -34,7 +33,7 @@ validate_toolbox = experiment.get_validation_toolbox(training_data.predictors, t
                                                      size_measure=afpo.evaluate_fitness_size_complexity,
                                                      expression_dict=cachetools.LRUCache(maxsize=100),
                                                      fitness_class=creator.ErrorSizeComplexity)
-pareto_files = lib.get_pareto_files(args.results, args.experiment, args.name)
+pareto_files = lib.get_pareto_files(args.results, args.experiment, training_data.name)
 filtered_files = []
 if args.seeds:
     for s in args.seeds:

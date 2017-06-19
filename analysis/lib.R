@@ -1,5 +1,5 @@
-getDataFrame <- function(experiment.name) {
-  files <- list.files(DATA_DIR, pattern = paste("^afsc_po_", experiment.name, "_\\d+.log", sep=""),
+getDataFrame <- function(experiment.name, directory) {
+  files <- list.files(directory, pattern = paste("^afsc_po_", experiment.name, "_\\d+.log", sep=""),
                       full.names = TRUE)
   for(file in files) {
     cat("Matched file:", file, "\n")
