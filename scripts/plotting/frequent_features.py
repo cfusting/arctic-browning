@@ -17,7 +17,6 @@ from ndvi import gp_processing_tools
 parser = argparse.ArgumentParser(description='Plot feature frequency.')
 parser.add_argument('-t', '--training', help='Path to training data as a design matrix in HDF format.', required=True)
 parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
-parser.add_argument('-n', '--name', help='Data set name.', required=True)
 parser.add_argument('-r', '--results', help='Path to results directory.', required=True)
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 args = parser.parse_args()
@@ -90,14 +89,14 @@ training_data.from_file(args.training)
 pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
                            training_data.variable_names, training_data.variable_dict)
 predictors_transformed, response_transformed = experiment.transform_features(training_data.predictors,
-                                                                             training_data.response)
-pareto_files = lib.get_pareto_files(args.results, args.experiment, args.name)
+                                                                             training_data.response)[0:2]
+pareto_files = lib.get_pareto_files(args.results, args.experiment, training_data.name)
 logging.info("Number of pareto files = {}".format(len(pareto_files)))
 validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
 front = gp_processing_tools.validate_pareto_optimal_inds(pareto_files, pset=pset, toolbox=validation_toolbox)
 logging.info("Number of pareto front solutions = {}".format(len(front)))
 features, counts, performances = get_feature_stats(front)
-identifier = args.experiment + '_' + args.name
+identifier = lib.get_identifier(training_data.name, args.experiment)
 with open(os.path.join(args.results, "features_{}.txt".format(identifier)), "wb") as f:
     for feature in features:
         f.write("{}\n".format(feature))

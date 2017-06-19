@@ -117,8 +117,8 @@ class Control(abstract_experiment.Experiment):
             toolbox.register("validate", size_measure, error_func=toolbox.validate_error)
         return toolbox
 
-    def transform_features(self, predictors, response):
-        return utils.transform_features(predictors, response)
+    def transform_features(self, predictors, response, predictor_transformer=None, response_transformer=None):
+        return utils.transform_features(predictors, response, predictor_transformer, response_transformer)
 
     def get_pset(self, num_predictors, variable_type_indices, names, variable_dict):
         pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices, names)

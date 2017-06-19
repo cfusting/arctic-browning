@@ -1,4 +1,5 @@
 import datetime as dt
+import ntpath
 import importlib
 import logging
 import os
@@ -292,10 +293,13 @@ def upsample_snow(data, pixel_logic, size=2):
 
 
 def get_pareto_files(results_path, experiment, data_set_name):
-    return glob.glob(results_path + "/pareto_*_po_{}_*.log".format(data_set_name + '_' + experiment))
+    return glob.glob(results_path + "/pareto_*_po_{}_*.log".format(get_identifier(data_set_name, experiment)))
 
 
 def get_experiment(experiment):
     mod = importlib.import_module("experiments." + experiment)
     return getattr(mod, mod.NAME)()
 
+
+def get_identifier(data_set, experiment):
+    return data_set + '_' + experiment

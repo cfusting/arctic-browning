@@ -18,7 +18,7 @@ class Experiment:
         pass
 
     @abstractmethod
-    def transform_features(self, predictors, response):
+    def transform_features(self, predictors, response, predictor_transformer=None, response_transformer=None):
         pass
 
     @abstractmethod

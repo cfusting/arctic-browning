@@ -11,11 +11,12 @@ def get_archive():
     return multi_archive
 
 
-def transform_features(predictors, response):
-    feature_transformer = preprocessing.StandardScaler()
-    predictors_transformed = feature_transformer.fit_transform(predictors, response)
-    response_transformer = preprocessing.StandardScaler()
+def transform_features(predictors, response, predictor_transformer=None, response_transformer=None):
+    if predictor_transformer is None and response_transformer is None:
+        predictor_transformer = preprocessing.StandardScaler()
+        response_transformer = preprocessing.StandardScaler()
+    predictors_transformed = predictor_transformer.fit_transform(predictors, response)
     response_transformed = response_transformer.fit_transform(response)
-    return predictors_transformed, response_transformed
+    return predictors_transformed, response_transformed, predictor_transformer, response_transformer
 
 

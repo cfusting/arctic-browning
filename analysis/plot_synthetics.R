@@ -1,15 +1,16 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA_DIR <- "~/symbolic_results"
-DATA.SET <- "complex"
-EXP1 <- paste(DATA.SET, "control_mandarin", sep = "_")
-EXP2 <- paste(DATA.SET, "mandarin", sep = "_")
+EXP1.dir <- "~/symbolic_results/simulation.csv_control"
+EXP2.dir <- "~/symbolic_results/simulation.csv_whistling_duck"
+DATA.SET <- "simulation"
+EXP1 <- paste(DATA.SET, "control", sep = "_")
+EXP2 <- paste(DATA.SET, "whistling_duck", sep = "_")
 EXP1.name <- "Control"
 EXP2.name <- "Mandarin"
 EXP1.SUB <- "Without Range Operator"
 EXP2.SUB <- "With Range Operator"
-exp1 <- getDataFrame(EXP1) 
-exp2 <- getDataFrame(EXP2)
+exp1 <- getDataFrame(EXP1, EXP1.dir) 
+exp2 <- getDataFrame(EXP2, EXP2.dir)
 library(ggplot2)
 XMAX <- max(exp1$generation, exp2$generation)
 YMAX.fitness <- max(exp1$min_fitness, exp2$min_fitness)
