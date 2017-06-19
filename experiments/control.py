@@ -69,6 +69,7 @@ class Control(abstract_experiment.Experiment):
                          node_selector=toolbox.koza_node_selector)
         toolbox.decorate("mutate", operators.static_limit(key=operator.attrgetter("height"), max_value=self.MAX_HEIGHT))
         toolbox.decorate("mutate", operators.static_limit(key=len, max_value=self.MAX_SIZE))
+        toolbox.register("error_func", self.ERROR_FUNCTION)
         expression_dict = cachetools.LRUCache(maxsize=1000)
         subset_selection_archive = subset_selection.RandomSubsetSelectionArchive(frequency=self.SUBSET_CHANGE_FREQUENCY,
                                                                                  predictors=predictors,
@@ -81,7 +82,6 @@ class Control(abstract_experiment.Experiment):
                                     subset_selection_archive=subset_selection_archive,
                                     error_function=toolbox.error_func,
                                     expression_dict=expression_dict)
-        toolbox.register("error_func", self.ERROR_FUNCTION)
         toolbox.register("evaluate_error", evaluate_function)
         toolbox.register("assign_fitness", afpo.assign_age_fitness_size_complexity)
         self.multi_archive = utils.get_archive()
