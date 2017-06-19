@@ -19,7 +19,7 @@ class Mandarin(control.Control):
                     test_response=None):
         toolbox = super(Mandarin, self).get_toolbox(predictors, response, pset, variable_type_indices, variable_names,
                                                     test_predictors=None, test_response=None)
-        mutations = [partial(sp.mutate_parametrized_nodes, stdev_calc=math.sqrt),
+        mutations = [partial(sp.mutate_single_parametrized_node, stdev_calc=math.sqrt),
                      partial(operators.mutation_biased, expr=toolbox.grow, node_selector=toolbox.koza_node_selector)]
         toolbox.register("mutate", mutation.multi_mutation_exclusive, mutations=mutations, probs=[.5, .5])
         toolbox.register("run", afpo.pareto_optimization, population=self.pop, toolbox=toolbox,

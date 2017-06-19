@@ -13,7 +13,7 @@ parser.add_argument('-t', '--training', help='Path to the training data as a des
                     required=True)
 parser.add_argument('-s', '--seed', help='Random seed.', required=True, type=int)
 parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
-parser.add_argument('-p', '--split', help='Proportion of data used for training.', type=int, default=1)
+parser.add_argument('-p', '--split', help='Proportion of data used for training.', type=float, default=1)
 parser.add_argument('-d', '--debug', help='Debug.', action='store_true')
 args = parser.parse_args()
 

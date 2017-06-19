@@ -26,7 +26,7 @@ class Bufflehead(mandarin.Mandarin):
             frequency=self.SUBSET_CHANGE_FREQUENCY,
             predictors=predictors,
             response=response,
-            subset_size=1000,
+            subset_size=int(self.SUBSET_SIZE * .1),
             expression_dict=expression_dict)
         tiny_evaluate_function = partial(subset_selection.fast_numpy_evaluate_subset,
                                          get_node_semantics=sp.get_node_semantics,
