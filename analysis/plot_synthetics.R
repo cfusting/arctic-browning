@@ -1,12 +1,15 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-EXP1.dir <- "~/symbolic_results/simulation.csv_control"
-EXP2.dir <- "~/symbolic_results/simulation.csv_whistling_duck"
 DATA.SET <- "simulation"
-EXP1 <- paste(DATA.SET, "control", sep = "_")
-EXP2 <- paste(DATA.SET, "whistling_duck", sep = "_")
-EXP1.name <- "Control"
-EXP2.name <- "Mandarin"
+DATA.TYPE <- "csv"
+EXP1.id <- "lesser_scaup"
+EXP2.id <- "bufflehead"
+EXP1 <- paste(DATA.SET, EXP1.id, sep = "_")
+EXP2 <- paste(DATA.SET, EXP2.id, sep = "_")
+EXP1.dir <- paste(paste("~/symbolic_results/", paste(DATA.SET, DATA.TYPE, sep = "."), sep = ""), EXP1.id, sep = "_")
+EXP2.dir <- paste(paste("~/symbolic_results/", paste(DATA.SET, DATA.TYPE, sep = "."), sep = ""), EXP2.id, sep = "_")
+EXP1.name <- "Lesser Scaup"
+EXP2.name <- "Bufflhead"
 EXP1.SUB <- "Without Range Operator"
 EXP2.SUB <- "With Range Operator"
 exp1 <- getDataFrame(EXP1, EXP1.dir) 

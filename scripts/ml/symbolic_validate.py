@@ -1,6 +1,5 @@
 import logging
 import csv
-import glob
 import random
 import operator
 import argparse
