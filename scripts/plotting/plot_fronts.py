@@ -1,6 +1,5 @@
 import argparse
 import logging
-import importlib
 import cachetools
 
 import pygraphviz as pgv
@@ -57,9 +56,11 @@ for key in all_inds.keys():
     for ind in all_inds[key]:
         nodes, edges, labels = sp.graph(ind)
         g = pgv.AGraph()
+        g.graph_attr['K'] = 9
+        g.graph_attr['repulsiveforce'] = 3
         g.add_nodes_from(nodes)
         g.add_edges_from(edges)
-        g.layout(prog="dot")
+        g.layout(prog="sfdp")
         for j in nodes:
             n = g.get_node(j)
             n.attr["label"] = labels[j]
