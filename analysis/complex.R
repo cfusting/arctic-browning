@@ -5,7 +5,9 @@ source("~/Dropbox/arctic-browning/analysis/lib.R")
 simulation <- function(dat) {
   res <- apply(dat[,1:20], 1, sum) + 
     apply(dat[,13:25], 1, max) +
-    dat[,53]^3
+    dat[,53]^3 + 
+    apply(dat[,50:59], 1, mean) +
+    dat[,33]^2
   return(res)
 }
 
