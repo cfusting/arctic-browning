@@ -38,10 +38,13 @@ class LearningData:
     def from_hdf(self, hdf_file):
         self.predictors, self.response = get_predictors_and_response(hdf_file)
         self.num_observations, self.num_variables = self.predictors.shape
-        lst_days, snow_days = get_lst_and_snow_days(hdf_file)
-        self.variable_type_indices = get_variable_type_indices(lst_days, snow_days)
-        self.variable_names = get_hdf_variable_names(lst_days, snow_days)
-        self.variable_dict = get_lst_and_snow_variable_dict(lst_days, snow_days)
+        days = get_hdf_days(hdf_file)
+        self.variable_type_indices = get_variable_type_indices(days)
+        name_prefixes = ['lst']
+        if len(days) > 1:
+            name_prefixes.append('snow')
+        self.variable_names = get_hdf_variable_names(days, name_prefixes)
+        self.variable_dict = get_hdf_variable_dict(self.variable_names, 'ARG')
         self.name = ntpath.basename(hdf_file)[:-4]
 
 
@@ -56,38 +59,33 @@ def get_predictors_and_response(hdf_file):
     return design_matrix[:, :-1], design_matrix[:, -1]
 
 
-def get_lst_and_snow_days(hdf_file):
+def get_hdf_days(hdf_file):
     data_hdf = SD(hdf_file)
     sds = data_hdf.select("design_matrix")
-    lst_days = [int(x) for x in sds.lst_days.split(",")]
-    snow_days = [int(x) for x in sds.snow_days.split(",")]
+    days = []
+    if sds.lst_days:
+        days.append([int(x) for x in sds.lst_days.split(",")])
+    if sds.snow_days:
+        days.append([int(x) for x in sds.snow_days.split(",")])
     sds.endaccess()
     data_hdf.end()
-    return lst_days, snow_days
+    return days
 
 
-def get_lst_names(lst_days):
-    return ["lst_" + str(x) for x in lst_days]
+def get_hdf_variable_names(days, name_prefixes):
+    if len(days) != len(name_prefixes):
+        raise ValueError("Must days and prefixes must have the same length.")
+    names = []
+    i = 0
+    for d in days:
+        names.extend([str(name_prefixes[i]) + '_' + str(x) for x in d])
+        i += 1
+    return names
 
 
-def get_snow_names(snow_days):
-    return ["snow_" + str(x) for x in snow_days]
-
-
-def get_hdf_variable_names(lst_days, snow_days):
-    return get_lst_names(lst_days) + get_snow_names(snow_days)
-
-
-def get_lst_and_snow_variable_dict(lst_days, snow_days):
-    lst_args = ["ARG" + str(x) for x in range(0, len(lst_days))]
-    lst_names = get_lst_names(lst_days)
-    first_args = dict(zip(lst_args, lst_names))
-    snow_args = ["ARG" + str(x) for x in range(len(lst_days), len(lst_days) + len(snow_days))]
-    snow_names = get_snow_names(snow_days)
-    second_args = dict(zip(snow_args, snow_names))
-    args = first_args.copy()
-    args.update(second_args)
-    return args
+def get_hdf_variable_dict(names, default_prefix):
+    args = [default_prefix + str(x) for x in range(0, len(names))]
+    return dict(zip(args, names))
 
 
 def get_simple_variable_names(num_vars):
@@ -100,5 +98,12 @@ def get_simple_variable_dict(num_vars):
     return dict(zip(args, simple))
 
 
-def get_variable_type_indices(lst_days, snow_days):
-    return [len(lst_days) - 1, len(lst_days) + len(snow_days) - 1]
+def get_variable_type_indices(days):
+    indices = []
+    previous = 0
+    for i in days:
+        current = previous + len(i)
+        if len(i) != 0:
+            indices.append(current - 1)
+            previous = current
+    return indices

@@ -12,7 +12,7 @@ from utilities import lib
 parser = argparse.ArgumentParser(description='Create design matrix.')
 parser.add_argument('-l', '--lst-files', help='File containing LST file paths.', required=True)
 parser.add_argument('-n', '--ndvi-files', help='File containing NDVI file paths.', required=True)
-parser.add_argument('-s', '--snow-files', help='File containing SNOW file paths.', required=True)
+parser.add_argument('-s', '--snow-files', help='File containing SNOW file paths.')
 parser.add_argument('-y', '--first-year', help='First year.', required=True, type=int)
 parser.add_argument('-j', '--last-year', help='Last year.', required=True, type=int)
 parser.add_argument('-t', '--t0', help='The day of the year considered t0.', required=True, type=int)
@@ -20,7 +20,7 @@ parser.add_argument('-a', '--delta', help='Number of days back from t0 to consid
 parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', required=True, type=int)
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
-parser.add_argument('-o', '--out-file', help='Name of HDF file to save the design matrix.', required=True)
+parser.add_argument('-o', '--out-file', help='Path to HDF file to save the design matrix.', required=True)
 parser.add_argument('-m', '--missing-ratio', help='Remove variables missing at least this amount of data.', type=float)
 parser.add_argument('-z', '--snow-mean', help='Remove snow variables with mean at least this large.', type=float)
 parser.add_argument('-r', '--remove-lst-columns', nargs='+', help='Remove *only* these columns from the LST matrix.',
@@ -186,7 +186,7 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
     ndvi_vector = ndvi_masked.mean(axis=1)
     logging.info('NDVI matrix constructed. Shape: ' + str(ndvi_vector.shape))
     rows = ndvi_vector.shape[0]
-    return ndvi_vector.reshape(rows, 1)
+    return ndvi_vector.reshape(rows, 1), []
 
 
 def build_design_matrix(*matrices):
@@ -197,12 +197,15 @@ def build_design_matrix(*matrices):
     logging.debug(str(dm))
     return dm
 
-lst_matrix, lst_day_of_year = build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
-                                                     args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)
-snow_matrix, snow_day_of_year = build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0,
-                                                       args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW)
-ndvi_matrix = build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END)
-design_matrix = build_design_matrix(lst_matrix, snow_matrix, ndvi_matrix)
+matrices_days = []
+matrices_days.append(build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
+                                            args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA))
+if args.snow_files:
+    matrices_days.append(build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0,
+                                                args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))
+matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
+mats, days = zip(*matrices_days)
+design_matrix = build_design_matrix(mats)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
 sds = sd.create("design_matrix", SDC.FLOAT64, design_matrix.shape)
 sds.first_year = args.first_year
@@ -216,8 +219,9 @@ if args.remove_lst_columns:
     sds.removed_lst_columns = ",".join(str(x) for x in args.remove_lst_columns)
 if args.remove_snow_columns:
     sds.removed_snow_columns = ",".join(str(x) for x in args.remove_snow_columns)
-sds.lst_days = ",".join(str(x) for x in lst_day_of_year)
-sds.snow_days = ",".join(str(x) for x in snow_day_of_year)
+sds.lst_days = ",".join(str(x) for x in days[0])
+if args.snow_files:
+    sds.snow_days = ",".join(str(x) for x in days[1])
 sds[:] = design_matrix
 sds.endaccess()
 sd.end()

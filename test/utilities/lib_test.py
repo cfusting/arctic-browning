@@ -17,7 +17,7 @@ class Test:
         assert ma.array(inputarray, mask=reliability).sum() == 12337
 
     def test_get_filenames_list(self):
-        files_from = "test_data/data_list.txt"
+        files_from = "../../test_data/data_list.txt"
         files = ["A2016177_clipped_mosaic_250m 16 days NDVI.tif",
                  "A2016177_clipped_mosaic_250m 16 days pixel reliability.tif",
                  "A2016193_clipped_mosaic_250m 16 days NDVI.tif",
