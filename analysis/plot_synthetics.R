@@ -1,17 +1,17 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA.SET <- "simulation"
+DATA.SET <- "complex"
 DATA.TYPE <- "csv"
-EXP1.id <- "lesser_scaup"
-EXP2.id <- "bufflehead"
+EXP1.id <- "bufflehead"
+EXP2.id <- "mandarin"
+EXP1.name <- "Bufflehead"
+EXP2.name <- "Mandarin"
+EXP1.SUB <- "Without Range Operator"
+EXP2.SUB <- "With Range Operator"
 EXP1 <- paste(DATA.SET, EXP1.id, sep = "_")
 EXP2 <- paste(DATA.SET, EXP2.id, sep = "_")
 EXP1.dir <- paste(paste("~/symbolic_results/", paste(DATA.SET, DATA.TYPE, sep = "."), sep = ""), EXP1.id, sep = "_")
 EXP2.dir <- paste(paste("~/symbolic_results/", paste(DATA.SET, DATA.TYPE, sep = "."), sep = ""), EXP2.id, sep = "_")
-EXP1.name <- "Lesser Scaup"
-EXP2.name <- "Bufflhead"
-EXP1.SUB <- "Without Range Operator"
-EXP2.SUB <- "With Range Operator"
 exp1 <- getDataFrame(EXP1, EXP1.dir) 
 exp2 <- getDataFrame(EXP2, EXP2.dir)
 library(ggplot2)
