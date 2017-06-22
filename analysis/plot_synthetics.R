@@ -1,6 +1,6 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA.SET <- "complex"
+DATA.SET <- "simulation_random"
 DATA.TYPE <- "csv"
 EXP1.id <- "control"
 EXP2.id <- "lesser_scaup"

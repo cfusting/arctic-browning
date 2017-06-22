@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: source kickoff_symbolic_regression training_data experiment_name num_runs data split
+# usage: source kickoff_symbolic_regression experiment_name num_runs data split
 last=`pwd`
 for i in `seq 1 ${2}`
 do

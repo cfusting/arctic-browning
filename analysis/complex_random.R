@@ -6,27 +6,15 @@ set.seed(2017)
 simulation <- function(dat) {
   res <- apply(dat[,1:20], 1, sum) + 
     apply(dat[,13:25], 1, max) +
-    dat[,53]^3 + 
+    dat[,53] + 
     apply(dat[,50:59], 1, mean) +
-    dat[,33]^2
+    dat[,33]
   return(res)
 }
 
 dat <- buildNormalMatrix()
 
-apply(dat[,1:20], 1, sum)
-apply(dat[,13:25], 1, max)
-dat[,53]^3 
-apply(dat[,50:59], 1, mean)
-dat[,33]^2
-    
-mean(apply(dat[,1:20], 1, sum))
-mean(apply(dat[,13:25], 1, max))
-mean(dat[,53]^3 )
-mean(apply(dat[,50:59], 1, mean))
-mean(dat[,33]^2)
- 
 Y <- simulation(dat)
 synthetic <- cbind(dat, Y)
-#heatmap(as.matrix(synthetic), Rowv = NA, Colv = NA)
+summary(synthetic)
 write.csv(synthetic, "~/design_matrices/complex_random.csv", row.names = FALSE)

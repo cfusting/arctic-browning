@@ -41,8 +41,8 @@ def get_front(results_path, data_set_name, toolbox, pset):
     non_dominated = afpo.find_pareto_front(individuals)
     ft = [individuals[d] for d in non_dominated]
     ft.sort(key=operator.attrgetter("fitness.values"))
-    while ft[-1].fitness.values[0] >= 1.0:
-        ft.pop()
+    # while ft[-1].fitness.values[0] >= 1.0:
+    #     ft.pop()
     ft.reverse()
     return ft
 

@@ -14,19 +14,6 @@ simulation <- function(dat) {
 
 dat <- matrix(rnorm(1000*60, mean = 60, sd = 15), ncol=60)
 
-apply(dat[,1:20], 1, sum)
-apply(dat[,13:25], 1, max)
-dat[,53]^3 
-apply(dat[,50:59], 1, mean)
-dat[,33]^2
-    
-mean(apply(dat[,1:20], 1, sum))
-mean(apply(dat[,13:25], 1, max))
-mean(dat[,53]^3 )
-mean(apply(dat[,50:59], 1, mean))
-mean(dat[,33]^2)
- 
 Y <- simulation(dat)
 synthetic <- cbind(dat, Y)
-#heatmap(as.matrix(synthetic), Rowv = NA, Colv = NA)
 write.csv(synthetic, "~/design_matrices/complex.csv", row.names = FALSE)
