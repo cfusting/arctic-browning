@@ -118,7 +118,7 @@ class Control(abstract_experiment.Experiment):
         return toolbox
 
     def transform_features(self, predictors, response, predictor_transformer=None, response_transformer=None):
-        return utils.transform_features(predictors, response, predictor_transformer, response_transformer)
+        return predictors, response, None, None
 
     def get_pset(self, num_predictors, variable_type_indices, names, variable_dict):
         pset = sp.SimpleParametrizedPrimitiveSet("MAIN", num_predictors, variable_type_indices, names)
@@ -129,6 +129,6 @@ class Control(abstract_experiment.Experiment):
         pset.addPrimitive(numpy.exp, 1)
         pset.addPrimitive(symbreg.cube, 1)
         pset.addPrimitive(numpy.square, 1)
-        pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 1.0))
+        pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 10.0))
         pset.renameArguments(**variable_dict)
         return pset
