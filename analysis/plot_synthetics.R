@@ -2,10 +2,10 @@ rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
 DATA.SET <- "complex"
 DATA.TYPE <- "csv"
-EXP1.id <- "bufflehead"
-EXP2.id <- "mandarin"
-EXP1.name <- "Bufflehead"
-EXP2.name <- "Mandarin"
+EXP1.id <- "control"
+EXP2.id <- "lesser_scaup"
+EXP1.name <- "Control"
+EXP2.name <- "Lesser Scaup"
 EXP1.SUB <- "Without Range Operator"
 EXP2.SUB <- "With Range Operator"
 EXP1 <- paste(DATA.SET, EXP1.id, sep = "_")

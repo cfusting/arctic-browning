@@ -1,6 +1,8 @@
 rm(list = ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
 
+set.seed(2017)
+
 maximumFunction <- function(dat) {
   res <- pmax(dat[,1], dat[,2], dat[,3], dat[,4], dat[,5], dat[,6])
   return(res)

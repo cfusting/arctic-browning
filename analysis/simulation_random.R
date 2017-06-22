@@ -9,9 +9,9 @@ simulation <- function(dat) {
   return(res)
 }
 
-dat <- matrix(rnorm(1000*60, mean = 60, sd = 15), ncol=60)
-
+dat <- buildNormalMatrix()
+dat <- scale(dat)
 Y <- simulation(dat)
 synthetic <- cbind(dat, Y)
 heatmap(as.matrix(synthetic), Rowv = NA, Colv = NA)
-write.csv(synthetic, "~/design_matrices/simulation.csv", row.names = FALSE)
+write.csv(synthetic, "~/design_matrices/simulation_random.csv", row.names = FALSE)
