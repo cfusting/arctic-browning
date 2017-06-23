@@ -1,0 +1,46 @@
+import argparse
+import logging
+from functools import partial
+
+from deap import creator
+
+import numpy
+
+from utilities import learning_data, feature as ft, lib
+
+parser = argparse.ArgumentParser(description='Change the basis of variables in a data set.')
+parser.add_argument('-t', '--training', help='Path to training data.', required=True)
+parser.add_argument('-f', '--features', help='Path to feature file.', required=True)
+parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
+parser.add_argument('-o', '--output', help='Path to output file.', required=True)
+parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
+args = parser.parse_args()
+
+experiment = lib.get_experiment(args.experiment)
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+
+training_data = learning_data.LearningData()
+training_data.from_file(args.training)
+pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
+                           training_data.variable_names, training_data.variable_dict)
+predictors_transformed, response_transformed = experiment.transform_features(training_data.predictors,
+                                                                             training_data.response)[0:2]
+validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
+features = []
+with open(args.features) as feature_file:
+    for line in feature_file:
+        feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), 'X')
+        feature.from_infix_string(line)
+        features.append(feature)
+basis = numpy.empty((training_data.num_observations, len(features) + 1))
+feature_names = []
+i = 0
+for feature in features:
+    feature_names.append(feature.name)
+    basis[:, i] = validation_toolbox.get_semantics(feature.representation)
+    i += 1
+feature_names.append('response')
+basis[:, i] = response_transformed
+numpy.savetxt(args.output, X=basis, delimiter=',', header=','.join(feature_names))

@@ -109,8 +109,19 @@ class Control(abstract_experiment.Experiment):
         else:
             creator.create("Individual", sp.SimpleParametrizedPrimitiveTree, fitness=fitness_class)
         toolbox.register("validate_func", partial(self.ERROR_FUNCTION, response=response))
-        toolbox.register("validate_error", sp.simple_parametrized_evaluate, context=pset.context, predictors=predictors,
-                         error_function=toolbox.validate_func, expression_dict=expression_dict)
+        toolbox.register("validate_error",
+                         fast_evaluate.fast_numpy_evaluate,
+                         get_node_semantics=sp.get_node_semantics,
+                         context=pset.context,
+                         predictors=predictors,
+                         error_function=toolbox.validate_func,
+                         expression_dict=expression_dict)
+        toolbox.register("get_semantics",
+                         fast_evaluate.fast_numpy_evaluate,
+                         get_node_semantics=sp.get_node_semantics,
+                         context=pset.context,
+                         predictors=predictors,
+                         expression_dict=expression_dict)
         if size_measure is None:
             toolbox.register("validate", afpo.evaluate_fitness_size, error_func=toolbox.validate_error)
         else:
@@ -129,6 +140,7 @@ class Control(abstract_experiment.Experiment):
         pset.addPrimitive(numpy.exp, 1)
         pset.addPrimitive(symbreg.cube, 1)
         pset.addPrimitive(numpy.square, 1)
+        pset.addPrimitive(numpy.power, 2)
         pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 10.0))
         pset.renameArguments(**variable_dict)
         return pset

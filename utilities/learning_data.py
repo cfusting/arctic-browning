@@ -5,6 +5,8 @@ from pyhdf.SD import SD
 
 
 class LearningData:
+    DEFAULT_PREFIX = 'ARG'
+    CSV = "csv"
 
     def __init__(self):
         self.num_variables = None
@@ -16,11 +18,13 @@ class LearningData:
         self.variable_dict = None
         self.name = None
 
-    def from_file(self, file_name):
+    def from_file(self, file_name, header=False):
         file_type = file_name[-3:]
         if file_type == "hdf":
             self.from_hdf(file_name)
-        elif file_type == "csv":
+        elif file_type == self.CSV and header:
+            self.from_headed_csv(file_name)
+        elif file_type == self.CSV:
             self.from_csv(file_name)
         else:
             raise ValueError("File extension must be one of csv, hdf.")
@@ -35,6 +39,17 @@ class LearningData:
         self.variable_dict = get_simple_variable_dict(self.num_variables)
         self.name = ntpath.basename(csv_file)[:-4]
 
+    def from_headed_csv(self, csv_file):
+        dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True)
+        self.variable_names = dat.dtype.names[:-1]
+        dat = dat.view((dat.dtype[0], len(dat.dtype.names)))
+        self.predictors = dat[:, :-1]
+        self.num_observations, self.num_variables = self.predictors.shape
+        self.response = dat[:, -1]
+        self.variable_type_indices = [self.num_variables - 1]
+        self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
+        self.name = ntpath.basename(csv_file)[:-4]
+
     def from_hdf(self, hdf_file):
         self.predictors, self.response = get_predictors_and_response(hdf_file)
         self.num_observations, self.num_variables = self.predictors.shape
@@ -44,7 +59,7 @@ class LearningData:
         if len(days) > 1:
             name_prefixes.append('snow')
         self.variable_names = get_hdf_variable_names(days, name_prefixes)
-        self.variable_dict = get_hdf_variable_dict(self.variable_names, 'ARG')
+        self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
         self.name = ntpath.basename(hdf_file)[:-4]
 
 
@@ -83,7 +98,7 @@ def get_hdf_variable_names(days, name_prefixes):
     return names
 
 
-def get_hdf_variable_dict(names, default_prefix):
+def get_named_variable_dict(names, default_prefix):
     args = [default_prefix + str(x) for x in range(0, len(names))]
     return dict(zip(args, names))
 

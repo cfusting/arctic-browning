@@ -1,7 +1,7 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA.SET <- "simulation_random"
-DATA.TYPE <- "csv"
+DATA.SET <- "training_matrix_lst_snow"
+DATA.TYPE <- "hdf"
 EXP1.id <- "control"
 EXP2.id <- "lesser_scaup"
 EXP1.name <- "Control"
@@ -16,7 +16,7 @@ exp1 <- getDataFrame(EXP1, EXP1.dir)
 exp2 <- getDataFrame(EXP2, EXP2.dir)
 library(ggplot2)
 XMAX <- max(exp1$generation, exp2$generation)
-YMAX.fitness <- max(exp1$min_fitness, exp2$min_fitness)
+YMAX.fitness <- max(exp1$min_fitness, exp2$min_fitness) 
 YMAX.size <- max(exp1$avg_size, exp2$avg_size)
 ggplot(exp1, aes(generation, min_fitness, colour = seed)) + geom_line(show.legend = FALSE) +
   labs(title = EXP1.name, subtitle = EXP1.SUB) +
@@ -41,7 +41,7 @@ exp1.avg$experiment <- EXP1.name
 exp2.avg$experiment <- EXP2.name
 exps <- rbind(exp1.avg, exp2.avg)
 XMAX.avg <- max(exps$generation)
-YMAX.fitness.avg <- max(exps$min_fitness)
+YMAX.fitness.avg <- max(exps$min_fitness) 
 YMAX.size.avg <- max(exps$avg_size)
 ggplot(exps, aes(generation, min_fitness, colour = experiment)) + geom_line() +
   labs(title = "Minimum Fitness Averaged Over Seeds") +
@@ -65,3 +65,8 @@ ggplot(exps, aes(generation, avg_parametrized, colour = experiment)) +
   geom_line() + labs(title = "Average Parametrized Terminals Averaged Over Seeds") +
   theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
   ylim(0, 1) + xlim(0, XMAX.avg)
+
+sqrt(min(exp1$min_fitness))
+sqrt(min(exp2$min_fitness))
+min(exp1$min_fitness)
+min(exp2$min_fitness)
