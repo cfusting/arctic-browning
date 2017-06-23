@@ -140,7 +140,6 @@ class Control(abstract_experiment.Experiment):
         pset.addPrimitive(numpy.exp, 1)
         pset.addPrimitive(symbreg.cube, 1)
         pset.addPrimitive(numpy.square, 1)
-        pset.addPrimitive(numpy.power, 2)
         pset.addEphemeralConstant("gaussian", lambda: random.gauss(0.0, 10.0))
         pset.renameArguments(**variable_dict)
         return pset

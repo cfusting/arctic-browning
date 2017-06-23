@@ -25,6 +25,7 @@ training_data = learning_data.LearningData()
 training_data.from_file(args.training)
 pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
                            training_data.variable_names, training_data.variable_dict)
+pset.addPrimitive(numpy.power, 2)
 predictors_transformed, response_transformed = experiment.transform_features(training_data.predictors,
                                                                              training_data.response)[0:2]
 validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
