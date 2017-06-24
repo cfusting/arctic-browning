@@ -1,4 +1,6 @@
 import ntpath
+import re
+import logging
 
 import numpy
 from pyhdf.SD import SD
@@ -14,6 +16,7 @@ class LearningData:
         self.predictors = None
         self.response = None
         self.variable_names = None
+        self.variable_prefixes = None
         self.variable_type_indices = None
         self.variable_dict = None
         self.name = None
@@ -28,6 +31,11 @@ class LearningData:
             self.from_csv(file_name)
         else:
             raise ValueError("File extension must be one of csv, hdf.")
+        self.init_common(file_name)
+
+    def init_common(self, file_name):
+        self.name = ntpath.basename(file_name)[:-4]
+        self.variable_prefixes = get_variable_prefixes(self.variable_names)
 
     def from_csv(self, csv_file):
         dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
@@ -37,7 +45,6 @@ class LearningData:
         self.variable_names = get_simple_variable_names(self.num_variables)
         self.variable_type_indices = [self.num_variables - 1]
         self.variable_dict = get_simple_variable_dict(self.num_variables)
-        self.name = ntpath.basename(csv_file)[:-4]
 
     def from_headed_csv(self, csv_file):
         dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True)
@@ -48,7 +55,6 @@ class LearningData:
         self.response = dat[:, -1]
         self.variable_type_indices = [self.num_variables - 1]
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
-        self.name = ntpath.basename(csv_file)[:-4]
 
     def from_hdf(self, hdf_file):
         self.predictors, self.response = get_predictors_and_response(hdf_file)
@@ -60,7 +66,6 @@ class LearningData:
             name_prefixes.append('snow')
         self.variable_names = get_hdf_variable_names(days, name_prefixes)
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
-        self.name = ntpath.basename(hdf_file)[:-4]
 
 
 def get_predictors_and_response(hdf_file):
@@ -78,10 +83,14 @@ def get_hdf_days(hdf_file):
     data_hdf = SD(hdf_file)
     sds = data_hdf.select("design_matrix")
     days = []
-    if sds.lst_days:
+    try:
         days.append([int(x) for x in sds.lst_days.split(",")])
-    if sds.snow_days:
+    except AttributeError:
+        logging.debug("No lst days available.")
+    try:
         days.append([int(x) for x in sds.snow_days.split(",")])
+    except AttributeError:
+        logging.debug("No snow days available.")
     sds.endaccess()
     data_hdf.end()
     return days
@@ -122,3 +131,12 @@ def get_variable_type_indices(days):
             indices.append(current - 1)
             previous = current
     return indices
+
+
+def get_variable_prefixes(variable_names):
+    """
+    Assumes the form prefixnumber.
+    :param variable_names:
+    :return:
+    """
+    return set(map(lambda x: re.match('([a-zA-Z]+)', x).group(1), variable_names))

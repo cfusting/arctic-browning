@@ -31,13 +31,16 @@ predictors_transformed, response_transformed = experiment.transform_features(tra
                                                                              training_data.response)[0:2]
 validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, response_transformed, pset)
 features = []
+exclude = re.compile(r"\de[-|+]?\d")
 with open(args.features) as feature_file:
+    i = 0
     for line in feature_file:
-        if re.search('\de-?\d', line):
+        if re.search(exclude, line):
             continue
-        feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), 'X')
+        feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), training_data.variable_prefixes)
         feature.from_infix_string(line)
         features.append(feature)
+        i += 1
 basis = numpy.empty((training_data.num_observations, len(features) + 1))
 feature_names = []
 i = 0

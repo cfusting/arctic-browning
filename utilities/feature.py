@@ -3,17 +3,17 @@ from gp.experiments import symbreg
 
 class Feature:
 
-    def __init__(self, constructor, prefix):
+    def __init__(self, constructor, prefixes):
         self.name = None
         self.representation = None
         self.constructor = constructor
         self.score = None
-        self.prefix = prefix
+        self.prefixes = prefixes
 
     def from_infix_string(self, feature_string):
         cleaned_string = ''.join(feature_string.rstrip().split())
         self.name = cleaned_string
-        self.representation = self.constructor(infix_to_prefix(cleaned_string, self.prefix))
+        self.representation = self.constructor(infix_to_prefix(cleaned_string, self.prefixes))
 
 
 def infix_to_prefix(infix_string, prefix):
