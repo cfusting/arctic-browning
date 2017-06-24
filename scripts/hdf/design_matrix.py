@@ -197,9 +197,8 @@ def build_design_matrix(*matrices):
     logging.debug(str(dm))
     return dm
 
-matrices_days = []
-matrices_days.append(build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
-                                            args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA))
+matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
+                                        args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)]
 if args.snow_files:
     matrices_days.append(build_predictor_matrix(args.snow_files, args.first_year, args.last_year, args.t0,
                                                 args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))

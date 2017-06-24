@@ -93,7 +93,7 @@ def get_hdf_variable_names(days, name_prefixes):
     names = []
     i = 0
     for d in days:
-        names.extend([str(name_prefixes[i]) + '_' + str(x) for x in d])
+        names.extend([str(name_prefixes[i]) + str(x) for x in d])
         i += 1
     return names
 

@@ -9,8 +9,9 @@ from utilities import learning_data
 
 parser = argparse.ArgumentParser(description='Run ElasticNet.')
 parser.add_argument('-t', '--training', help='Path to the training data.', required=True)
-parser.add_argument('-e', '--testing', help='Path to the testing data.', required=True)
+parser.add_argument('-j', '--testing', help='Path to the testing data.', required=True)
 parser.add_argument('-a', '--header', help='Header?', action='store_true')
+parser.add_argument('-o', '--output', help='Path to output file.', action='store_true')
 parser.add_argument('-v', '--verbose', help='Verbose.', action='store_true')
 args = parser.parse_args()
 
@@ -36,10 +37,6 @@ model = enet.fit(training_predictors_transformed, training_response_transformed)
 coefficients = {}
 for i in range(0, len(model.coef_)):
     coefficients[str(training_data.variable_names[i])] = model.coef_[i]
-
-logging.info('Coefficients:')
-for key, value in sorted(coefficients.iteritems(), key=lambda (k, v): (v, k)):
-    logging.info(str(value) + ': ' + str(key))
 R2 = model.score(training_predictors_transformed, training_response_transformed)
 pred_y = model.predict(training_predictors_transformed)
 M2 = mean_squared_error(training_response_transformed, pred_y)
@@ -53,6 +50,10 @@ UM = mean_squared_error(response_transformer.inverse_transform(training_response
 t_UM = mean_squared_error(response_transformer.inverse_transform(testing_response_transformed),
                           response_transformer.inverse_transform(t_pred_y))
 
-logging.info("Data: R^2, mean square error, untransformed mean squared error")
-logging.info("Training: {}, {}, {}".format(R2, M2, UM))
-logging.info("Testing: {}, {}, {}".format(t_R2, t_M2, t_UM))
+with open(args.output, 'w') as f:
+    f.write('Coefficients:')
+    for key, value in sorted(coefficients.iteritems(), key=lambda (k, v): (v, k)):
+        f.write(str(value) + ': ' + str(key))
+    f.write("Data: R^2, mean square error, untransformed mean squared error")
+    f.write("Training: {}, {}, {}".format(R2, M2, UM))
+    f.write("Testing: {}, {}, {}".format(t_R2, t_M2, t_UM))
