@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1,pmem=2gb,pvmem=2gb
-#PBS -l walltime=01:00:00
+#PBS -l nodes=1:ppn=1,pmem=8gb,pvmem=8gb
+#PBS -l walltime=03:00:00
 #PBS -N symbolic_validate
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
