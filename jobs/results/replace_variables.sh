@@ -5,4 +5,4 @@
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
-sed -r -i 's/(lst|snow)_([0-9]+)/\1\2/g' pareto*
+sed -r -i 's/(lst|snow)_([0-9]+)/\1\2/g' ${filepath}
