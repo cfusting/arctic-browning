@@ -18,13 +18,13 @@ python ${ARCTIC_HOME}/scripts/plotting/frequent_features.py \
         -r ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
-        -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt
-        -e ${experiment}
+        -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
+        -e ${experiment} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.txt
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
-        -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt
-        -e ${experiment}
+        -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
+        -e ${experiment} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.txt
 python ${ARCTIC_HOME}/scripts/ml/elastic_net.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
