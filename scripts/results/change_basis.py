@@ -1,5 +1,6 @@
 import argparse
 import logging
+import re
 from functools import partial
 
 from deap import creator
@@ -32,6 +33,8 @@ validation_toolbox = experiment.get_validation_toolbox(predictors_transformed, r
 features = []
 with open(args.features) as feature_file:
     for line in feature_file:
+        if re.search('\de-?\d', line):
+            continue
         feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), 'X')
         feature.from_infix_string(line)
         features.append(feature)
