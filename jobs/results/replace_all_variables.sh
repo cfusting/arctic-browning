@@ -7,10 +7,3 @@ do
   qsub $ARCTIC_HOME/jobs/results/replace_variables.sh
   cd ..
 done
-for directory in $(ls)
-do
-  cd $directory
-  echo "Fixing Range and Moment terminals in: ${directory}"
-  qsub $ARCTIC_HOME/jobs/results/replace_terminals.sh
-  cd ..
-done
