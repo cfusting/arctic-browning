@@ -5,4 +5,4 @@
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
-sed -r -i 's/([a-zA-Z]+Operation)\(([a-zA-Z0-9]+?),([a-zA-Z0-9]+?),([a-zA-Z0-9]+?)\)/\1_\2_\3_\4/g' pareto*
+sed -r -i 's/([a-zA-Z]+Operation)\(([a-zA-Z0-9]+?),([a-zA-Z0-9]+?),([a-zA-Z0-9]+?)\)/\1_\2_\3_\4/g' ${filepath}
