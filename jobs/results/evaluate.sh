@@ -27,7 +27,7 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -e ${experiment} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.txt
 python ${ARCTIC_HOME}/scripts/ml/elastic_net.py \
-        -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
-        -j ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
+        -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.txt
+        -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.txt
         -a \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/elastic_net_results_${experiment}.txt

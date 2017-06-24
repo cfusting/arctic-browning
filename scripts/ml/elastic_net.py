@@ -51,7 +51,7 @@ t_UM = mean_squared_error(response_transformer.inverse_transform(testing_respons
                           response_transformer.inverse_transform(t_pred_y))
 
 with open(args.output, 'w') as f:
-    f.write('Coefficients:')
+    f.write('Coefficients:\n')
     for key, value in sorted(coefficients.iteritems(), key=lambda (k, v): (v, k)):
         f.write(str(value) + ': ' + str(key) + '\n')
     f.write("Data: R^2, mean square error, untransformed mean squared error" + '\n')
