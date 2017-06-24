@@ -37,7 +37,7 @@ with open(args.features) as feature_file:
     for line in feature_file:
         if re.search(exclude, line):
             continue
-        feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), training_data.variable_prefixes)
+        feature = ft.Feature(partial(creator.Individual.from_string, pset=pset), training_data.unique_variable_prefixes)
         feature.from_infix_string(line)
         features.append(feature)
         i += 1

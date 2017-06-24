@@ -17,6 +17,7 @@ class LearningData:
         self.response = None
         self.variable_names = None
         self.variable_prefixes = None
+        self.unique_variable_prefixes = None
         self.variable_type_indices = None
         self.variable_dict = None
         self.name = None
@@ -36,6 +37,7 @@ class LearningData:
     def init_common(self, file_name):
         self.name = ntpath.basename(file_name)[:-4]
         self.variable_prefixes = get_variable_prefixes(self.variable_names)
+        self.unique_variable_prefixes = set(self.variable_prefixes)
 
     def from_csv(self, csv_file):
         dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
@@ -61,10 +63,7 @@ class LearningData:
         self.num_observations, self.num_variables = self.predictors.shape
         days = get_hdf_days(hdf_file)
         self.variable_type_indices = get_variable_type_indices(days)
-        name_prefixes = ['lst']
-        if len(days) > 1:
-            name_prefixes.append('snow')
-        self.variable_names = get_hdf_variable_names(days, name_prefixes)
+        self.variable_names = get_hdf_variable_names(days, ['lst', 'snow'])
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
 
 
@@ -98,7 +97,7 @@ def get_hdf_days(hdf_file):
 
 def get_hdf_variable_names(days, name_prefixes):
     if len(days) != len(name_prefixes):
-        raise ValueError("Must days and prefixes must have the same length.")
+        raise ValueError("Days and prefixes must have the same length.")
     names = []
     i = 0
     for d in days:
@@ -139,4 +138,4 @@ def get_variable_prefixes(variable_names):
     :param variable_names:
     :return:
     """
-    return set(map(lambda x: re.match('([a-zA-Z]+)', x).group(1), variable_names))
+    return map(lambda x: re.match('([a-zA-Z]+)', x).group(1), variable_names)
