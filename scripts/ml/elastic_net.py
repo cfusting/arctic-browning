@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Run ElasticNet.')
 parser.add_argument('-t', '--training', help='Path to the training data.', required=True)
 parser.add_argument('-j', '--testing', help='Path to the testing data.', required=True)
 parser.add_argument('-a', '--header', help='Header?', action='store_true')
-parser.add_argument('-o', '--output', help='Path to output file.', action='store_true')
+parser.add_argument('-o', '--output', help='Path to output file.', required=True)
 parser.add_argument('-v', '--verbose', help='Verbose.', action='store_true')
 args = parser.parse_args()
 
