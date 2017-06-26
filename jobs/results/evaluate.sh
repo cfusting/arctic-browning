@@ -7,7 +7,7 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
-if [ !${linearonly} ]
+if [ ${linearonly} != "true" ]
 then
 python ${ARCTIC_HOME}/scripts/results/symbolic_validate.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
