@@ -7,7 +7,7 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
-echo "Running evaluate."
+echo "Running evaluate with flags: ${flags}."
 if [[ ${flags}  == *"v"* ]]
 then
 echo "Running symbolic validate."
