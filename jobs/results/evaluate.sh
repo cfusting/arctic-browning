@@ -26,8 +26,8 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv
-python ${ARCTIC_HOME}/scripts/ml/elastic_net.py \
+python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv \
         -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv \
         -a \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/elastic_net_results_${experiment}.txt
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}.txt

@@ -1,6 +1,7 @@
 import ntpath
 import re
 import logging
+from functools import partial
 
 import numpy
 from pyhdf.SD import SD
@@ -38,6 +39,8 @@ class LearningData:
         self.name = ntpath.basename(file_name)[:-4]
         self.variable_prefixes = get_variable_prefixes(self.variable_names)
         self.unique_variable_prefixes = set(self.variable_prefixes)
+        self.predictors = numpy.nan_to_num(self.predictors)
+        self.response = numpy.nan_to_num(self.response)
 
     def from_csv(self, csv_file):
         dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
@@ -138,4 +141,11 @@ def get_variable_prefixes(variable_names):
     :param variable_names:
     :return:
     """
-    return map(lambda x: re.match('([a-zA-Z]+)', x).group(1), variable_names)
+    expr = re.compile('([a-zA-Z]+)')
+
+    def get_prefix(name, expression):
+        result = re.match(expression, name)
+        if result:
+            return result.group(1)
+        return ''
+    return map(partial(get_prefix, expression=expr), variable_names)

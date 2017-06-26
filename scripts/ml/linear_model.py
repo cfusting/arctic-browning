@@ -1,7 +1,8 @@
 import argparse
 import logging
 
-from sklearn.linear_model import ElasticNetCV
+import numpy as np
+from sklearn.linear_model import ElasticNetCV, LassoCV
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn import preprocessing
 
@@ -10,6 +11,7 @@ from utilities import learning_data
 parser = argparse.ArgumentParser(description='Run ElasticNet.')
 parser.add_argument('-t', '--training', help='Path to the training data.', required=True)
 parser.add_argument('-j', '--testing', help='Path to the testing data.', required=True)
+parser.add_argument('-m', '--method', help='Linear method.', choices=['lasso', 'elasticnet'], default='lasso')
 parser.add_argument('-a', '--header', help='Header?', action='store_true')
 parser.add_argument('-o', '--output', help='Path to output file.', required=True)
 parser.add_argument('-v', '--verbose', help='Verbose.', action='store_true')
@@ -21,18 +23,25 @@ if args.verbose:
 training_data = learning_data.LearningData()
 training_data.from_file(args.training, header=args.header)
 testing_data = learning_data.LearningData()
-testing_data.from_file(args.training, header=args.header)
+testing_data.from_file(args.testing, header=args.header)
 
 feature_transformer = preprocessing.StandardScaler()
 response_transformer = preprocessing.StandardScaler()
-training_predictors_transformed = feature_transformer.fit_transform(training_data.predictors, training_data.response)
-training_response_transformed = response_transformer.fit_transform(training_data.response)
-testing_predictors_transformed = feature_transformer.transform(testing_data.predictors, testing_data.response)
-testing_response_transformed = response_transformer.transform(testing_data.response)
 
-l1 = [.1, .5, .7, .9, .95, .99, 1]
-enet = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=True)
-model = enet.fit(training_predictors_transformed, training_response_transformed)
+training_predictors_transformed = np.nan_to_num(
+    feature_transformer.fit_transform(training_data.predictors, training_data.response))
+training_response_transformed = np.nan_to_num(response_transformer.fit_transform(training_data.response))
+
+testing_predictors_transformed = np.nan_to_num(
+    feature_transformer.transform(testing_data.predictors, testing_data.response))
+testing_response_transformed = np.nan_to_num(response_transformer.transform(testing_data.response))
+
+if args.method == 'elasticnet':
+    l1 = [.1, .5, .7, .9, .95, .99, 1]
+    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False)
+else:
+    method = LassoCV(cv=10, fit_intercept=False)
+model = method.fit(training_predictors_transformed, training_response_transformed)
 
 coefficients = {}
 for i in range(0, len(model.coef_)):
