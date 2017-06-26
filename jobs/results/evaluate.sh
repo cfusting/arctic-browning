@@ -7,9 +7,10 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
+echo "Running evaluate."
 if [[ ${flags}  == *"v"* ]]
 then
-echo "Running symbolic validate"
+echo "Running symbolic validate."
 python ${ARCTIC_HOME}/scripts/results/symbolic_validate.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -j ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
@@ -18,7 +19,7 @@ python ${ARCTIC_HOME}/scripts/results/symbolic_validate.py \
 fi
 if [[ ${flags}  == *"f"* ]]
 then
-echo "Running frequent features"
+echo "Running frequent features."
 python ${ARCTIC_HOME}/scripts/plotting/frequent_features.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -e ${experiment} \
@@ -26,7 +27,7 @@ python ${ARCTIC_HOME}/scripts/plotting/frequent_features.py \
 fi
 if [[ ${flags}  == *"c"* ]]
 then
-echo "Running change basis"
+echo "Running change basis."
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
@@ -40,7 +41,7 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
 fi
 if [[ ${flags}  == *"m"* ]]
 then
-echo "Running linear model"
+echo "Running linear model."
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv \
         -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv \
