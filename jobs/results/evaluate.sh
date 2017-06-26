@@ -7,6 +7,8 @@
 #PBS -q shortq
 source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$ARCTIC_HOME
+if [ !${linearonly} ]
+then
 python ${ARCTIC_HOME}/scripts/results/symbolic_validate.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -j ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
@@ -26,6 +28,7 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv
+fi
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv \
         -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv \

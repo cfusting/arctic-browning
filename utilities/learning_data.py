@@ -52,7 +52,8 @@ class LearningData:
         self.variable_dict = get_simple_variable_dict(self.num_variables)
 
     def from_headed_csv(self, csv_file):
-        dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True)
+        dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True,
+                               deletechars="""~!@#$%^&-=~\|]}[{';: /?.>,<""")
         self.variable_names = dat.dtype.names[:-1]
         dat = dat.view((dat.dtype[0], len(dat.dtype.names)))
         self.predictors = dat[:, :-1]

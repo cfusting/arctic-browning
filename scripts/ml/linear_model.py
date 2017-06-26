@@ -38,9 +38,9 @@ testing_response_transformed = np.nan_to_num(response_transformer.transform(test
 
 if args.method == 'elasticnet':
     l1 = [.1, .5, .7, .9, .95, .99, 1]
-    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False)
+    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000)
 else:
-    method = LassoCV(cv=10, fit_intercept=False)
+    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000)
 model = method.fit(training_predictors_transformed, training_response_transformed)
 
 coefficients = {}
