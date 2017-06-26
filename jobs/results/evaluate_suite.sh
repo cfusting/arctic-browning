@@ -1,7 +1,16 @@
 #!/bin/bash
-# trainset, testset, datatype, linearonly?
-experiments="control mandarin whistling_duck lesser_scaup bufflehead"
+# trainset, testset, datatype, flags
+#experiments="control mandarin whistling_duck bufflehead"
+experiments="control"
 for experiment in ${experiments}
 do
-  qsub -N evaluate_${1}_${experiment} -v experiment=${experiment},trainset=${1},testset=${2},datatype=${3},linearonly=${4} ${ARCTIC_HOME}/jobs/results/evaluate.sh
+  if [[ ${flags} == *"l"* ]]
+  then
+    trainset=${trainset} testset=${testset} datatype=${datatype} flags=${flags} experiment=${experiment} \
+    ${ARCTIC_HOME}/jobs/results/evaluate.sh
+  else
+     qsub -N evaluate_${1}_${experiment} \
+    -v experiment=${experiment},trainset=${1},testset=${2},datatype=${3},flags=${flags} \
+    ${ARCTIC_HOME}/jobs/results/evaluate.sh
+  fi
 done

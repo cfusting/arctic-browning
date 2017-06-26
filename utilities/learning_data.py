@@ -32,7 +32,7 @@ class LearningData:
         elif file_type == self.CSV:
             self.from_csv(file_name)
         else:
-            raise ValueError("File extension must be one of csv, hdf.")
+            raise ValueError("Bad file: " + file_name + ". File extension must be one of csv, hdf.")
         self.init_common(file_name)
 
     def init_common(self, file_name):
