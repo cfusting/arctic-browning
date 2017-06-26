@@ -10,7 +10,7 @@ do
     ${ARCTIC_HOME}/jobs/results/evaluate.sh
   else
     qsub -N evaluate_${1}_${experiment} \
-    -v experiment=${experiment},trainset=${1},testset=${2},datatype=${3},flags=${flags} \
+    -v experiment=${experiment},trainset=${1},testset=${2},datatype=${3},flags=${4} \
     ${ARCTIC_HOME}/jobs/results/evaluate.sh
   fi
 done
