@@ -11,9 +11,8 @@ class Feature:
         self.prefixes = prefixes
 
     def from_infix_string(self, feature_string):
-        cleaned_string = ''.join(feature_string.rstrip().split())
-        self.name = cleaned_string
-        self.representation = self.constructor(infix_to_prefix(cleaned_string, self.prefixes))
+        self.name = ''.join(feature_string.rstrip().split())
+        self.representation = self.constructor(infix_to_prefix(feature_string, self.prefixes))
 
 
 def infix_to_prefix(infix_string, prefix):
