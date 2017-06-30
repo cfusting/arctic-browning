@@ -6,6 +6,7 @@
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
-cd ~/modis_data/snow_8day_500m_new
+directory=${ARCTIC_DATA_HOME}/snow_8day_500m_new
+cd ${directory}
 find `pwd` -name "*hdf" > hdfs.list
-python ~/arctic-browning/scripts/hdf/mask_hdf.py -i "$HOME/modis_data/snow_8day_500m/hdfs.list" -b Maximum_Snow_Extent -t snow -v
+python ~/arctic-browning/scripts/hdf/mask_hdf.py -i ${directory}/hdfs.list -b Maximum_Snow_Extent -t snow -v
