@@ -1,6 +1,7 @@
 import ntpath
 import re
 import logging
+import design_matrix as dm
 from functools import partial
 
 import numpy
@@ -22,6 +23,7 @@ class LearningData:
         self.variable_type_indices = None
         self.variable_dict = None
         self.name = None
+        self.design_matrix = None
 
     def from_file(self, file_name, header=False):
         file_type = file_name[-3:]
@@ -43,10 +45,11 @@ class LearningData:
         self.response = numpy.nan_to_num(self.response)
 
     def from_csv(self, csv_file):
-        dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
-        self.predictors = dat[:, :-1]
+        self.design_matrix = dm.DesignMatrix()
+        self.design_matrix.from_csv(csv_file)
+        self.predictors = self.design_matrix.predictors
+        self.response = self.design_matrix.response
         self.num_observations, self.num_variables = self.predictors.shape
-        self.response = dat[:, -1]
         self.variable_names = get_simple_variable_names(self.num_variables)
         self.variable_type_indices = get_default_variable_type_indices(self.num_variables)
         self.variable_dict = get_simple_variable_dict(self.num_variables)
