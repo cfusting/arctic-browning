@@ -1,6 +1,8 @@
 import numpy
 import numpy.testing as npt
 
+import utilities.design_matrix
+import utilities.learning_data
 from utilities import learning_data, feature
 from scripts.results import change_basis as cb
 from experiments import control as experiment
@@ -35,10 +37,10 @@ def build_random_training_data(shape):
     training_data.num_variables = shape[1]
     training_data.predictors = numpy.random.rand(training_data.num_observations, training_data.num_variables)
     training_data.response = numpy.random.rand(training_data.num_observations, 1)
-    training_data.variable_names = learning_data.get_simple_variable_names(training_data.num_variables)
+    training_data.variable_names = utilities.design_matrix.get_simple_variable_names(training_data.num_variables)
     training_data.variable_type_indices = \
         learning_data.get_default_variable_type_indices(training_data.num_variables)
-    training_data.variable_dict = learning_data.get_simple_variable_dict(training_data.num_variables)
+    training_data.variable_dict = utilities.learning_data.get_simple_variable_dict(training_data.num_variables)
     return training_data
 
 

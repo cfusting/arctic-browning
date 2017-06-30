@@ -1,11 +1,13 @@
+import logging
 import ntpath
 import re
-import logging
-import design_matrix as dm
 from functools import partial
 
 import numpy
 from pyhdf.SD import SD
+
+import design_matrix as dm
+from utilities.design_matrix import get_simple_variable_names
 
 
 class LearningData:
@@ -24,6 +26,7 @@ class LearningData:
         self.variable_dict = None
         self.name = None
         self.design_matrix = None
+        self.data_attributes = {}
 
     def from_file(self, file_name, header=False):
         file_type = file_name[-3:]
@@ -50,28 +53,38 @@ class LearningData:
         self.predictors = self.design_matrix.predictors
         self.response = self.design_matrix.response
         self.num_observations, self.num_variables = self.predictors.shape
-        self.variable_names = get_simple_variable_names(self.num_variables)
+        self.variable_names = self.design_matrix.variable_names
         self.variable_type_indices = get_default_variable_type_indices(self.num_variables)
         self.variable_dict = get_simple_variable_dict(self.num_variables)
 
     def from_headed_csv(self, csv_file):
-        dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True,
-                               deletechars="""~!@#$%^&-=~\|]}[{';: /?.>,<""")
-        self.variable_names = dat.dtype.names[:-1]
-        dat = dat.view((dat.dtype[0], len(dat.dtype.names)))
-        self.predictors = dat[:, :-1]
+        self.design_matrix = dm.DesignMatrix()
+        self.design_matrix.from_headed_csv(csv_file)
+        self.variable_names = self.variable_names
+        self.predictors = self.design_matrix.predictors
         self.num_observations, self.num_variables = self.predictors.shape
-        self.response = dat[:, -1]
+        self.response = self.design_matrix.response
         self.variable_type_indices = get_default_variable_type_indices(self.num_variables)
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
 
     def from_hdf(self, hdf_file):
-        self.predictors, self.response = get_predictors_and_response(hdf_file)
+        self.design_matrix = dm.DesignMatrix()
+        self.predictors = self.design_matrix.predictors
+        self.response = self.design_matrix.response
         self.num_observations, self.num_variables = self.predictors.shape
         days = get_hdf_days(hdf_file)
         self.variable_type_indices = get_variable_type_indices(days)
         self.variable_names = get_hdf_variable_names(days, ['lst', 'snow'])
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
+        self.data_attributes['years'] = get_years_vector(hdf_file)
+
+    def to_hdf(self, hdf_file):
+
+
+
+def get_years_vector(hdf_file):
+    sd = SD(hdf_file)
+    return sd.select('years').get()
 
 
 def get_default_variable_type_indices(num_variables):
@@ -122,16 +135,6 @@ def get_named_variable_dict(names, default_prefix):
     return dict(zip(args, names))
 
 
-def get_simple_variable_names(num_vars):
-    return ['X' + str(x) for x in range(0, num_vars)]
-
-
-def get_simple_variable_dict(num_vars):
-    args = ['ARG' + str(x) for x in range(0, num_vars)]
-    simple = get_simple_variable_names(num_vars)
-    return dict(zip(args, simple))
-
-
 def get_variable_type_indices(days):
     indices = []
     previous = 0
@@ -157,3 +160,9 @@ def get_variable_prefixes(variable_names):
             return result.group(1)
         return ''
     return map(partial(get_prefix, expression=expr), variable_names)
+
+
+def get_simple_variable_dict(num_vars):
+    args = ['ARG' + str(x) for x in range(0, num_vars)]
+    simple = get_simple_variable_names(num_vars)
+    return dict(zip(args, simple))

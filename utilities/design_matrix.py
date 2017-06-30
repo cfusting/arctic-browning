@@ -21,6 +21,7 @@ class DesignMatrix:
     def from_csv(self, csv_file):
         dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
         self.set_predictors_and_response(dat)
+        self.variable_names = get_simple_variable_names(self.predictors.shape[0])
         return self.predictors, self.response
 
     def from_headed_csv(self, csv_file):
@@ -44,3 +45,7 @@ class DesignMatrix:
     def set_predictors_and_response(self, dat):
         self.predictors = dat[:, :-1]
         self.response = dat[:, -1]
+
+
+def get_simple_variable_names(num_vars):
+    return ['X' + str(x) for x in range(0, num_vars)]
