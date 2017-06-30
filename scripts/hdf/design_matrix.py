@@ -55,8 +55,8 @@ def build_matrix(modis_files, layer_name):
         data = fl.get_layer_data(layer_name).flatten()
         columns.append(data)
         day_of_years.append(int(fl.datetime.strftime('%j')))
-        logging.info('Added MODIS data to matrix: ' + str(fl.datetime))
-        logging.info("Possible values: " + str(np.unique(data)))
+        logging.debug('Added MODIS data to matrix: ' + str(fl.datetime))
+        logging.debug("Possible values: " + str(np.unique(data)))
     logging.info('Matrix built for layer: ' + layer_name + '. Number of variables: ' + str(len(columns)))
     return np.vstack(columns).transpose(), day_of_years
 
@@ -200,7 +200,6 @@ def build_design_matrix(years, *matrices):
     logging.info("Removing rows with missing values.")
     dm = np.ma.compress_rows(design_masked)
     logging.info("Design Matrix shape: " + str(dm.shape))
-    logging.debug(str(dm))
     return dm[:, :-1], dm[:, -1]
 
 matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
