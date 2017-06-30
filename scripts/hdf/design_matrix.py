@@ -189,13 +189,19 @@ def build_ndvi_matrix(file_paths, first_year, last_year, ndvi_start, ndvi_end):
     return ndvi_vector.reshape(rows, 1), []
 
 
-def build_design_matrix(*matrices):
-    design_masked = np.ma.concatenate(matrices, axis=1)
+def build_years_vector(years, total_observations):
+    observations = total_observations / len(years)
+    return np.hstack([np.full(observations, year) for year in years])
+
+
+def build_design_matrix(years, *matrices):
+    years_column = build_years_vector(years, matrices[0].shape[0])
+    design_masked = np.ma.concatenate([matrices, years_column], axis=1)
     logging.info("Removing rows with missing values.")
     dm = np.ma.compress_rows(design_masked)
     logging.info("Design Matrix shape: " + str(dm.shape))
     logging.debug(str(dm))
-    return dm
+    return dm[:, :-1], dm[:, -1]
 
 matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
                                         args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)]
@@ -204,7 +210,7 @@ if args.snow_files:
                                                 args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))
 matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
 mats, days = zip(*matrices_days)
-design_matrix = build_design_matrix(mats)
+design_matrix, years_vector = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
 sds = sd.create("design_matrix", SDC.FLOAT64, design_matrix.shape)
 sds.first_year = args.first_year
@@ -223,4 +229,7 @@ if args.snow_files:
     sds.snow_days = ",".join(str(x) for x in days[1])
 sds[:] = design_matrix
 sds.endaccess()
+year_sds = sd.create("years", SDC.INT32, years_vector.shape)
+year_sds[:] = years_vector
+year_sds.endaccess()
 sd.end()
