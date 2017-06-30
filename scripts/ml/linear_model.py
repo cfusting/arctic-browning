@@ -2,7 +2,7 @@ import argparse
 import logging
 
 import numpy as np
-from sklearn.linear_model import ElasticNetCV, LassoCV
+from sklearn.linear_model import ElasticNetCV, LassoCV, Lasso
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn import preprocessing
 
@@ -11,7 +11,7 @@ from utilities import learning_data
 parser = argparse.ArgumentParser(description='Run ElasticNet.')
 parser.add_argument('-t', '--training', help='Path to the training data.', required=True)
 parser.add_argument('-j', '--testing', help='Path to the testing data.', required=True)
-parser.add_argument('-m', '--method', help='Linear method.', choices=['lasso', 'elasticnet'], default='lasso')
+parser.add_argument('-m', '--method', help='Linear method.', choices=['lasso', 'elasticnet', 'alpha'], default='lasso')
 parser.add_argument('-a', '--header', help='Header?', action='store_true')
 parser.add_argument('-o', '--output', help='Path to output file.', required=True)
 parser.add_argument('-v', '--verbose', help='Verbose.', action='store_true')
@@ -38,9 +38,11 @@ testing_response_transformed = np.nan_to_num(response_transformer.transform(test
 
 if args.method == 'elasticnet':
     l1 = [.1, .5, .7, .9, .95, .99, 1]
-    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000)
+    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000, n_jobs=-1)
+elif args.method == 'lasso':
+    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000, n_jobs=-1)
 else:
-    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000)
+    method = Lasso(alpha=.15, fit_intercept=False)
 model = method.fit(training_predictors_transformed, training_response_transformed)
 
 coefficients = {}
@@ -60,6 +62,9 @@ t_UM = mean_squared_error(response_transformer.inverse_transform(testing_respons
                           response_transformer.inverse_transform(t_pred_y))
 
 with open(args.output, 'w') as f:
+    f.write('Chosen alpha: ' + str(method.alpha_) + '\n')
+    f.write('Alphas used: ' + str(method.alphas_) + '\n')
+    f.write('MSE on alpha, fold: ' + str(method.mse_path_) + '\n')
     f.write('Coefficients:\n')
     for key, value in sorted(coefficients.iteritems(), key=lambda (k, v): (v, k)):
         f.write(str(value) + ': ' + str(key) + '\n')

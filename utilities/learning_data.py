@@ -48,7 +48,7 @@ class LearningData:
         self.num_observations, self.num_variables = self.predictors.shape
         self.response = dat[:, -1]
         self.variable_names = get_simple_variable_names(self.num_variables)
-        self.variable_type_indices = [self.num_variables - 1]
+        self.variable_type_indices = get_default_variable_type_indices(self.num_variables)
         self.variable_dict = get_simple_variable_dict(self.num_variables)
 
     def from_headed_csv(self, csv_file):
@@ -59,7 +59,7 @@ class LearningData:
         self.predictors = dat[:, :-1]
         self.num_observations, self.num_variables = self.predictors.shape
         self.response = dat[:, -1]
-        self.variable_type_indices = [self.num_variables - 1]
+        self.variable_type_indices = get_default_variable_type_indices(self.num_variables)
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
 
     def from_hdf(self, hdf_file):
@@ -69,6 +69,10 @@ class LearningData:
         self.variable_type_indices = get_variable_type_indices(days)
         self.variable_names = get_hdf_variable_names(days, ['lst', 'snow'])
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
+
+
+def get_default_variable_type_indices(num_variables):
+    return [num_variables - 1]
 
 
 def get_predictors_and_response(hdf_file):

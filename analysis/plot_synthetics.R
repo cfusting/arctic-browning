@@ -1,7 +1,7 @@
 rm(list=ls())
 source("~/Dropbox/arctic-browning/analysis/lib.R")
-DATA.SET <- "training_matrix_lst_snow"
-DATA.TYPE <- "hdf"
+DATA.SET <- "complex_random"
+DATA.TYPE <- "csv"
 EXP1.id <- "control"
 EXP2.id <- "lesser_scaup"
 EXP1.name <- "Control"
