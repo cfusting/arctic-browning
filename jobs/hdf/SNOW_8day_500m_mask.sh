@@ -5,6 +5,7 @@
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 #PBS -q shortq
+source $HOME/.bash_profile
 export PYTHONPATH=$HOME/gp_mecl:$HOME/arctic-browning
 directory=${ARCTIC_DATA_HOME}/snow_8day_500m_new
 cd ${directory}
