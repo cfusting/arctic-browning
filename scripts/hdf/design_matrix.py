@@ -232,6 +232,6 @@ if args.snow_files:
 sds[:] = design_matrix
 sds.endaccess()
 year_sds = sd.create("years", SDC.INT32, years_vector.shape)
-year_sds[:] = years_vector
+year_sds[:] = years_vector.astype(np.int32)
 year_sds.endaccess()
 sd.end()
