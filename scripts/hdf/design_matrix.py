@@ -28,7 +28,7 @@ parser.add_argument('-r', '--remove-lst-columns', nargs='+', help='Remove *only*
                     type=int)
 parser.add_argument('-x', '--remove-snow-columns', nargs='+', help='Remove *only* these columns from the snow matrix.',
                     type=int)
-parser.add_argument('-b', '--testing-year', help='Year starting testing matrix.', required=True)
+parser.add_argument('-b', '--testing-year', help='Year starting testing matrix.', required=True, type=int)
 args = parser.parse_args()
 
 if args.debug:
@@ -236,7 +236,7 @@ def build_hdf(file_name, matrix, years):
 
 
 def split_data(matrix, testing_year):
-    logging.info("Raw matrix: " + str(matrix))
+    logging.info("Raw matrix shape: " + str(matrix.shape))
     training = matrix[matrix[:, -1] < testing_year][:, :-1]
     testing = matrix[matrix[:, -1] >= testing_year][:, :-1]
     logging.info("Training data shape: " + str(training.shape))
