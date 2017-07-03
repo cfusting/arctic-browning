@@ -235,9 +235,10 @@ def build_hdf(file_name, matrix, years):
     sd.end()
 
 
-def split_data(matrix, testing_years):
-    training = matrix[matrix[:, -1] < testing_years][:, :-1]
-    testing = matrix[matrix[:, -1] >= testing_years][:, :-1]
+def split_data(matrix, testing_year):
+    logging.info("Raw matrix: " + str(matrix))
+    training = matrix[matrix[:, -1] < testing_year][:, :-1]
+    testing = matrix[matrix[:, -1] >= testing_year][:, :-1]
     logging.info("Training data shape: " + str(training.shape))
     logging.info("Testing data shape: " + str(testing.shape))
     return training, testing, matrix[:, -1]
