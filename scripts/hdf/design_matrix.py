@@ -211,7 +211,6 @@ if args.snow_files:
                                                 args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))
 matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
 mats, days = zip(*matrices_days)
-logging.info(mats)
 design_matrix, years_vector = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
 sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
 sds = sd.create("design_matrix", SDC.FLOAT64, design_matrix.shape)
