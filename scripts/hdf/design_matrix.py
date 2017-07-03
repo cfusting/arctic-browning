@@ -195,9 +195,10 @@ def build_years_vector(years, total_observations):
 
 
 def build_design_matrix(years, matrices):
-    years_column = build_years_vector(years, matrices[0].shape[0])
-    matrices.append(years_column.reshape((years_column.shape[0], 1)))
-    design_masked = np.ma.concatenate(matrices, axis=1)
+    matrix_list = list(matrices)
+    years_column = build_years_vector(years, matrix_list[0].shape[0])
+    matrix_list.append(years_column.reshape((years_column.shape[0], 1)))
+    design_masked = np.ma.concatenate(matrix_list, axis=1)
     logging.info("Removing rows with missing values.")
     dm = np.ma.compress_rows(design_masked)
     logging.info("Design Matrix shape: " + str(dm.shape))
