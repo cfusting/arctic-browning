@@ -83,7 +83,6 @@ testing_data.from_file(args.testing)
 transformed_testing_predictors, transformed_testing_response = \
     experiment.transform_features(testing_data.predictors, testing_data.response, predictor_transformer,
                                   response_transformer)[0:2]
-logging.info("Testing models on: " + args.testing)
 testing_toolbox = experiment.get_validation_toolbox(transformed_testing_predictors, transformed_testing_response, pset,
                                                     size_measure=afpo.evaluate_fitness_size_complexity,
                                                     expression_dict=cachetools.LRUCache(maxsize=100),

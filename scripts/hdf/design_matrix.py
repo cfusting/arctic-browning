@@ -20,13 +20,15 @@ parser.add_argument('-a', '--delta', help='Number of days back from t0 to consid
 parser.add_argument('-e', '--eta', help='Number of days from t0 back to skip.', required=True, type=int)
 parser.add_argument('-v', '--verbose', help='Verbose logging.', action='store_true')
 parser.add_argument('-d', '--debug', help='Debug logging.', action='store_true')
-parser.add_argument('-o', '--out-file', help='Path to HDF file to save the design matrix.', required=True)
+parser.add_argument('-o', '--training-out', help='Path to HDF file to save the training matrix.', required=True)
+parser.add_argument('-q', '--testing-out', help='Path to HDF file to save the testing matrix.', required=True)
 parser.add_argument('-m', '--missing-ratio', help='Remove variables missing at least this amount of data.', type=float)
 parser.add_argument('-z', '--snow-mean', help='Remove snow variables with mean at least this large.', type=float)
 parser.add_argument('-r', '--remove-lst-columns', nargs='+', help='Remove *only* these columns from the LST matrix.',
                     type=int)
 parser.add_argument('-x', '--remove-snow-columns', nargs='+', help='Remove *only* these columns from the snow matrix.',
                     type=int)
+parser.add_argument('-b', '--testing-year', help='Year starting testing matrix.', required=True)
 args = parser.parse_args()
 
 if args.debug:
@@ -201,8 +203,45 @@ def build_design_matrix(years, matrices):
     design_masked = np.ma.concatenate(matrix_list, axis=1)
     logging.info("Removing rows with missing values.")
     dm = np.ma.compress_rows(design_masked)
-    logging.info("Design Matrix shape: " + str(dm.shape))
-    return dm[:, :-1], dm[:, -1]
+    return dm
+
+
+def set_hdf_properties(sds):
+    sds.first_year = args.first_year
+    sds.last_year = args.last_year
+    sds.t0 = args.t0
+    sds.delta = args.delta
+    sds.eta = args.eta
+    sds.missing_ratio = args.missing_ratio
+    sds.snow_mean = args.snow_mean
+    if args.remove_lst_columns:
+        sds.removed_lst_columns = ",".join(str(x) for x in args.remove_lst_columns)
+    if args.remove_snow_columns:
+        sds.removed_snow_columns = ",".join(str(x) for x in args.remove_snow_columns)
+    sds.lst_days = ",".join(str(x) for x in days[0])
+    if args.snow_files:
+        sds.snow_days = ",".join(str(x) for x in days[1])
+
+
+def build_hdf(file_name, matrix, years):
+    sd = SD(file_name, SDC.WRITE | SDC.CREATE)
+    design_matrix_sds = sd.create("design_matrix", SDC.FLOAT64, matrix.shape)
+    set_hdf_properties(design_matrix_sds)
+    design_matrix_sds[:] = matrix
+    design_matrix_sds.endaccess()
+    year_sds = sd.create("years", SDC.INT32, years.shape)
+    year_sds[:] = years.astype(np.int32)
+    year_sds.endaccess()
+    sd.end()
+
+
+def split_data(matrix, testing_years):
+    training = matrix[matrix[:, -1] < testing_years][:, :-1]
+    testing = matrix[matrix[:, -1] >= testing_years][:, :-1]
+    logging.info("Training data shape: " + str(training.shape))
+    logging.info("Testing data shape: " + str(testing.shape))
+    return training, testing, matrix[:, -1]
+
 
 matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
                                         args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)]
@@ -211,26 +250,7 @@ if args.snow_files:
                                                 args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))
 matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
 mats, days = zip(*matrices_days)
-design_matrix, years_vector = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
-sd = SD(args.out_file, SDC.WRITE | SDC.CREATE)
-sds = sd.create("design_matrix", SDC.FLOAT64, design_matrix.shape)
-sds.first_year = args.first_year
-sds.last_year = args.last_year
-sds.t0 = args.t0
-sds.delta = args.delta
-sds.eta = args.eta
-sds.missing_ratio = args.missing_ratio
-sds.snow_mean = args.snow_mean
-if args.remove_lst_columns:
-    sds.removed_lst_columns = ",".join(str(x) for x in args.remove_lst_columns)
-if args.remove_snow_columns:
-    sds.removed_snow_columns = ",".join(str(x) for x in args.remove_snow_columns)
-sds.lst_days = ",".join(str(x) for x in days[0])
-if args.snow_files:
-    sds.snow_days = ",".join(str(x) for x in days[1])
-sds[:] = design_matrix
-sds.endaccess()
-year_sds = sd.create("years", SDC.INT32, years_vector.shape)
-year_sds[:] = years_vector.astype(np.int32)
-year_sds.endaccess()
-sd.end()
+raw_matrix = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
+training_matrix, testing_matrix, years_vector = split_data(raw_matrix, args.testing_years)
+build_hdf(args.training_out, training_matrix, years_vector)
+build_hdf(args.testing_out, testing_matrix, years_vector)
