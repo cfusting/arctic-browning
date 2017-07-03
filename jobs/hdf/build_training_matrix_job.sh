@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1,pmem=256gb,pvmem=256gb
+#PBS -l nodes=1:ppn=1,pmem=64gb,pvmem=64gb
 #PBS -l walltime=03:00:00
 #PBS -N training_matrix
 #PBS -o /users/c/f/cfusting/job_logs
