@@ -251,6 +251,6 @@ if args.snow_files:
 matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
 mats, days = zip(*matrices_days)
 raw_matrix = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
-training_matrix, testing_matrix, years_vector = split_data(raw_matrix, args.testing_years)
+training_matrix, testing_matrix, years_vector = split_data(raw_matrix, args.testing_year)
 build_hdf(args.training_out, training_matrix, years_vector)
 build_hdf(args.testing_out, testing_matrix, years_vector)
