@@ -14,7 +14,7 @@ class DesignMatrix:
         sd = SD(hdf_file)
         sds = sd.select("design_matrix")
         self.set_predictors_and_response(sds.get())
-        self.variable_names = sds.variable_names
+        # self.variable_names = sds.variable_names
         sds.endaccess()
         sd.end()
 
