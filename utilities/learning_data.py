@@ -78,9 +78,6 @@ class LearningData:
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
         self.data_attributes['years'] = get_years_vector(hdf_file)
 
-    def to_hdf(self, hdf_file):
-
-
 
 def get_years_vector(hdf_file):
     sd = SD(hdf_file)
