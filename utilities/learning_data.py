@@ -69,6 +69,7 @@ class LearningData:
 
     def from_hdf(self, hdf_file):
         self.design_matrix = dm.DesignMatrix()
+        self.design_matrix.from_hdf(hdf_file)
         self.predictors = self.design_matrix.predictors
         self.response = self.design_matrix.response
         self.num_observations, self.num_variables = self.predictors.shape
