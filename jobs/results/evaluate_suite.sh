@@ -1,6 +1,6 @@
 #!/bin/bash
 # trainset, testset, datatype, flags
-experiments="control mandarin whistling_duck bufflehead lesser_scaup"
+experiments="control mandarin whistling_duck lesser_scaup"
 for experiment in ${experiments}
 do
   if [[ ${flags} == *"l"* ]]
