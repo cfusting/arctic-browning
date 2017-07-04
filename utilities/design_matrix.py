@@ -17,14 +17,16 @@ class DesignMatrix:
         self.dat = sds.get()
         self.set_predictors_and_response()
         if sds.variable_names:
-            self.variable_names = sds.variable_names
+            self.variable_names = sds.variable_names.split(",")
+        else:
+            self.variable_names = self.generate_simple_variable_names()
         sds.endaccess()
         sd.end()
 
     def from_csv(self, csv_file):
         self.dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
         self.set_predictors_and_response()
-        self.variable_names = get_simple_variable_names(self.predictors.shape[0])
+        self.variable_names = self.generate_simple_variable_names()
         return self.predictors, self.response
 
     def from_headed_csv(self, csv_file):
@@ -34,10 +36,18 @@ class DesignMatrix:
         self.variable_names = self.dat.dtype.names[:-1]
         return self.predictors, self.response
 
+    def from_data(self, matrix, variable_names):
+        self.dat = matrix
+        self.set_predictors_and_response()
+        if variable_names:
+            self.variable_names = variable_names
+        else:
+            self.generate_simple_variable_names()
+
     def to_hdf(self, file_name):
         sd = SD(file_name, SDC.WRITE | SDC.CREATE)
-        sds = sd.create('design_matrix', SDC.FLOAT64, (self.predictors.shape(0), self.predictors.shape(1) + 1))
-        sds.variable_names = self.variable_names
+        sds = sd.create('design_matrix', SDC.FLOAT64, (self.predictors.shape[0], self.predictors.shape[1] + 1))
+        sds.variable_names = ",".join(self.variable_names)
         sds[:] = self.dat
         sds.endaccess()
         sd.end()
@@ -49,6 +59,5 @@ class DesignMatrix:
         self.predictors = self.dat[:, :-1]
         self.response = self.dat[:, -1]
 
-
-def get_simple_variable_names(num_vars):
-    return ['X' + str(x) for x in range(0, num_vars)]
+    def generate_simple_variable_names(self):
+        return ['X' + str(x) for x in range(0, self.predictors.shape[1])]
