@@ -1,29 +1,76 @@
 import numpy.testing as npt
+import numpy as np
+from pyhdf.SD import SD, SDC
 
-from utilities import learning_data
+from utilities import learning_data as ld
 
 
 class Test:
 
-    def test_get_variable_type_indices(self):
-        npt.assert_array_equal(learning_data.get_variable_type_indices([[]]), [])
-        days = []
-        days.append([1, 3, 5])
-        npt.assert_array_equal(learning_data.get_variable_type_indices(days), [2])
-        days.append([])
-        npt.assert_array_equal(learning_data.get_variable_type_indices(days), [2])
-        days.append([6, 7, 8])
-        npt.assert_array_equal(learning_data.get_variable_type_indices(days), [2, 5])
+    def test_get_unique_variable_prefixes(self):
+        variable_names = ['penguin0', 'penguin1']
+        npt.assert_array_equal(ld.get_unique_variable_prefixes(variable_names), ['penguin'])
+        variable_names.append('ferret0')
+        npt.assert_array_equal(ld.get_unique_variable_prefixes(variable_names), ['penguin', 'ferret'])
 
-    def test_get_hdf_variable_names(self):
-        npt.assert_array_equal(learning_data.get_hdf_variable_names([], []), [])
-        days = []
-        days.append([1, 3, 5])
-        name_prefixes = ['cat']
-        npt.assert_array_equal(learning_data.get_hdf_variable_names(days, name_prefixes),
-                               ['cat_1', 'cat_3', 'cat_5'])
-        days.append([6, 7, 8])
-        name_prefixes.append('dog')
-        npt.assert_array_equal(learning_data.get_hdf_variable_names(days, name_prefixes),
-                               ['cat_1', 'cat_3', 'cat_5', 'dog_6', 'dog_7', 'dog_8'])
+    def test_get_variable_groups(self):
+        variable_names = ['penguin0', 'penguin1']
+        unique_prefixes = ld.get_unique_variable_prefixes(variable_names)
+        npt.assert_array_equal(ld.get_variable_groups(variable_names, unique_prefixes),
+                               [['penguin0', 'penguin1']])
+        variable_names.append('ferret0')
+        unique_prefixes = ld.get_unique_variable_prefixes(variable_names)
+        npt.assert_array_equal(ld.get_variable_groups(variable_names, unique_prefixes),
+                               [['penguin0', 'penguin1'], ['ferret0']])
+
+    def test_get_variable_type_indices(self):
+        npt.assert_array_equal(ld.get_variable_type_indices([[]]), [])
+        variable_groups = [['penguin0', 'penguin1']]
+        npt.assert_array_equal(ld.get_variable_type_indices(variable_groups), [1])
+        variable_groups.append([])
+        npt.assert_array_equal(ld.get_variable_type_indices(variable_groups), [1])
+        variable_groups.append(['ferret0'])
+        npt.assert_array_equal(ld.get_variable_type_indices(variable_groups), [1, 2])
+
+    def test_to_from_hdf(self, tmpdir):
+        file_name = str(tmpdir) + "/penguin.hdf"
+        variable_names = ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1', 'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5']
+        dat = np.random.rand(10, 11)
+        years = range(10)
+        learning_data = ld.LearningData()
+        learning_data.from_data(dat, variable_names, 'penguin')
+        learning_data.meta_layers['years'] = np.array(years).reshape((10, 1))
+        learning_data.to_hdf(file_name)
+        training_data = ld.LearningData()
+        training_data.from_hdf(file_name)
+        assert training_data.num_variables == 10
+        assert training_data.num_observations == 10
+        npt.assert_array_equal(training_data.variable_names, ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1',
+                               'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5'])
+        npt.assert_array_equal(training_data.unique_variable_prefixes, ['lst', 'snow', 'ndvi'])
+        npt.assert_array_equal(training_data.variable_type_indices, [2, 4, 9])
+        assert training_data.name == 'penguin'
+        npt.assert_array_equal(training_data.meta_layers['years'], np.array(years).reshape(10, 1))
+        npt.assert_array_equal(training_data.predictors, dat[:, :-1])
+        npt.assert_array_equal(training_data.response, dat[:, -1])
+        npt.assert_array_equal(training_data.design_matrix.dat, dat)
+
+    def test_from_data(self):
+        variable_names = ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1', 'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5']
+        dat = np.random.rand(10, 11)
+        training_data = ld.LearningData()
+        training_data.from_data(dat, variable_names, 'penguin')
+        assert training_data.num_variables == 10
+        assert training_data.num_observations == 10
+        npt.assert_array_equal(training_data.variable_names, ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1',
+                               'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5'])
+        npt.assert_array_equal(training_data.unique_variable_prefixes, ['lst', 'snow', 'ndvi'])
+        npt.assert_array_equal(training_data.variable_type_indices, [2, 4, 9])
+        assert training_data.name == 'penguin'
+        npt.assert_array_equal(training_data.predictors, dat[:, :-1])
+        npt.assert_array_equal(training_data.response, dat[:, -1])
+        npt.assert_array_equal(training_data.design_matrix.dat, dat)
+
+
+
 

@@ -24,10 +24,6 @@ parser.add_argument('-o', '--training-out', help='Path to HDF file to save the t
 parser.add_argument('-q', '--testing-out', help='Path to HDF file to save the testing matrix.', required=True)
 parser.add_argument('-m', '--missing-ratio', help='Remove variables missing at least this amount of data.', type=float)
 parser.add_argument('-z', '--snow-mean', help='Remove snow variables with mean at least this large.', type=float)
-parser.add_argument('-r', '--remove-lst-columns', nargs='+', help='Remove *only* these columns from the LST matrix.',
-                    type=int)
-parser.add_argument('-x', '--remove-snow-columns', nargs='+', help='Remove *only* these columns from the snow matrix.',
-                    type=int)
 parser.add_argument('-b', '--testing-year', help='Year starting testing matrix.', required=True, type=int)
 args = parser.parse_args()
 
@@ -158,12 +154,7 @@ def build_predictor_matrix(file_paths, first_year, last_year, t0, delta, eta, da
     row_num = masked_matrix.shape[0]
     logging.info("Proportion of rows without missing values: " + str(available_rows / row_num))
     average_day_of_year_cleaned = average_day_of_year
-    if data_set_name == LST_LAYER and args.remove_lst_columns:
-        indices_to_delete = args.remove_lst_columns
-    elif data_set_name == SNOW_LAYER and args.remove_snow_columns:
-        indices_to_delete = args.remove_snow_columns
-    else:
-        indices_to_delete = dynamically_remove_columns(masked_matrix, data_set_name, args.snow_mean, args.missing_ratio)
+    indices_to_delete = dynamically_remove_columns(masked_matrix, data_set_name, args.snow_mean, args.missing_ratio)
     if len(indices_to_delete) != 0:
         indices_to_delete = np.unique(indices_to_delete)
         average_day_of_year_cleaned = [el for i, el in enumerate(average_day_of_year) if i not in indices_to_delete]
@@ -206,7 +197,8 @@ def build_design_matrix(years, matrices):
     return dm
 
 
-def set_hdf_properties(sds):
+def set_hdf_properties(sds, names):
+    sds.variable_names = names
     sds.first_year = args.first_year
     sds.last_year = args.last_year
     sds.t0 = args.t0
@@ -214,19 +206,12 @@ def set_hdf_properties(sds):
     sds.eta = args.eta
     sds.missing_ratio = args.missing_ratio
     sds.snow_mean = args.snow_mean
-    if args.remove_lst_columns:
-        sds.removed_lst_columns = ",".join(str(x) for x in args.remove_lst_columns)
-    if args.remove_snow_columns:
-        sds.removed_snow_columns = ",".join(str(x) for x in args.remove_snow_columns)
-    sds.lst_days = ",".join(str(x) for x in days[0])
-    if args.snow_files:
-        sds.snow_days = ",".join(str(x) for x in days[1])
 
 
-def build_hdf(file_name, matrix, years):
+def build_hdf(file_name, matrix, years, names):
     sd = SD(file_name, SDC.WRITE | SDC.CREATE)
     design_matrix_sds = sd.create("design_matrix", SDC.FLOAT64, matrix.shape)
-    set_hdf_properties(design_matrix_sds)
+    set_hdf_properties(design_matrix_sds, names)
     design_matrix_sds[:] = matrix
     design_matrix_sds.endaccess()
     year_sds = sd.create("years", SDC.INT32, years.shape)
@@ -244,6 +229,13 @@ def split_data(matrix, testing_year):
     return training, testing, matrix[:, -1]
 
 
+def build_variable_names(days_list, snow):
+    names = ['lst' + d for d in days_list[0]]
+    if snow:
+        names.extend(['snow' + d for d in days_list[0]])
+    return ",".join(names)
+
+
 matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
                                         args.delta, args.eta, LST_LAYER, lib.LST_NO_DATA)]
 if args.snow_files:
@@ -251,7 +243,8 @@ if args.snow_files:
                                                 args.delta, args.eta, SNOW_LAYER, lib.FILL_SNOW))
 matrices_days.append(build_ndvi_matrix(args.ndvi_files, args.first_year, args.last_year, NDVI_START, NDVI_END))
 mats, days = zip(*matrices_days)
+variable_names = build_variable_names(days, args.snow_files)
 raw_matrix = build_design_matrix(range(args.first_year, args.last_year + 1), mats)
 training_matrix, testing_matrix, years_vector = split_data(raw_matrix, args.testing_year)
-build_hdf(args.training_out, training_matrix, years_vector)
-build_hdf(args.testing_out, testing_matrix, years_vector)
+build_hdf(args.training_out, training_matrix, years_vector, variable_names)
+build_hdf(args.testing_out, testing_matrix, years_vector, variable_names)

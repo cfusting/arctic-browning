@@ -31,19 +31,18 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf
 fi
 if [[ ${flags}  == *"m"* ]]
 then
 echo "Running linear model."
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
-        -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv \
-        -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv \
-        -a \
+        -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf \
+        -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}.txt
 fi

@@ -7,7 +7,10 @@ from deap import creator
 
 import numpy
 
-from utilities import learning_data, feature as ft, lib
+from utilities import lib
+from utilities import feature as ft
+from utilities import learning_data as ld
+from utilities import design_matrix as dm
 
 
 def get_features(feature_file_path, unique_variable_prefixes, pset, validation_toolbox):
@@ -43,7 +46,7 @@ def build_basis_and_feature_names(features, num_observations, validation_toolbox
 
 
 def change_basis(training_data_path, feature_file_path, output_file_path):
-    training_data = learning_data.LearningData()
+    training_data = ld.LearningData()
     training_data.from_file(training_data_path)
     pset = experiment.get_pset(training_data.num_variables, training_data.variable_type_indices,
                                training_data.variable_names, training_data.variable_dict)
@@ -55,12 +58,14 @@ def change_basis(training_data_path, feature_file_path, output_file_path):
                             validation_toolbox)
     basis, feature_names = build_basis_and_feature_names(features, training_data.num_observations, validation_toolbox,
                                                          response_transformed)
-    numpy.savetxt(output_file_path, X=basis, delimiter=',', header=','.join(feature_names))
+    basis_data = ld.LearningData()
+    basis_data.from_data(basis, feature_names, output_file_path)
+    basis_data.to_hdf(output_file_path)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Change the basis of variables in a data set.')
-    parser.add_argument('-t', '--training', help='Path to training data.', required=True)
+    parser.add_argument('-t', '--data', help='Path to data.', required=True)
     parser.add_argument('-f', '--features', help='Path to feature file.', required=True)
     parser.add_argument('-e', '--experiment', help='Experiment name.', required=True)
     parser.add_argument('-o', '--output', help='Path to output file.', required=True)
@@ -69,5 +74,5 @@ if __name__ == '__main__':
     experiment = lib.get_experiment(args.experiment)
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    change_basis(args.training, args.features, args.output)
+    change_basis(args.data, args.features, args.output)
 
