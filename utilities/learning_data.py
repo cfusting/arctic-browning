@@ -24,6 +24,7 @@ class LearningData:
         self.variable_dict = None
         self.name = None
         self.design_matrix = None
+        self.attributes = {}
         self.meta_layers = {}
 
     def from_file(self, file_name, header=False):
@@ -69,6 +70,7 @@ class LearningData:
         self.design_matrix.from_hdf(hdf_file)
         self.init_common(hdf_file)
         self.get_meta_layers(hdf_file)
+        self.get_layer_attributes(hdf_file, 'design_matrix')
 
     def from_data(self, matrix, variable_names, name):
         self.design_matrix = dm.DesignMatrix()
@@ -78,6 +80,7 @@ class LearningData:
     def to_hdf(self, file_name):
         self.design_matrix.to_hdf(file_name)
         self.save_meta_layers(file_name)
+        self.save_layer_attributes(file_name, 'design_matrix')
 
     def to_headed_csv(self, file_name):
         self.design_matrix.to_headed_csv(file_name)
@@ -88,6 +91,22 @@ class LearningData:
             sds = sd.create(k, SDC.FLOAT64, v.shape)
             sds[:] = v
             sds.endaccess()
+        sd.end()
+
+    def get_layer_attributes(self, file_name, layer):
+        sd = SD(file_name)
+        sds = sd.select(layer)
+        self.attributes = sds.attributes()
+        sds.endaccess()
+        sd.end()
+
+    def save_layer_attributes(self, file_name, layer):
+        sd = SD(file_name, SDC.WRITE)
+        sds = sd.select(layer)
+        for k, v in self.attributes.items():
+            sds.__setattr__(k, v)
+        sds.endaccess()
+        sd.end()
 
 
 def get_variable_dict(names, default_prefix):

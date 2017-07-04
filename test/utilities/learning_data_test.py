@@ -40,6 +40,7 @@ class Test:
         learning_data = ld.LearningData()
         learning_data.from_data(dat, variable_names, 'penguin')
         learning_data.meta_layers['years'] = np.array(years).reshape((10, 1))
+        learning_data.attributes = {'penguin': 'yes', 'tophat': 'no'}
         learning_data.to_hdf(file_name)
         training_data = ld.LearningData()
         training_data.from_hdf(file_name)
@@ -54,6 +55,8 @@ class Test:
         npt.assert_array_equal(training_data.predictors, dat[:, :-1])
         npt.assert_array_equal(training_data.response, dat[:, -1])
         npt.assert_array_equal(training_data.design_matrix.dat, dat)
+        assert training_data.attributes['penguin'] == 'yes'
+        assert training_data.attributes['tophat'] == 'no'
 
     def test_from_data(self):
         variable_names = ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1', 'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5']

@@ -8,6 +8,7 @@ from pyhdf.SD import SD, SDC
 
 import modis.modisfile as modis
 from utilities import lib
+from utilities import learning_data as ld
 
 parser = argparse.ArgumentParser(description='Create design matrix.')
 parser.add_argument('-l', '--lst-files', help='File containing LST file paths.', required=True)
@@ -197,27 +198,22 @@ def build_design_matrix(years, matrices):
     return dm
 
 
-def set_hdf_properties(sds, names):
-    sds.variable_names = names
-    sds.first_year = args.first_year
-    sds.last_year = args.last_year
-    sds.t0 = args.t0
-    sds.delta = args.delta
-    sds.eta = args.eta
-    sds.missing_ratio = args.missing_ratio
-    sds.snow_mean = args.snow_mean
+def get_hdf_attributes():
+    return {'first_year': args.first_year,
+            'last_year': args.last_year,
+            't0': args.t0,
+            'delta': args.delta,
+            'eta': args.eta,
+            'missing_ratio': args.missing_ratio,
+            'snow_mean': args.snow_mean}
 
 
 def build_hdf(file_name, matrix, years, names):
-    sd = SD(file_name, SDC.WRITE | SDC.CREATE)
-    design_matrix_sds = sd.create("design_matrix", SDC.FLOAT64, matrix.shape)
-    set_hdf_properties(design_matrix_sds, names)
-    design_matrix_sds[:] = matrix
-    design_matrix_sds.endaccess()
-    year_sds = sd.create("years", SDC.INT32, years.shape)
-    year_sds[:] = years.astype(np.int32)
-    year_sds.endaccess()
-    sd.end()
+    learning_data = ld.LearningData()
+    learning_data.from_data(matrix, names, 'none')
+    learning_data.meta_layers['years'] = years
+    learning_data.attributes = get_hdf_attributes()
+    learning_data.to_hdf(file_name)
 
 
 def split_data(matrix, testing_year):
@@ -230,9 +226,9 @@ def split_data(matrix, testing_year):
 
 
 def build_variable_names(days_list, snow):
-    names = ['lst' + d for d in days_list[0]]
+    names = ['lst' + str(d) for d in days_list[0]]
     if snow:
-        names.extend(['snow' + d for d in days_list[0]])
+        names.extend(['snow' + str(d) for d in days_list[1]])
     return ",".join(names)
 
 
