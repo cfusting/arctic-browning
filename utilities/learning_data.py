@@ -79,6 +79,18 @@ class LearningData:
         self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
         self.data_attributes['years'] = get_years_vector(hdf_file)
 
+    def from_basis_hdf(self, hdf_file):
+        self.design_matrix = dm.DesignMatrix()
+        self.design_matrix.from_hdf(hdf_file)
+        self.predictors = self.design_matrix.predictors
+        self.response = self.design_matrix.response
+        self.variable_names = self.design_matrix.variable_names
+        self.num_observations, self.num_variables = self.predictors.shape
+        self.variable_dict = get_named_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
+
+    def to_basis_hdf(self, hdf_file):
+        self.design_matrix.to_hdf(hdf_file)
+
 
 def get_years_vector(hdf_file):
     sd = SD(hdf_file)

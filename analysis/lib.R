@@ -8,7 +8,8 @@ getDataFrame <- function(experiment.name, directory) {
   seeds <- unlist(lapply(files, function(x) { 
     m <- regexpr(pattern, x) 
     seed <- regmatches(x, m)
-    return(regmatches(seed, regexpr("\\d+", seed)))
+    st <- regmatches(seed, regexpr("_(\\d+).log", seed))
+    return(regmatches(st, regexpr("\\d+", st)))
   }))
   dats <- lapply(files, read.csv)
   dats.labeled <- lapply(1:length(dats), function(i) {

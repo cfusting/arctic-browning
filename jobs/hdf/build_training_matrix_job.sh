@@ -7,13 +7,13 @@
 #PBS -q shortq
 source ~/.bash_profile
 uphdfs
-training=training_matrix_lst_snow_${start}_${end}_${prop}.hdf
-testing=testing_matrix_lst_snow_${tstart}_${tend}_${prop}.hdf
 start=2002
 end=2013
 tstart=2014
 tend=2016
 prop=.15
+training=training_matrix_lst_snow_${start}_${end}_${prop}.hdf
+testing=testing_matrix_lst_snow_${tstart}_${tend}_${prop}.hdf
 rm ${ARCTIC_DATA}/${training}
 rm ${ARCTIC_DATA}/${testing}
 export PYTHONPATH=${HOME}/gp_mecl:${ARCTIC_HOME}
