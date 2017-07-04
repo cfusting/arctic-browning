@@ -229,7 +229,7 @@ def build_variable_names(days_list, snow):
     names = ['lst' + str(d) for d in days_list[0]]
     if snow:
         names.extend(['snow' + str(d) for d in days_list[1]])
-    return ",".join(names)
+    return names
 
 
 matrices_days = [build_predictor_matrix(args.lst_files, args.first_year, args.last_year, args.t0,
