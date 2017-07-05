@@ -29,9 +29,8 @@ variable_names = training_data.variable_names
 feature_transformer = preprocessing.StandardScaler()
 response_transformer = preprocessing.StandardScaler()
 
-training_predictors_transformed = np.nan_to_num(
-    feature_transformer.fit_transform(training_data.predictors, training_data.response))
-training_response_transformed = np.nan_to_num(response_transformer.fit_transform(training_data.response))
+training_predictors_transformed = feature_transformer.fit_transform(training_data.predictors, training_data.response)
+training_response_transformed = response_transformer.fit_transform(training_data.response)
 
 testing_predictors_transformed = np.nan_to_num(
     feature_transformer.transform(testing_data.predictors, testing_data.response))

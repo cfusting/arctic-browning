@@ -11,6 +11,9 @@ class DesignMatrix:
         self.response = None
         self.variable_names = None
 
+    def init_common(self):
+        self.dat = numpy.nan_to_num(self.dat)
+
     def from_hdf(self, hdf_file):
         with h5py.File(hdf_file, 'r') as f:
             dset = f['design_matrix']
@@ -20,19 +23,20 @@ class DesignMatrix:
                 self.variable_names = dset.attrs['variable_names'].split(",")
             else:
                 self.variable_names = self.generate_simple_variable_names()
+        self.init_common()
 
     def from_csv(self, csv_file):
         self.dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
         self.set_predictors_and_response()
         self.variable_names = self.generate_simple_variable_names()
-        return self.predictors, self.response
+        self.init_common()
 
     def from_headed_csv(self, csv_file):
         self.dat = numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True,
                                     deletechars="""~!@#$%^&-=~\|]}[{';: /?.>,<""")
         self.set_predictors_and_response()
         self.variable_names = self.dat.dtype.names[:-1]
-        return self.predictors, self.response
+        self.init_common()
 
     def from_data(self, matrix, variable_names):
         self.dat = matrix
@@ -41,6 +45,7 @@ class DesignMatrix:
             self.variable_names = variable_names
         else:
             self.generate_simple_variable_names()
+        self.init_common()
 
     def to_hdf(self, file_name):
         with h5py.File(file_name, 'w') as f:
