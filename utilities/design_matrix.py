@@ -46,7 +46,7 @@ class DesignMatrix:
 
     def to_hdf(self, file_name):
         sd = SD(file_name, SDC.WRITE | SDC.CREATE)
-        sds = sd.create('design_matrix', SDC.FLOAT64, (self.predictors.shape[0], self.predictors.shape[1] + 1))
+        sds = sd.create('design_matrix', SDC.FLOAT64, self.dat.shape)
         sds.variable_names = ",".join(self.variable_names)
         sds[:] = self.dat
         sds.endaccess()
