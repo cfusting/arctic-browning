@@ -27,16 +27,20 @@ fi
 if [[ ${flags}  == *"c"* ]]
 then
 echo "Running change basis."
+traininghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf
+testinghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf
+rm ${traininghdf}
+rm ${testinghdf}
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${trainset}.${datatype} \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf
+        -o ${traininghdf}
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
         -t ${ARCTIC_DATA_HOME}/${testset}.${datatype} \
         -f ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/features_${trainset}_${experiment}.txt \
         -e ${experiment} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf
+        -o ${testinghdf}
 fi
 if [[ ${flags}  == *"m"* ]]
 then
