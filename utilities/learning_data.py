@@ -3,7 +3,7 @@ import ntpath
 import re
 from functools import partial
 
-from pyhdf.SD import SD, SDC
+import h5py
 
 import design_matrix as dm
 
@@ -49,12 +49,6 @@ class LearningData:
         self.variable_type_indices = get_variable_type_indices(variable_groups)
         self.variable_dict = get_variable_dict(self.variable_names, self.DEFAULT_PREFIX)
 
-    def get_meta_layers(self, file_name):
-        sd = SD(file_name)
-        layers = filter(lambda x: x != 'design_matrix', sd.datasets())
-        for layer in layers:
-            self.meta_layers[layer] = sd.select(layer).get()
-
     def from_csv(self, csv_file):
         self.design_matrix = dm.DesignMatrix()
         self.design_matrix.from_csv(csv_file)
@@ -85,28 +79,28 @@ class LearningData:
     def to_headed_csv(self, file_name):
         self.design_matrix.to_headed_csv(file_name)
 
+    def get_meta_layers(self, file_name):
+        f = h5py.File(file_name, 'r')
+        layers = filter(lambda x: x != 'design_matrix', f.keys())
+        for layer in layers:
+            self.meta_layers[layer] = f[layer]
+
     def save_meta_layers(self, file_name):
-        sd = SD(file_name, SDC.WRITE)
+        f = h5py.File(file_name, 'r+')
         for k, v in self.meta_layers.items():
-            sds = sd.create(k, SDC.FLOAT64, v.shape)
-            sds[:] = v
-            sds.endaccess()
-        sd.end()
+            f.create_dataset(k, data=v)
 
     def get_layer_attributes(self, file_name, layer):
-        sd = SD(file_name)
-        sds = sd.select(layer)
-        self.attributes = sds.attributes()
-        sds.endaccess()
-        sd.end()
+        f = h5py.File(file_name, 'r')
+        dset = f[layer]
+        for k, v in dset.attrs.iteritems():
+            self.attributes[k] = v
 
     def save_layer_attributes(self, file_name, layer):
-        sd = SD(file_name, SDC.WRITE)
-        sds = sd.select(layer)
+        f = h5py.File(file_name, 'r+')
+        dset = f[layer]
         for k, v in self.attributes.items():
-            sds.__setattr__(k, v)
-        sds.endaccess()
-        sd.end()
+            dset.attrs[k] = v
 
 
 def get_variable_dict(names, default_prefix):
