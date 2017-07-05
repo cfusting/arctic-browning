@@ -4,7 +4,6 @@ import datetime as dt
 import logging
 
 import numpy as np
-from pyhdf.SD import SD, SDC
 
 import modis.modisfile as modis
 from utilities import lib
@@ -199,8 +198,9 @@ def build_design_matrix(years, matrices):
 
 
 def get_hdf_attributes():
-    return {'first_year': args.first_year,
-            'last_year': args.last_year,
+    return {'training_first_year': args.first_year,
+            'testing_first_year': args.testing_year,
+            'testing_last_year': args.last_year,
             't0': args.t0,
             'delta': args.delta,
             'eta': args.eta,

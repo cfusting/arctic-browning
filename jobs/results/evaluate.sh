@@ -27,8 +27,8 @@ fi
 if [[ ${flags}  == *"c"* ]]
 then
 echo "Running change basis."
-traininghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf
-testinghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf
+traininghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv
+testinghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv
 rm ${traininghdf}
 rm ${testinghdf}
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
@@ -46,7 +46,7 @@ if [[ ${flags}  == *"m"* ]]
 then
 echo "Running linear model."
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
-        -t ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf \
-        -j ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf \
+        -t ${traininghdf} \
+        -j ${testinghdf} \
         -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}.txt
 fi

@@ -60,7 +60,7 @@ def change_basis(training_data_path, feature_file_path, output_file_path):
                                                          response_transformed)
     basis_data = ld.LearningData()
     basis_data.from_data(basis, feature_names, output_file_path)
-    basis_data.to_hdf(output_file_path)
+    basis_data.to_headed_csv(output_file_path)
 
 
 if __name__ == '__main__':
