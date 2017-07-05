@@ -1,8 +1,8 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1,pmem=32gb,pvmem=32gb
-#PBS -l walltime=30:00:00
+#PBS -l nodes=1:ppn=1,pmem=64gb,pvmem=64gb
+#PBS -l walltime=01:00:00
 #PBS -N symbolic_validate
-#PBS -q shortw
+#PBS -q shortq
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 source $HOME/.bash_profile

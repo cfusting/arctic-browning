@@ -1,4 +1,5 @@
 import argparse
+import gc
 import logging
 
 import numpy as np
@@ -23,6 +24,7 @@ training_data = learning_data.LearningData()
 training_data.from_file(args.training)
 testing_data = learning_data.LearningData()
 testing_data.from_file(args.testing)
+variable_names = training_data.variable_names
 
 feature_transformer = preprocessing.StandardScaler()
 response_transformer = preprocessing.StandardScaler()
@@ -34,6 +36,11 @@ training_response_transformed = np.nan_to_num(response_transformer.fit_transform
 testing_predictors_transformed = np.nan_to_num(
     feature_transformer.transform(testing_data.predictors, testing_data.response))
 testing_response_transformed = np.nan_to_num(response_transformer.transform(testing_data.response))
+
+del training_data
+del testing_data
+gc.collect()
+logging.info("Building linear model.")
 
 if args.method == 'elasticnet':
     l1 = [.1, .5, .7, .9, .95, .99, 1]
