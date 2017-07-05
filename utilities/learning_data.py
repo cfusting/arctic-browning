@@ -80,27 +80,27 @@ class LearningData:
         self.design_matrix.to_headed_csv(file_name)
 
     def get_meta_layers(self, file_name):
-        f = h5py.File(file_name, 'r')
-        layers = filter(lambda x: x != 'design_matrix', f.keys())
-        for layer in layers:
-            self.meta_layers[layer] = f[layer]
+        with h5py.File(file_name, 'r') as f:
+            layers = filter(lambda x: x != 'design_matrix', f.keys())
+            for layer in layers:
+                self.meta_layers[layer] = f[layer]
 
     def save_meta_layers(self, file_name):
-        f = h5py.File(file_name, 'r+')
-        for k, v in self.meta_layers.items():
-            f.create_dataset(k, data=v)
+        with h5py.File(file_name, 'r+') as f:
+            for k, v in self.meta_layers.items():
+                f.create_dataset(k, data=v)
 
     def get_layer_attributes(self, file_name, layer):
-        f = h5py.File(file_name, 'r')
-        dset = f[layer]
-        for k, v in dset.attrs.iteritems():
-            self.attributes[k] = v
+        with h5py.File(file_name, 'r') as f:
+            dset = f[layer]
+            for k, v in dset.attrs.iteritems():
+                self.attributes[k] = v
 
     def save_layer_attributes(self, file_name, layer):
-        f = h5py.File(file_name, 'r+')
-        dset = f[layer]
-        for k, v in self.attributes.items():
-            dset.attrs[k] = v
+        with h5py.File(file_name, 'r+') as f:
+            dset = f[layer]
+            for k, v in self.attributes.items():
+                dset.attrs[k] = v
 
 
 def get_variable_dict(names, default_prefix):

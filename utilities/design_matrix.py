@@ -12,14 +12,14 @@ class DesignMatrix:
         self.variable_names = None
 
     def from_hdf(self, hdf_file):
-        f = h5py.File(hdf_file, 'r')
-        dset = f['design_matrix']
-        self.dat = dset
-        self.set_predictors_and_response()
-        if dset.attrs['variable_names']:
-            self.variable_names = dset.attrs['variable_names'].split(",")
-        else:
-            self.variable_names = self.generate_simple_variable_names()
+        with h5py.File(hdf_file, 'r') as f:
+            dset = f['design_matrix']
+            self.dat = dset
+            self.set_predictors_and_response()
+            if dset.attrs['variable_names']:
+                self.variable_names = dset.attrs['variable_names'].split(",")
+            else:
+                self.variable_names = self.generate_simple_variable_names()
 
     def from_csv(self, csv_file):
         self.dat = numpy.genfromtxt(csv_file, delimiter=',', skip_header=True)
@@ -43,9 +43,9 @@ class DesignMatrix:
             self.generate_simple_variable_names()
 
     def to_hdf(self, file_name):
-        f = h5py.File(file_name, 'w')
-        dset = f.create_dataset('design_matrix', data=self.dat)
-        dset.attrs['variable_names'] = ",".join(self.variable_names)
+        with h5py.File(file_name, 'w') as f:
+            dset = f.create_dataset('design_matrix', data=self.dat)
+            dset.attrs['variable_names'] = ",".join(self.variable_names)
 
     def to_headed_csv(self, file_name):
         numpy.savetxt(file_name, X=self.dat, delimiter=',', header=','.join(self.variable_names))

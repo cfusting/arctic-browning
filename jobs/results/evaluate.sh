@@ -2,6 +2,7 @@
 #PBS -l nodes=1:ppn=1,pmem=32gb,pvmem=32gb
 #PBS -l walltime=30:00:00
 #PBS -N symbolic_validate
+#PBS -q shortw
 #PBS -o /users/c/f/cfusting/job_logs
 #PBS -e /users/c/f/cfusting/job_logs
 source $HOME/.bash_profile
@@ -24,11 +25,11 @@ python ${ARCTIC_HOME}/scripts/plotting/frequent_features.py \
         -e ${experiment} \
         -r ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}
 fi
+traininghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.hdf
+testinghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.hdf
 if [[ ${flags}  == *"c"* ]]
 then
 echo "Running change basis."
-traininghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${trainset}.csv
-testinghdf=${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/optimal_basis_${testset}.csv
 rm ${traininghdf}
 rm ${testinghdf}
 python ${ARCTIC_HOME}/scripts/results/change_basis.py \
