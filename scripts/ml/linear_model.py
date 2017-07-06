@@ -56,7 +56,7 @@ model = method.fit(training_predictors_transformed, training_response_transforme
 
 coefficients = {}
 for i in range(0, len(model.coef_)):
-    coefficients[str(training_data.variable_names[i])] = model.coef_[i]
+    coefficients[str(variable_names[i])] = model.coef_[i]
 R2 = model.score(training_predictors_transformed, training_response_transformed)
 pred_y = model.predict(training_predictors_transformed)
 M2 = mean_squared_error(training_response_transformed, pred_y)
