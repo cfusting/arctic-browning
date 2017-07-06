@@ -42,13 +42,14 @@ testing_response_transformed = np.nan_to_num(testing_response_transformed)
 del training_data
 del testing_data
 gc.collect()
+
 logging.info("Building linear model.")
 
 if args.method == 'elasticnet':
     l1 = [.1, .5, .7, .9, .95, .99, 1]
-    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000, n_jobs=-1)
+    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000)
 elif args.method == 'lasso':
-    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000, n_jobs=-1)
+    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000)
 else:
     method = Lasso(alpha=.15, fit_intercept=False)
 model = method.fit(training_predictors_transformed, training_response_transformed)
