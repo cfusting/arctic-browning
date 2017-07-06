@@ -47,9 +47,9 @@ logging.info("Building linear model.")
 
 if args.method == 'elasticnet':
     l1 = [.1, .5, .7, .9, .95, .99, 1]
-    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=10000)
+    method = ElasticNetCV(l1_ratio=l1, cv=10, fit_intercept=False, max_iter=100000)
 elif args.method == 'lasso':
-    method = LassoCV(cv=10, fit_intercept=False, max_iter=10000)
+    method = LassoCV(cv=10, fit_intercept=False, max_iter=100000)
 else:
     method = Lasso(alpha=.15, fit_intercept=False)
 model = method.fit(training_predictors_transformed, training_response_transformed)
