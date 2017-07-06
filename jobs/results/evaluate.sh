@@ -45,9 +45,19 @@ python ${ARCTIC_HOME}/scripts/results/change_basis.py \
 fi
 if [[ ${flags}  == *"m"* ]]
 then
-echo "Running linear model."
+echo "Building linear models."
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${traininghdf} \
         -j ${testinghdf} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}.txt
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}
+python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
+        -t ${traininghdf} \
+        -j ${testinghdf} \
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}
+        -s
+python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
+        -t ${traininghdf} \
+        -j ${testinghdf} \
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}
+        -n
 fi

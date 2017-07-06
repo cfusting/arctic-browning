@@ -58,21 +58,11 @@ class Test:
         assert training_data.attributes['penguin'] == 'yes'
         assert training_data.attributes['tophat'] == 'no'
 
-    def test_from_data(self):
-        variable_names = ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1', 'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5']
+    def test_finite(self):
         dat = np.random.rand(10, 11)
-        training_data = ld.LearningData()
-        training_data.from_data(dat, variable_names, 'penguin')
-        assert training_data.num_variables == 10
-        assert training_data.num_observations == 10
-        npt.assert_array_equal(training_data.variable_names, ['lst1', 'lst2', 'lst3', 'snow1', 'snow2', 'ndvi1',
-                               'ndvi2', 'ndvi3', 'ndvi4', 'ndvi5'])
-        npt.assert_array_equal(training_data.unique_variable_prefixes, ['lst', 'snow', 'ndvi'])
-        npt.assert_array_equal(training_data.variable_type_indices, [2, 4, 9])
-        assert training_data.name == 'penguin'
-        npt.assert_array_equal(training_data.predictors, dat[:, :-1])
-        npt.assert_array_equal(training_data.response, dat[:, -1])
-        npt.assert_array_equal(training_data.design_matrix.dat, dat)
-
-    def test_infinite_values(self):
-
+        dat[1, 2] = np.inf
+        dat[5, 3] = -np.inf
+        dat[7, 9] = np.nan
+        dat[10, 3] = np.inf
+        learning_data = ld.LearningData()
+        learning_data.from_data(dat, None, 'penguin')
