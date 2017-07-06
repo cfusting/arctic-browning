@@ -31,10 +31,13 @@ response_transformer = preprocessing.StandardScaler()
 
 training_predictors_transformed = feature_transformer.fit_transform(training_data.predictors, training_data.response)
 training_response_transformed = response_transformer.fit_transform(training_data.response)
+training_predictors_transformed = np.nan_to_num(training_predictors_transformed)
+training_response_transformed = np.nan_to_num(training_response_transformed)
 
-testing_predictors_transformed = np.nan_to_num(
-    feature_transformer.transform(testing_data.predictors, testing_data.response))
-testing_response_transformed = np.nan_to_num(response_transformer.transform(testing_data.response))
+testing_predictors_transformed = feature_transformer.transform(testing_data.predictors, testing_data.response)
+testing_response_transformed = response_transformer.transform(testing_data.response)
+testing_predictors_transformed = np.nan_to_num(testing_predictors_transformed)
+testing_response_transformed = np.nan_to_num(testing_response_transformed)
 
 del training_data
 del testing_data
