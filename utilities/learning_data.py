@@ -83,7 +83,7 @@ class LearningData:
         with h5py.File(file_name, 'r') as f:
             layers = filter(lambda x: x != 'design_matrix', f.keys())
             for layer in layers:
-                self.meta_layers[layer] = f[layer]
+                self.meta_layers[layer] = f[layer][:]
 
     def save_meta_layers(self, file_name):
         with h5py.File(file_name, 'r+') as f:

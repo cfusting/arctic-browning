@@ -17,7 +17,7 @@ class DesignMatrix:
     def from_hdf(self, hdf_file):
         with h5py.File(hdf_file, 'r') as f:
             dset = f['design_matrix']
-            self.dat = dset
+            self.dat = dset[:]
             self.set_predictors_and_response()
             if dset.attrs['variable_names']:
                 self.variable_names = dset.attrs['variable_names'].split(",")
