@@ -74,6 +74,5 @@ class Test:
         npt.assert_array_equal(training_data.response, dat[:, -1])
         npt.assert_array_equal(training_data.design_matrix.dat, dat)
 
-
-
+    def test_infinite_values(self):
 
