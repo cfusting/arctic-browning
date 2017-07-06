@@ -53,11 +53,11 @@ python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${traininghdf} \
         -j ${testinghdf} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment} \
         -s
 python ${ARCTIC_HOME}/scripts/ml/linear_model.py \
         -t ${traininghdf} \
         -j ${testinghdf} \
-        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment}
+        -o ${ARCTIC_RESULTS_HOME}/${trainset}.${datatype}_${experiment}/linear_model_results_${experiment} \
         -n
 fi
