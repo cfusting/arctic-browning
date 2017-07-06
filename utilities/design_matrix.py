@@ -19,12 +19,12 @@ class DesignMatrix:
             if dset.attrs['variable_names']:
                 self.variable_names = dset.attrs['variable_names'].split(",")
             else:
-                self.variable_names = self.generate_simple_variable_names()
+                self.generate_simple_variable_names()
 
     def from_csv(self, csv_file):
         self.dat = numpy.nan_to_num(numpy.genfromtxt(csv_file, delimiter=',', skip_header=True))
         self.set_predictors_and_response()
-        self.variable_names = self.generate_simple_variable_names()
+        self.generate_simple_variable_names()
 
     def from_headed_csv(self, csv_file):
         self.dat = numpy.nan_to_num(numpy.genfromtxt(csv_file, dtype=numpy.float, delimiter=',', names=True,
@@ -53,4 +53,4 @@ class DesignMatrix:
         self.response = self.dat[:, -1]
 
     def generate_simple_variable_names(self):
-        return ['X' + str(x) for x in range(0, self.predictors.shape[1])]
+        self.variable_names = ['X' + str(x) for x in range(0, self.predictors.shape[1])]

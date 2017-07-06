@@ -58,11 +58,13 @@ class Test:
         assert training_data.attributes['penguin'] == 'yes'
         assert training_data.attributes['tophat'] == 'no'
 
-    def test_finite(self):
+    def test_good_values(self):
         dat = np.random.rand(10, 11)
         dat[1, 2] = np.inf
         dat[5, 3] = -np.inf
         dat[7, 9] = np.nan
-        dat[10, 3] = np.inf
+        dat[9, 3] = np.inf
         learning_data = ld.LearningData()
         learning_data.from_data(dat, None, 'penguin')
+        assert np.isnan(learning_data.predictors).any() == False
+        assert np.isfinite(learning_data.predictors).all() == True
