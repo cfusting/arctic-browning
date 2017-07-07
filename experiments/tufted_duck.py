@@ -9,7 +9,6 @@ class TuftedDuck(lesser_scaup.LesserScaup):
 
     def __init__(self):
         super(TuftedDuck, self).__init__()
-        self.POP_SIZE = 1000
 
     def get_pset(self, num_predictors, variable_type_indices, names, variable_dict):
         pset = super(TuftedDuck, self).get_pset(num_predictors, variable_type_indices, names, variable_dict)
