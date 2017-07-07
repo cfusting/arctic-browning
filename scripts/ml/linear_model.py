@@ -98,5 +98,5 @@ with open(file_name, 'w') as f:
     for key, value in sorted(coefficients.iteritems(), key=lambda (k, v): (v, k)):
         f.write(str(value) + ': ' + str(key) + '\n')
     f.write("Data: R^2, mean square error, untransformed mean squared error, untransformed mean error" + '\n')
-    f.write("Training: {}, {}, {}".format(R2, M2, UM, math.sqrt(UM)) + '\n')
-    f.write("Testing: {}, {}, {}".format(t_R2, t_M2, t_UM, math.sqrt(t_UM)) + '\n')
+    f.write("Training: {}, {}, {}, {}".format(R2, M2, UM, math.sqrt(UM)) + '\n')
+    f.write("Testing: {}, {}, {}, {}".format(t_R2, t_M2, t_UM, math.sqrt(t_UM)) + '\n')
