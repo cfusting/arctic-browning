@@ -14,10 +14,12 @@ class TuftedDuck(lesser_scaup.LesserScaup):
         pset = super(TuftedDuck, self).get_pset(num_predictors, variable_type_indices, names, variable_dict)
 
         def safe_sqrt(x):
-            result = numpy.sqrt(x)
-            if result == numpy.nan:
-                result = 0
-            return result
+            x = numpy.sqrt(x)
+            if isinstance(x, numpy.ndarray):
+                x[numpy.isnan(x)] = 0
+            elif numpy.isnan(x):
+                x = 0
+            return x
         pset.addPrimitive(safe_sqrt, 1)
         pset.addPrimitive(numpy.cbrt, 1)
         return pset
