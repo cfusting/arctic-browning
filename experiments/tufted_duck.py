@@ -12,7 +12,6 @@ class TuftedDuck(lesser_scaup.LesserScaup):
 
     def get_pset(self, num_predictors, variable_type_indices, names, variable_dict):
         pset = super(TuftedDuck, self).get_pset(num_predictors, variable_type_indices, names, variable_dict)
-        pset.addPrimitive(numpy.cbrt, 1)
 
         def safe_sqrt(x):
             result = numpy.sqrt(x)
