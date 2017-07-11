@@ -1,6 +1,6 @@
 #!/bin/bash
 # trainset, testset, datatype, flags
-experiments="tufted_duck"
+experiments="inverse_control"
 for experiment in ${experiments}
 do
   if [[ ${flags} == *"l"* ]]
