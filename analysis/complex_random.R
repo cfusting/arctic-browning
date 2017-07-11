@@ -12,9 +12,9 @@ simulation <- function(dat) {
   return(res)
 }
 
-dat <- buildNormalMatrix()
+dat <- buildNormalMatrix(200)
 
 Y <- simulation(dat)
 synthetic <- cbind(dat, Y)
 summary(synthetic)
-write.csv(synthetic, "~/design_matrices/complex_random.csv", row.names = FALSE)
+write.csv(synthetic, "~/design_matrices/complex_random_test.csv", row.names = FALSE)

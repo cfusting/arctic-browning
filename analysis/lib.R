@@ -62,10 +62,10 @@ buildNormalData <- function(n, mean, stdev, multiplier, values) {
   return(dat)
 }
 
-buildNormalMatrix <- function() {
+buildNormalMatrix <- function(n) {
   dat <- c()
   for (i in 1:60) {
-    dat <- cbind(dat, rnorm(1000, mean = runif(1, 10, 50), sd = runif(1, 0, 10)))
+    dat <- cbind(dat, rnorm(n, mean = runif(1, 10, 50), sd = runif(1, 0, 10)))
   }
   return(dat)
 }
